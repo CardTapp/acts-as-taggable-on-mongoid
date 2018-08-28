@@ -1,0 +1,51 @@
+# https://github.com/bbatsov/rubocop/blob/master/config/default.yml
+
+Documentation:
+  Enabled: false
+
+AllCops:
+  TargetRubyVersion: 2.3
+  Exclude:
+    - "bin/**/*"
+
+LineLength:
+  Max:  150
+
+## Multi-line method chaining should be done with leading dots.
+Layout/DotPosition:
+  EnforcedStyle: trailing
+
+Layout/MultilineMethodCallIndentation:
+  Enabled: false
+
+Layout/MultilineOperationIndentation:
+  Enabled: false
+
+MethodLength:
+  Max: 10
+
+StringLiterals:
+  EnforcedStyle: double_quotes
+
+IndentHash:
+  EnforcedStyle: consistent
+
+# Indentation of `when`.
+Layout/CaseIndentation:
+  EnforcedStyle: case
+  SupportedStyles:
+    - case
+    - end
+  IndentOneStep: true
+  # By default, the indentation width from Style/IndentationWidth is used
+  # But it can be overridden by setting this parameter
+  # This only matters if IndentOneStep is true
+  IndentationWidth: ~
+
+Metrics/ClassLength:
+  Max: 150
+
+Metrics/BlockLength:
+  Exclude:
+    - "spec/**/*"
+    - "*.gemspec"

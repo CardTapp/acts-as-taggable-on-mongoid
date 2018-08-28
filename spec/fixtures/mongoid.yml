@@ -1,0 +1,43 @@
+DEFAULTS: &DEFAULTS
+  #  clients:
+  #    default:
+  #      database: <%= ENV["TAGGABLE_MONGO_DATABASE"] %>
+  #      hosts: [<%= ENV["TAGGABLE_MONGO_HOSTS"] %>]
+  #      options:
+  #        user: <%= ENV["TAGGABLE_MONGO_USERNAME"] %>
+  #        password: <%= ENV["TAGGABLE_MONGO_PASSWORD"] %>
+  #        max_pool_size: <%= ENV["TAGGABLE_MONGO_POOL_SIZE"] %>
+  #        write:
+  #          w: 0
+  #        read:
+  #          mode: :secondary_preferred
+  #        ssl: true
+  #        ssl_verify: false
+  clients:
+    default:
+      database: acts_as_taggable_on_test
+      hosts:
+      - localhost:27017
+
+development:
+  clients:
+    default:
+      database: acts_as_taggable_on_development
+      hosts:
+      - localhost:27017
+
+test:
+  clients:
+    default:
+      database: acts_as_taggable_on_test
+      hosts:
+      - localhost:27017
+
+staging:
+  <<: *DEFAULTS
+
+preproduction:
+  <<: *DEFAULTS
+
+production:
+  <<: *DEFAULTS
