@@ -21,8 +21,8 @@ Layout/MultilineMethodCallIndentation:
 Layout/MultilineOperationIndentation:
   Enabled: false
 
-MethodLength:
-  Max: 10
+Metrics/MethodLength:
+  Max: 15
 
 StringLiterals:
   EnforcedStyle: double_quotes

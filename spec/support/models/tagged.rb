@@ -6,4 +6,6 @@ class Tagged
   include ::Mongoid::Timestamps
 
   field :string_field, type: String
+
+  acts_as_taggable
 end

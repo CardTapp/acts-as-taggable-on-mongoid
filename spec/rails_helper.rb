@@ -14,14 +14,19 @@ SimpleCov.start "rails" do
     changed_files = `git diff --name-only #{current_branch} $(git merge-base #{current_branch} origin/master)`.split("\n")
     add_group "Changed" do |source_file|
       changed_files.detect do |filename|
-        source_file.filename.ends_with?(filename)
+        source_file.filename.end_with?(filename)
       end
     end
   end
 end
 
+require "active_support"
 require "spec_helper"
+require "mongoid"
 require "database_cleaner"
+require "acts-as-taggable-on-mongoid"
+
+ActsAsTaggableOnMongoid.eager_load!
 
 Dir[Pathname.new(__FILE__).join("..", "support", "**", "*")].sort.each do |support_file|
   next if File.directory? support_file
