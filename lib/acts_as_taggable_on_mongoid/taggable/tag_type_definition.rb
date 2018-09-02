@@ -24,9 +24,9 @@ module ActsAsTaggableOnMongoid
                                   :force_lowercase,
                                   :force_parameterize,
                                   :remove_unused_tags,
-                                  :strict_case_match,
                                   :tags_table,
-                                  :taggings_table)
+                                  :taggings_table,
+                                  :tags_counter)
 
         options.each do |key, value|
           instance_variable_set("@#{key}", value)
@@ -46,6 +46,14 @@ module ActsAsTaggableOnMongoid
 
       def taggings_table
         @taggings_table || ActsAsTaggableOnMongoid.taggings_table
+      end
+
+      def tags_counter
+        if defined?(@tags_counter)
+          @tags_counter
+        else
+          ActsAsTaggableOnMongoid.configuration.tags_counter?
+        end
       end
 
       def force_lowercase
@@ -72,14 +80,6 @@ module ActsAsTaggableOnMongoid
         end
       end
 
-      def strict_case_match
-        if defined?(@strict_case_match)
-          @strict_case_match
-        else
-          ActsAsTaggableOnMongoid.configuration.strict_case_match?
-        end
-      end
-
       # rubocop:disable Layout/SpaceAroundOperators
 
       # I've defined the parser as being required to return an array of strings.
@@ -97,6 +97,10 @@ module ActsAsTaggableOnMongoid
 
       def tag_list_name
         @tag_list_name ||= "#{single_tag_type}_list"
+      end
+
+      def save_tags_method
+        @save_tags_method ||= "save_#{single_tag_type}_list"
       end
 
       def tag_list_variable_name
@@ -211,8 +215,8 @@ module ActsAsTaggableOnMongoid
         owner.taggable_mixin.module_eval do
           tag_list_name = tag_definition.tag_list_name
 
-          define_method("#{tag_list_name}=") do |*new_tags|
-            parsed_new_list = tag_definition.parse(*new_tags)
+          define_method("#{tag_list_name}=") do |new_tags|
+            parsed_new_list = tag_definition.parse(*Array.wrap(new_tags))
 
             current_tag_list = send(tag_list_name)
 
@@ -220,7 +224,7 @@ module ActsAsTaggableOnMongoid
               changed_attributes[tag_list_name] = current_tag_list
             end
 
-            tag_list_set(tag_definition, parsed_new_list)
+            tag_list_set(parsed_new_list)
           end
         end
       end
@@ -228,10 +232,10 @@ module ActsAsTaggableOnMongoid
       alias preserve_tag_order? preserve_tag_order
       alias cached_in_model? cached_in_model
       alias index_cache? index_cache
+      alias tags_counter? tags_counter
       alias force_lowercase? force_lowercase
       alias force_parameterize? force_parameterize
       alias remove_unused_tags? remove_unused_tags
-      alias strict_case_match? strict_case_match
     end
   end
 end

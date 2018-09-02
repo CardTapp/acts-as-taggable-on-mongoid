@@ -26,5 +26,10 @@ RSpec.describe ActsAsTaggableOnMongoid::Taggable do
 
     # expect(tagged.base_tags.sort).to eq %w[tag_1 tag_2 tag_3 tag_4 tag_5 tag_6].sort
     expect(tagged.taggings.to_a.sort).to eq taggings.sort
+
+    tagged.tag_list = ["tag_2, tag_3, tag_9", parse: true]
+    tagged.save
+
+    expect(tagged.reload.tag_list).to eq %w(tag_2 tag_3 tag_9)
   end
 end

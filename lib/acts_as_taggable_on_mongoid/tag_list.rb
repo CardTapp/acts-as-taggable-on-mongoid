@@ -92,7 +92,7 @@ module ActsAsTaggableOnMongoid
       map! { |tag| tag.mb_chars.downcase.to_s } if tag_type_definition.force_lowercase?
       map!(&:parameterize) if tag_type_definition.force_parameterize?
 
-      tag_type_definition.strict_case_match ? uniq! : uniq!(&:downcase)
+      uniq!
 
       self
     end

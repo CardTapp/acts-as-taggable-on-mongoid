@@ -7,7 +7,7 @@ module ActsAsTaggableOnMongoid
 
       class_methods do
         def tag_types
-          @tag_types ||= {}
+          @tag_types ||= {}.with_indifferent_access
         end
 
         def tag_definition(tag_type)

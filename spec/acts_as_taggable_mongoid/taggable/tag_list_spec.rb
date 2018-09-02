@@ -126,26 +126,6 @@ RSpec.describe ActsAsTaggableOnMongoid::TagList do
 
       ActsAsTaggableOnMongoid.force_lowercase = false
     end
-
-    it "should ignore case when removing duplicates if strict_case_match is false" do
-      tag_list = ActsAsTaggableOnMongoid::TagList.new(tag_definition, "Junglist", "JUNGLIST", "Junglist", "Massive", "MASSIVE", "MASSIVE")
-
-      expect(tag_list).to eq(%w[Junglist Massive])
-    end
-
-    it "should not ignore case when removing duplicates if strict_case_match is true" do
-      ActsAsTaggableOnMongoid.strict_case_match = true
-      tag_list                                  = ActsAsTaggableOnMongoid::TagList.new(tag_definition,
-                                                                                       "Junglist",
-                                                                                       "JUNGLIST",
-                                                                                       "Junglist",
-                                                                                       "Massive",
-                                                                                       "MASSIVE",
-                                                                                       "MASSIVE")
-
-      expect(tag_list).to eq(%w[Junglist JUNGLIST Massive MASSIVE])
-      ActsAsTaggableOnMongoid.strict_case_match = false
-    end
   end
 
   describe "custom parser" do
