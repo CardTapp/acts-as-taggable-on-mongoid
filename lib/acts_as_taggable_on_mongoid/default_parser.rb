@@ -4,41 +4,60 @@ module ActsAsTaggableOnMongoid
   ##
   # Returns a new Array using the given tag string.
   #
-  # Example:
-  #   tag_list = ActsAsTaggableOnMongoid::DefaultParser.parse("One , Two,  Three")
-  #   tag_list # ["One", "Two", "Three"]
+  # Parsing is done based on an array of delimiters that is set at the class level.  Parsing will split
+  # on any delimiter value that is found.  By default strings are split by commas (,).
+  #
+  # To allow more complex strings, parsing will parse out quoted strings (either single or double quoted)as a block.
+  # (This is only partially implemented for quick not accurate/complete implementation that is
+  # "good enough" for most expected tags.)
+  #
+  # examples:
+  #
+  # # Delimiters
+  # # You can set the delimiters to a single value:
+  # DefaultParser.delimiter = "\\|"
+  #
+  # # You can set the delimiters to an array value:
+  # DefaultParser.delimiter = %w[\\| , break_here]
+  #
+  # # Parsing a string by multiple delimters
+  # DefaultParser.new("a|stupid,stringbreak_hereparses").parse
+  # # > ["a", "stupid", "string", "parses"]
+  #
+  # # Parsing works with simple quoted strings:
+  # DefaultParser.new("a,\"more,interesting\",string").parse
+  # # > ["a", "more,interesting", "string"]
   class DefaultParser < GenericParser
     class_attribute :delimiter
 
     def parse
-      return tags if tags.is_a?(Array)
+      @tags = [].tap do |tag_list|
+        tags.each do |tag|
+          string = tag.to_s.dup
 
-      string = tags.to_s.dup
+          extract_quoted_strings(string, tag_list, double_quote_pattern)
+          extract_quoted_strings(string, tag_list, single_quote_pattern)
 
-      # string = string.join(ActsAsTaggableOn.glue) if string.respond_to?(:join)
-      [].tap do |tag_list|
-        extract_quoted_strings(string, tag_list, double_quote_pattern)
-        extract_quoted_strings(string, tag_list, single_quote_pattern)
-
-        # split the string by the delimiter
-        # and add to the tag_list
-        tag_list.concat(string.split(delimiter_regex))
-      end
+          # split the string by the delimiter
+          # and add to the tag_list
+          tag_list.concat(string.split(delimiter_regex))
+        end
+      end.flatten
     end
 
-    def self.stringify_tag_list(*tag_list)
-      tags = tag_list.frozen? ? tag_list.dup : tag_list
+    def to_s
+      tag_list = tags.frozen? ? tags.dup : tags
 
-      d     = delimiters.first
-      regex = Regexp.new delimiters.join("|")
+      d     = ActsAsTaggableOnMongoid::DefaultParser.delimiters.first
+      regex = Regexp.new (Array.wrap(ActsAsTaggableOnMongoid::DefaultParser.delimiters) + %w[" ']).join("|")
 
-      tags.map do |name|
+      tag_list.map do |name|
         name.index(regex) ? "\"#{name}\"" : name
       end.join(d)
     end
 
     def self.delimiters
-      Array.wrap(delimiter.presence || ",")
+      Array.wrap(delimiter.presence || DEFAULT_DELIMITER)
     end
 
     private

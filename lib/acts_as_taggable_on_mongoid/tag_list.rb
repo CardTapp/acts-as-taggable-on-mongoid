@@ -3,9 +3,29 @@
 # require "active_support/core_ext/module/delegation"
 
 module ActsAsTaggableOnMongoid
+  # A list of tags.  The TagList must be initialized with a tag definition so that it knows how to clean
+  # the list properly and to convert the list to a string.
+  #
+  # All methods that add objects to the list (initialization, concat, etc.) optionally take an array of values including
+  # options to parse the values and to optionally specifiy the parser to use.  If no parser is specified, then
+  # parser for the tag_type_definition is used.
+  #
+  # If the input value(s) are to be parsed, then all values passed in are parsed.
+  #
+  # Examples:
+  #   TagList.new(tag_definition, "value 1", "value 2")
+  #   # > TagList<> ["value 1", "value 2"]
+  #
+  #   TagList.new(tag_definition, "value 1, value 2", parse: true)
+  #   # > TagList<> ["value 1", "value 2"]
+  #
+  #   TagList.new(tag_definition, "value 1, value 2", "value 3, value 4", parse: true)
+  #   # > TagList<> ["value 1", "value 2", "value 3", "value 4"]
+  #
+  #   TagList.new(tag_definition, "value 1, value 2", "value 3, value 4", parser: ActsAsTaggableOnMongoid::GenericParser)
+  #   # > TagList<> ["value 1", "value 2", "value 3", "value 4"]
   class TagList < Array
     # attr_accessor :owner
-    attr_accessor :parser
     attr_reader :tag_type_definition
 
     def initialize(tag_type_definition, *args)
@@ -71,9 +91,7 @@ module ActsAsTaggableOnMongoid
     #   tag_list = TagList.new("Round", "Square,Cube")
     #   tag_list.to_s # 'Round, "Square,Cube"'
     def to_s
-      run_parser = parser || tag_type_definition.parser
-
-      run_parser.stringify_tag_list(*self)
+      tag_type_definition.parser.new(*self).to_s
     end
 
     private
@@ -101,7 +119,7 @@ module ActsAsTaggableOnMongoid
       options = args.extract_options!
       options.assert_valid_keys :parse, :parser
 
-      run_parser = options[:parser] || parser || tag_type_definition.parser
+      run_parser = options[:parser] || tag_type_definition.parser
 
       args.flatten!
       args.map! { |a| run_parser.new(a).parse } if options[:parse] || options[:parser]

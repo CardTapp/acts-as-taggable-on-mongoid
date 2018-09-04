@@ -63,23 +63,23 @@ RSpec.describe ActsAsTaggableOnMongoid::DefaultParser do
     end
   end
 
-  describe "stringify_tag_list" do
+  describe "to_s" do
     before(:each) do
       ActsAsTaggableOnMongoid::DefaultParser.delimiter = [",", " ", "\\|"]
     end
 
-    it "joings all pass in items with first delimeter" do
+    it "joins all pass in items with first delimeter" do
       ActsAsTaggableOnMongoid::DefaultParser.delimiter = ["，", "的", "可能是"]
 
-      expect(ActsAsTaggableOnMongoid::DefaultParser.stringify_tag_list("cool", "data", "I", "have")).to eq "cool，data，I，have"
+      expect(ActsAsTaggableOnMongoid::DefaultParser.new("cool", "data", "I", "have").to_s).to eq "cool，data，I，have"
     end
 
     it "join all passed in items with commas and adds quotes" do
-      expect(ActsAsTaggableOnMongoid::DefaultParser.stringify_tag_list("cool", "data", "I,have")).to eq "cool,data,\"I,have\""
+      expect(ActsAsTaggableOnMongoid::DefaultParser.new("cool", "data", "I,have").to_s).to eq "cool,data,\"I,have\""
     end
 
     it "ignores empty arguments" do
-      expect(ActsAsTaggableOnMongoid::DefaultParser.stringify_tag_list).to eq ""
+      expect(ActsAsTaggableOnMongoid::DefaultParser.new.to_s).to eq ""
     end
   end
 end

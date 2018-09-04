@@ -4,11 +4,6 @@ module ActsAsTaggableOnMongoid
   module Taggable
     extend ActiveSupport::Concern
 
-    included do
-      include ActsAsTaggableOnMongoid::Taggable::Core
-      include ActsAsTaggableOnMongoid::Taggable::ListTags
-    end
-
     class_methods do
       # # tag options:
       # #   * preserve_tag_order - The tag(s) defined will preserve the tag order.
@@ -49,23 +44,23 @@ module ActsAsTaggableOnMongoid
         taggable_on(*tag_types)
       end
 
-      # ##
-      # # Make a model taggable on specified contexts
-      # # and preserves the order in which tags are created.
-      # #
-      # # An alias for acts_as_taggable_on *tag_types, preserve_tag_order: true
-      # #
-      # # @param [Array] tag_types An array of taggable contexts
-      # #
-      # # Example:
-      # #   class User < ActiveRecord::Base
-      # #     acts_as_ordered_taggable_on :languages, :skills
-      # #   end
-      # def acts_as_ordered_taggable_on(*tag_types)
-      #   options = tag_types.extract_options!
+      ##
+      # Make a model taggable on specified contexts
+      # and preserves the order in which tags are created.
       #
-      #   taggable_on(*tag_types, options.merge(preserve_tag_order: true))
-      # end
+      # An alias for acts_as_taggable_on *tag_types, preserve_tag_order: true
+      #
+      # @param [Array] tag_types An array of taggable contexts
+      #
+      # Example:
+      #   class User < ActiveRecord::Base
+      #     acts_as_ordered_taggable_on :languages, :skills
+      #   end
+      def acts_as_ordered_taggable_on(*tag_types)
+        options = tag_types.extract_options!
+
+        taggable_on(*tag_types, options.merge(preserve_tag_order: true))
+      end
 
       private
 
@@ -81,40 +76,23 @@ module ActsAsTaggableOnMongoid
       #     associations and methods after this logic has executed
       #
       def taggable_on(*tag_types)
+        # if we are actually defining tags on a module, add these modules to add hooks and global methods
+        # used by tagging.  We only add them dynamically like this so that they don't bloat the model
+        # and add hooks/callbacks that aren't needed without tags.
+        [ActsAsTaggableOnMongoid::Taggable::Core,
+         # include Collection - not sure we will need as done here.  Need to think more on this one.
+         # include Cache - TODO: Add this.
+         # include Ownership - TODO: Add this.
+         # include Related - TODO: Add this.
+         ActsAsTaggableOnMongoid::Taggable::ListTags].each do |include_module|
+          include include_module unless included_modules.include?(include_module)
+        end
+
         options = tag_types.extract_options!
 
         tag_types.each do |tag_type|
           define_tag tag_type, options
         end
-
-        # tag_types = tag_types.to_a.flatten.compact.map(&:to_sym)
-        #
-        # if taggable?
-        #   self.tag_types          = (self.tag_types + tag_types).uniq
-        #   self.preserve_tag_order = preserve_tag_order
-        # else
-        #   class_attribute :tag_types
-        #   self.tag_types = tag_types
-        #   class_attribute :preserve_tag_order
-        #   self.preserve_tag_order = preserve_tag_order
-        #
-        #   class_eval do
-        #     has_many :taggings, as: :taggable, dependent: :destroy, class_name: '::ActsAsTaggableOn::Tagging'
-        #     has_many :base_tags, through: :taggings, source: :tag, class_name: '::ActsAsTaggableOn::Tag'
-        #
-        #     def self.taggable?
-        #       true
-        #     end
-        #   end
-        # end
-        #
-        # # # each of these add context-specific methods and must be
-        # # # called on each call of taggable_on
-        # # include Core
-        # # include Collection
-        # # include Cache
-        # # include Ownership
-        # # include Related
       end
     end
   end

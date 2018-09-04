@@ -16,11 +16,9 @@ module ActsAsTaggableOnMongoid
 
       index({ name: 1, taggable_type: 1, context: 1 }, unique: true)
 
-      def taggings
-        return nil unless taggable_type.present?
+      ### ASSOCIATIONS:
 
-        taggable_type.constantize.tag_definition(context).taggings_table.where(taggable_type: taggable_type, context: context, tag_name: name)
-      end
+      has_many :taggings, dependent: :destroy, class_name: "ActsAsTaggableOnMongoid::Models::Tagging"
 
       ### VALIDATIONS:
 
@@ -34,6 +32,8 @@ module ActsAsTaggableOnMongoid
 
       scope :named, ->(name) { where(name: as_8bit_ascii(name)) }
       scope :named_any, ->(*names) { where(:name.in => names.map { |name| as_8bit_ascii(name) }) }
+      scope :named_like, ->(name) { where(name: /#{as_8bit_ascii(name)}/) }
+      scope :named_like_any, ->(*names) { where(:name.in => names.map { |name| /#{as_8bit_ascii(name)}/ }) }
       scope :for_context, ->(context) { where(context: context) }
       scope :for_taggable_class, ->(taggable_type) { where(taggable_type: taggable_type.name) }
       scope :for_tag, ->(tag_definition) { for_taggable_class(tag_definition.owner).for_context(tag_definition.tag_type) }
@@ -50,7 +50,7 @@ module ActsAsTaggableOnMongoid
             begin
               tries ||= 3
 
-              existing_tag = for_tag(tag_definition).named(tag_name).first
+              existing_tag = tag_definition.tags_table.for_tag(tag_definition).named(tag_name).first
 
               existing_tag || create_tag(tag_definition, tag_name)
             rescue Mongoid::Errors::Validations
@@ -66,9 +66,9 @@ module ActsAsTaggableOnMongoid
         private
 
         def create_tag(tag_definition, name)
-          create(name:          name,
-                 context:       tag_definition.tag_type,
-                 taggable_type: tag_definition.owner.name)
+          tag_definition.tags_table.create(name:          name,
+                                           context:       tag_definition.tag_type,
+                                           taggable_type: tag_definition.owner.name)
         end
 
         def as_8bit_ascii(string)
@@ -83,7 +83,7 @@ module ActsAsTaggableOnMongoid
       ### INSTANCE METHODS:
 
       def ==(object)
-        super || (object.is_a?(Tag) && name == object.name)
+        super || (object.class == self.class && name == object.name)
       end
 
       def to_s

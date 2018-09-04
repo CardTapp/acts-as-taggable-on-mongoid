@@ -2,8 +2,8 @@
 
 require 'rails_helper'
 
-RSpec.describe ActsAsTaggableOnMongoid::Models::Tag do
-  let(:tag) { ActsAsTaggableOnMongoid::Models::Tag.new }
+RSpec.describe AltTag do
+  let(:tag) { AltTag.new }
   let(:tag_definition) { ActsAsTaggableOnMongoid::Models::Taggable::TagTypeDefinition.new() }
 
   before(:each) do
@@ -14,13 +14,13 @@ RSpec.describe ActsAsTaggableOnMongoid::Models::Tag do
   describe 'named like any' do
     context 'case insensitive collation without indexes or case sensitive collation with indexes' do
       before(:each) do
-        ActsAsTaggableOnMongoid::Models::Tag.create(name: 'Awesome')
-        ActsAsTaggableOnMongoid::Models::Tag.create(name: 'awesome')
-        ActsAsTaggableOnMongoid::Models::Tag.create(name: 'epic')
+        AltTag.create!(name: 'Awesome', context: "fake", taggable_type: "Taggable")
+        AltTag.create!(name: 'awesome', context: "fake", taggable_type: "Taggable")
+        AltTag.create!(name: 'epic', context: "fake", taggable_type: "Taggable")
       end
 
       it 'should find both tags' do
-        expect(ActsAsTaggableOnMongoid::Models::Tag.named_any(*%w(awesome epic)).count).to eq(2)
+        expect(AltTag.named_any(*%w(awesome epic)).count).to eq(2)
       end
     end
   end

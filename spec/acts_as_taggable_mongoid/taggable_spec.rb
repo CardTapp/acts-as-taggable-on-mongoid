@@ -14,18 +14,19 @@ RSpec.describe ActsAsTaggableOnMongoid::Taggable do
 
     tagged = Tagged.create
 
-    taggings = [ActsAsTaggableOnMongoid::Models::Tagging.create(tag_name: "tag_1", context: "tags", taggable: tagged),
-                ActsAsTaggableOnMongoid::Models::Tagging.create(tag_name: "tag_2", context: "tags", taggable: tagged),
-                ActsAsTaggableOnMongoid::Models::Tagging.create(tag_name: "tag_5", context: "not_tags", taggable: tagged),
-                ActsAsTaggableOnMongoid::Models::Tagging.create(tag_name: "tag_6", context: "not_tags", taggable: tagged)]
+    tagged.tag_list     = %w[tag_1 tag_2]
+    tagged.not_tag_list = %w[tag_5 tag_6]
+    tagged.save
 
-    ActsAsTaggableOnMongoid::Models::Tagging.create(tag_name: "tag_3", context: "tags", taggable: not_tagged)
-    ActsAsTaggableOnMongoid::Models::Tagging.create(tag_name: "tag_4", context: "tags", taggable: not_tagged)
+    not_tagged.tag_list = %w[tag_3 tag_4]
+    not_tagged.save
+
+    tagged.reload
 
     expect(tagged.tag_list.sort).to eq %w[tag_1 tag_2].sort
 
     # expect(tagged.base_tags.sort).to eq %w[tag_1 tag_2 tag_3 tag_4 tag_5 tag_6].sort
-    expect(tagged.taggings.to_a.sort).to eq taggings.sort
+    expect(tagged.taggings.to_a.sort).to eq ActsAsTaggableOnMongoid::Models::Tagging.where(taggable_id: tagged.id).to_a.sort
 
     tagged.tag_list = ["tag_2, tag_3, tag_9", parse: true]
     tagged.save

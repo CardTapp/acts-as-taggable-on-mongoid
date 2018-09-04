@@ -148,10 +148,17 @@ RSpec.describe ActsAsTaggableOnMongoid::TagList do
     end
 
     it "should use the parser setted as attribute" do
+      tag_definition = ActsAsTaggableOnMongoid::Taggable::TagTypeDefinition.new Tagged, "tag_name", parser: parser_class
+
       allow(parser_class).to receive(:new).with("new, tag").and_return(parser)
 
-      tag_list        = ActsAsTaggableOnMongoid::TagList.new(tag_definition, "example")
-      tag_list.parser = parser_class
+      tag_list = ActsAsTaggableOnMongoid::TagList.new(tag_definition, "example")
+
+      # This feature of the TagList is no longer supported.  Custom parsing is controlled through the parameters or
+      # the TagTypeDefinition only.
+      #
+      # tag_list.parser = parser_class
+
       tag_list.add("new, tag", parse: true)
 
       expect(parser).to have_received(:parse)

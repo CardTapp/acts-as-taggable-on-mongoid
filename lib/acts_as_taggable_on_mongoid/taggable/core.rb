@@ -15,6 +15,9 @@ module ActsAsTaggableOnMongoid
       DYNAMIC_MODULE_NAME = :DynamicAttributes
 
       included do
+        # TODO: allow custom contexts
+        # attr_writer :custom_contexts
+
         after_save :save_tags
       end
 
@@ -34,11 +37,21 @@ module ActsAsTaggableOnMongoid
         end
       end
 
+      def reload(*args)
+        self.class.tag_types.each do |_tag_name, tag_definition|
+          instance_variable_set tag_definition.all_tag_list_variable_name, nil
+          instance_variable_set tag_definition.tag_list_variable_name, nil
+        end
+
+        super(*args)
+      end
+
       private
 
-      def tag_list_on(tag_type_definition)
-        # add_custom_context(tag_type_definition)
-        tag_list_cache_on(tag_type_definition)
+      def tag_list_cache_set_on(tag_definition)
+        variable_name = tag_definition.tag_list_variable_name
+
+        instance_variable_defined?(variable_name) && instance_variable_get(variable_name)
       end
 
       def tag_list_cache_on(tag_type_definition)
@@ -55,6 +68,26 @@ module ActsAsTaggableOnMongoid
         instance_variable_get(variable_name) ||
             instance_variable_set(variable_name,
                                   ActsAsTaggableOnMongoid::TagList.new(tag_type_definition, tags_on(tag_type_definition).map(&:tag_name)))
+      end
+
+      def tag_list_on(tag_type_definition)
+        # add_custom_context(tag_type_definition)
+        tag_list_cache_on(tag_type_definition)
+      end
+
+      def all_tags_list_on(tag_type_definition)
+        variable_name   = tag_type_definition.all_tag_list_variable_name
+        cached_variable = instance_variable_get(variable_name)
+
+        return cached_variable if instance_variable_defined?(variable_name) && cached_variable
+
+        instance_variable_set(variable_name, ActsAsTaggableOn::TagList.new(tag_type_definition, all_tags_on(tag_type_definition).map(&:name)).freeze)
+      end
+
+      ##
+      # Returns all tags of a given context
+      def all_tags_on(tag_definition)
+        tag_definition.tags_table.for_tag(tag_definition).to_a
       end
 
       ##
@@ -76,17 +109,19 @@ module ActsAsTaggableOnMongoid
         instance_variable_set(new_list.tag_type_definition.tag_list_variable_name, new_list)
       end
 
-      def dirtify_tag_list(tagging)
-        definition = self.class.tag_definition(tagging.context)
-
-        attribute_will_change! definition.tag_list_name
+      ##
+      # Find existing tags or create non-existing tags
+      def load_tags(tag_definition, tag_list)
+        tag_definition.tags_table.find_or_create_all_with_like_by_name(tag_definition, tag_list)
       end
 
       def save_tags
-        self.class.tag_types.each_value do |tag_definition|
-          break if @saving_tag_list
+        # Don't call save_tags again if a related classes save while processing this funciton causes this object to re-save.
+        return if @saving_tag_list
 
-          @saving_tag_list = true
+        @saving_tag_list = true
+
+        self.class.tag_types.each_value do |tag_definition|
 
           next unless tag_list_cache_set_on(tag_definition)
 
@@ -103,12 +138,12 @@ module ActsAsTaggableOnMongoid
 
           # Destroy old taggings:
           if old_tags.present?
-            send(tag_definition.taggings_name).by_context(context).where(:tag_name.in => old_tags.map(&:name)).destroy_all
+            send(tag_definition.taggings_name).by_context(tag_definition.tag_type).where(:tag_name.in => old_tags.map(&:name)).destroy_all
           end
 
           # Create new taggings:
           new_tags.each do |tag|
-            send(tag_definition.taggings_name).create!(tag_name: tag.name, context: tag_definition.tag_type, taggable: self)
+            send(tag_definition.taggings_name).create!(tag_name: tag.name, context: tag_definition.tag_type, taggable: self, tag: tag)
           end
         end
 
@@ -136,268 +171,16 @@ module ActsAsTaggableOnMongoid
         [old_tags, new_tags]
       end
 
-      def tag_list_cache_set_on(tag_definition)
-        variable_name = tag_definition.tag_list_variable_name
+      def dirtify_tag_list(tagging)
+        definition = self.class.tag_definition(tagging.context)
 
-        instance_variable_defined?(variable_name) && instance_variable_get(variable_name)
+        attribute_will_change! definition.tag_list_name
       end
 
-      #   def self.included(base)
-      #     base.extend ActsAsTaggableOn::Taggable::Core::ClassMethods
-      #
-      #     base.class_eval do
-      #       attr_writer :custom_contexts
-      #       after_save :save_tags
-      #     end
-      #
-      #     base.initialize_acts_as_taggable_on_core
-      #   end
-      #
-      #   module ClassMethods
-      #     def initialize_acts_as_taggable_on_core
-      #       include taggable_mixin
-      #       tag_types.map(&:to_s).each do |tags_type|
-      #         tag_type         = tags_type.to_s.singularize
-      #         context_taggings = "#{tag_type}_taggings".to_sym
-      #         context_tags     = tags_type.to_sym
-      #         taggings_order   = (preserve_tag_order? ? "#{ActsAsTaggableOn::Tagging.table_name}.id" : [])
-      #
-      #         class_eval do
-      #           # when preserving tag order, include order option so that for a 'tags' context
-      #           # the associations tag_taggings & tags are always returned in created order
-      #           has_many context_taggings, -> { includes(:tag).order(taggings_order).where(context: tags_type) },
-      #                    as:           :taggable,
-      #                    class_name:   'ActsAsTaggableOn::Tagging',
-      #                    dependent:    :destroy,
-      #                    after_add:    :dirtify_tag_list,
-      #                    after_remove: :dirtify_tag_list
-      #
-      #           has_many context_tags, -> { order(taggings_order) },
-      #                    class_name: 'ActsAsTaggableOn::Tag',
-      #                    through:    context_taggings,
-      #                    source:     :tag
-      #
-      #           attribute "#{tags_type.singularize}_list".to_sym, ActiveModel::Type::Value.new
-      #         end
-      #
-      #         taggable_mixin.class_eval <<-RUBY, __FILE__, __LINE__ + 1
-      #         def #{tag_type}_list
-      #           tag_list_on('#{tags_type}')
-      #         end
-      #
-      #         def #{tag_type}_list=(new_tags)
-      #           parsed_new_list = ActsAsTaggableOn.default_parser.new(new_tags).parse
-      #
-      #           if self.class.preserve_tag_order? || parsed_new_list.sort != #{tag_type}_list.sort
-      #             set_attribute_was('#{tag_type}_list', #{tag_type}_list)
-      #             write_attribute("#{tag_type}_list", parsed_new_list)
-      #           end
-      #
-      #           tag_list_set('#{tags_type}', new_tags)
-      #         end
-      #
-      #         def all_#{tags_type}_list
-      #           all_tags_list_on('#{tags_type}')
-      #         end
-      #
-      #         private
-      #         def dirtify_tag_list(tagging)
-      #           attribute_will_change! tagging.context.singularize+"_list"
-      #         end
-      #         RUBY
-      #       end
-      #     end
-      #
-      #     def taggable_on(preserve_tag_order, *tag_types)
-      #       super(preserve_tag_order, *tag_types)
-      #       initialize_acts_as_taggable_on_core
-      #     end
-      #
-      #     # all column names are necessary for PostgreSQL group clause
-      #     def grouped_column_names_for(object)
-      #       object.column_names.map { |column| "#{object.table_name}.#{column}" }.join(', ')
-      #     end
-      #
-      #     ##
-      #     # Return a scope of objects that are tagged with the specified tags.
-      #     #
-      #     # @param tags The tags that we want to query for
-      #     # @param [Hash] options A hash of options to alter you query:
-      #     #                       * <tt>:exclude</tt> - if set to true, return objects that are *NOT* tagged with the specified tags
-      #     #                       * <tt>:any</tt> - if set to true, return objects that are tagged with *ANY* of the specified tags
-      #     #                       * <tt>:order_by_matching_tag_count</tt> - if set to true and used with :any, sort by objects matching
-      #     #                                                                 the most tags, descending
-      #     #                       * <tt>:match_all</tt> - if set to true, return objects that are *ONLY* tagged with the specified tags
-      #     #                       * <tt>:owned_by</tt> - return objects that are *ONLY* owned by the owner
-      #     #                       * <tt>:start_at</tt> - Restrict the tags to those created after a certain time
-      #     #                       * <tt>:end_at</tt> - Restrict the tags to those created before a certain time
-      #     #
-      #     # Example:
-      #     #   User.tagged_with(["awesome", "cool"])                     # Users that are tagged with awesome and cool
-      #     #   User.tagged_with(["awesome", "cool"], :exclude => true)   # Users that are not tagged with awesome or cool
-      #     #   User.tagged_with(["awesome", "cool"], :any => true)       # Users that are tagged with awesome or cool
-      #     #   # Sort by users who match the most tags, descending
-      #     #   User.tagged_with(["awesome", "cool"], :any => true, :order_by_matching_tag_count => true)
-      #     #   User.tagged_with(["awesome", "cool"], :match_all => true) # Users that are tagged with just awesome and cool
-      #     #   User.tagged_with(["awesome", "cool"], :owned_by => foo ) # Users that are tagged with just awesome and cool by 'foo'
-      #     #   # Users that are tagged with just awesome, cool by 'foo' and starting today
-      #     #   User.tagged_with(["awesome", "cool"], :owned_by => foo, :start_at => Date.today )
-      #     def tagged_with(tags, options = {})
-      #       tag_list = ActsAsTaggableOn.default_parser.new(tags).parse
-      #       options  = options.dup
-      #
-      #       return none if tag_list.empty?
-      #
-      #       ::ActsAsTaggableOn::Taggable::TaggedWithQuery.build(self, ActsAsTaggableOn::Tag, ActsAsTaggableOn::Tagging, tag_list, options)
-      #     end
-      #
-      #     def is_taggable?
-      #       true
-      #     end
-      #
-      #     def taggable_mixin
-      #       @taggable_mixin ||= Module.new
-      #     end
-      #   end
-      #
-      #   # all column names are necessary for PostgreSQL group clause
-      #   def grouped_column_names_for(object)
-      #     self.class.grouped_column_names_for(object)
-      #   end
-      #
-      #   def custom_contexts
-      #     @custom_contexts ||= taggings.map(&:context).uniq
-      #   end
-      #
-      #   def is_taggable?
-      #     self.class.is_taggable?
-      #   end
-      #
-      #   def add_custom_context(value)
-      #     custom_contexts << value.to_s unless custom_contexts.include?(value.to_s) or self.class.tag_types.map(&:to_s).include?(value.to_s)
-      #   end
-      #
-      #   def cached_tag_list_on(context)
-      #     self["cached_#{context.to_s.singularize}_list"]
-      #   end
-      #
-      #   def tag_list_cache_set_on(context)
-      #     variable_name = "@#{context.to_s.singularize}_list"
-      #     instance_variable_defined?(variable_name) && instance_variable_get(variable_name)
-      #   end
-      #
-      #   def all_tags_list_on(context)
-      #     variable_name = "@all_#{context.to_s.singularize}_list"
-      #     return instance_variable_get(variable_name) if instance_variable_defined?(variable_name) && instance_variable_get(variable_name)
-      #
-      #     instance_variable_set(variable_name, ActsAsTaggableOn::TagList.new(all_tags_on(context).map(&:name)).freeze)
-      #   end
-      #
-      #   ##
-      #   # Returns all tags of a given context
-      #   def all_tags_on(context)
-      #     tagging_table_name = ActsAsTaggableOn::Tagging.table_name
-      #
-      #     opts  = ["#{tagging_table_name}.context = ?", context.to_s]
-      #     scope = base_tags.where(opts)
-      #
-      #     if ActsAsTaggableOn::Utils.using_postgresql?
-      #       group_columns = grouped_column_names_for(ActsAsTaggableOn::Tag)
-      #       scope.order(Arel.sql("max(#{tagging_table_name}.created_at)")).group(group_columns)
-      #     else
-      #       scope.group("#{ActsAsTaggableOn::Tag.table_name}.#{ActsAsTaggableOn::Tag.primary_key}")
-      #     end.to_a
-      #   end
-      #
-      #   def tagging_contexts
-      #     self.class.tag_types.map(&:to_s) + custom_contexts
-      #   end
-      #
-      #   def reload(*args)
-      #     self.class.tag_types.each do |context|
-      #       instance_variable_set("@#{context.to_s.singularize}_list", nil)
-      #       instance_variable_set("@all_#{context.to_s.singularize}_list", nil)
-      #     end
-      #
-      #     super(*args)
-      #   end
-
       ##
-      # Find existing tags or create non-existing tags
-      def load_tags(tag_definition, tag_list)
-        tag_definition.tags_table.find_or_create_all_with_like_by_name(tag_definition, tag_list)
-      end
-
+      # Imported from `ActsAsTaggableOn`.  It is simply easier to define a custom Tag class and define
+      # the tag to use that Tag class.
       #
-      #   def save_tags
-      #     tagging_contexts.each do |context|
-      #       next unless tag_list_cache_set_on(context)
-      #       # List of currently assigned tag names
-      #       tag_list = tag_list_cache_on(context).uniq
-      #
-      #       # Find existing tags or create non-existing tags:
-      #       tags = find_or_create_tags_from_list_with_context(tag_list, context)
-      #
-      #       # Tag objects for currently assigned tags
-      #       current_tags = tags_on(context)
-      #
-      #       # Tag maintenance based on whether preserving the created order of tags
-      #       if self.class.preserve_tag_order?
-      #         old_tags, new_tags = current_tags - tags, tags - current_tags
-      #
-      #         shared_tags = current_tags & tags
-      #
-      #         if shared_tags.any? && tags[0...shared_tags.size] != shared_tags
-      #           index = shared_tags.each_with_index { |_, i| break i unless shared_tags[i] == tags[i] }
-      #
-      #           # Update arrays of tag objects
-      #           old_tags |= current_tags[index...current_tags.size]
-      #           new_tags |= current_tags[index...current_tags.size] & shared_tags
-      #
-      #           # Order the array of tag objects to match the tag list
-      #           new_tags = tags.map do |t|
-      #             new_tags.find { |n| n.name.downcase == t.name.downcase }
-      #           end.compact
-      #         end
-      #       else
-      #         # Delete discarded tags and create new tags
-      #         old_tags = current_tags - tags
-      #         new_tags = tags - current_tags
-      #       end
-      #
-      #       # Destroy old taggings:
-      #       if old_tags.present?
-      #         taggings.not_owned.by_context(context).where(tag_id: old_tags).destroy_all
-      #       end
-      #
-      #       # Create new taggings:
-      #       new_tags.each do |tag|
-      #         taggings.create!(tag_id: tag.id, context: context.to_s, taggable: self)
-      #       end
-      #     end
-      #
-      #     true
-      #   end
-      #
-      #   private
-      #
-      #   def ensure_included_cache_methods!
-      #     self.class.columns
-      #   end
-      #
-      #   # Filters the tag lists from the attribute names.
-      #   def attributes_for_update(attribute_names)
-      #     tag_lists = tag_types.map { |tags_type| "#{tags_type.to_s.singularize}_list" }
-      #     super.delete_if { |attr| tag_lists.include? attr }
-      #   end
-      #
-      #   # Filters the tag lists from the attribute names.
-      #   def attributes_for_create(attribute_names)
-      #     tag_lists = tag_types.map { |tags_type| "#{tags_type.to_s.singularize}_list" }
-      #     super.delete_if { |attr| tag_lists.include? attr }
-      #   end
-
-      ##
       # Override this hook if you wish to subclass {ActsAsTaggableOn::Tag} --
       # context is provided so that you may conditionally use a Tag subclass
       # only for some contexts.

@@ -41,7 +41,7 @@ module ActsAsTaggableOnMongoid
       end
 
       def tags_table
-        @parser || ActsAsTaggableOnMongoid.tags_table
+        @tags_table || ActsAsTaggableOnMongoid.tags_table
       end
 
       def taggings_table
@@ -99,12 +99,20 @@ module ActsAsTaggableOnMongoid
         @tag_list_name ||= "#{single_tag_type}_list"
       end
 
-      def save_tags_method
-        @save_tags_method ||= "save_#{single_tag_type}_list"
-      end
-
       def tag_list_variable_name
         @tag_list_variable_name ||= "@#{tag_list_name}"
+      end
+
+      def all_tag_list_name
+        @all_tag_list_name ||= "all_#{single_tag_type}_list"
+      end
+
+      def all_tag_list_variable_name
+        @all_tag_list_variable_name ||= "@#{tag_list_name}"
+      end
+
+      def save_tags_method
+        @save_tags_method ||= "save_#{single_tag_type}_list"
       end
 
       def single_tag_type
@@ -112,11 +120,11 @@ module ActsAsTaggableOnMongoid
       end
 
       def base_tags_method
-        @base_tags_method ||= "base_#{tags_table.name.demodulize.downcase.pluralize}".to_sym
+        @base_tags_method ||= "base_#{tags_table.name.demodulize.underscore.downcase.pluralize}".to_sym
       end
 
       def taggings_name
-        @taggings_name ||= taggings_table.name.demodulize.downcase.pluralize.to_sym
+        @taggings_name ||= taggings_table.name.demodulize.underscore.downcase.pluralize.to_sym
       end
 
       def taggings_order
@@ -146,6 +154,8 @@ module ActsAsTaggableOnMongoid
         end
       end
 
+      # Mongoid does not allow the `through` option for relations, so we de-normalize data and manually add the methods we need
+      # for through like functionality.
       def add_base_tags_method
         tag_definition = self
 
@@ -177,7 +187,7 @@ module ActsAsTaggableOnMongoid
           define_method "#{tag_definition.single_tag_type}_taggings".to_sym do
             send(tag_definition.taggings_name).
                 order_by(*tag_definition.taggings_order).
-                where(context: tag_definition.tag_type)
+                for_tag(tag_definition)
           end
         end
       end
@@ -189,7 +199,7 @@ module ActsAsTaggableOnMongoid
           define_method tag_definition.tag_type.to_sym do
             send(base_tags_method).
                 order_by(*tag_definition.taggings_order).
-                where(context: tag_definition.tag_type)
+                for_tag(tag_definition)
           end
         end
       end
@@ -197,6 +207,7 @@ module ActsAsTaggableOnMongoid
       def add_tag_list
         add_list_getter
         add_list_setter
+        add_all_list_getter
       end
 
       def add_list_getter
@@ -209,6 +220,7 @@ module ActsAsTaggableOnMongoid
         end
       end
 
+      # TODO: Refactor this so that dirty attributes are set properly.
       def add_list_setter
         tag_definition = self
 
@@ -220,11 +232,22 @@ module ActsAsTaggableOnMongoid
 
             current_tag_list = send(tag_list_name)
 
-            if tag_definition.preserve_tag_order? || parsed_new_list.sort != current_tag_list.sort
+            if (tag_definition.preserve_tag_order? && parsed_new_list != current_tag_list) ||
+                parsed_new_list.sort != current_tag_list.sort
               changed_attributes[tag_list_name] = current_tag_list
             end
 
             tag_list_set(parsed_new_list)
+          end
+        end
+      end
+
+      def add_all_list_getter
+        tag_definition = self
+
+        owner.taggable_mixin.module_eval do
+          define_method(tag_definition.all_tag_list_name) do
+            all_tag_list_on tag_definition
           end
         end
       end
