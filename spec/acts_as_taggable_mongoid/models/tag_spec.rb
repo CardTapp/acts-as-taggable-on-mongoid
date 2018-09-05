@@ -1,33 +1,32 @@
 # frozen_string_literal: true
 
-require 'rails_helper'
+require "rails_helper"
 
 RSpec.describe AltTag do
   let(:tag) { AltTag.new }
-  let(:tag_definition) { ActsAsTaggableOnMongoid::Models::Taggable::TagTypeDefinition.new() }
+  let(:tag_definition) { ActsAsTaggableOnMongoid::Models::Taggable::TagTypeDefinition.new }
 
   before(:each) do
-    # @user = TaggableModel.create(name: 'Pablo')
+    # @user = TaggableModel.create(name: "Pablo")
   end
 
-
-  describe 'named like any' do
-    context 'case insensitive collation without indexes or case sensitive collation with indexes' do
+  describe "named like any" do
+    context "case insensitive collation without indexes or case sensitive collation with indexes" do
       before(:each) do
-        AltTag.create!(name: 'Awesome', context: "fake", taggable_type: "Taggable")
-        AltTag.create!(name: 'awesome', context: "fake", taggable_type: "Taggable")
-        AltTag.create!(name: 'epic', context: "fake", taggable_type: "Taggable")
+        AltTag.create!(name: "Awesome", context: "fake", taggable_type: "Taggable")
+        AltTag.create!(name: "awesome", context: "fake", taggable_type: "Taggable")
+        AltTag.create!(name: "epic", context: "fake", taggable_type: "Taggable")
       end
 
-      it 'should find both tags' do
-        expect(AltTag.named_any(*%w(awesome epic)).count).to eq(2)
+      it "should find both tags" do
+        expect(AltTag.named_any("awesome", "epic").count).to eq(2)
       end
     end
   end
 
-  # describe 'for context' do
+  # describe "for context" do
   #   before(:each) do
-  #     @user.skill_list.add('ruby')
+  #     @user.skill_list.add("ruby")
   #     @user.save
   #   end
   #
@@ -92,12 +91,14 @@ RSpec.describe AltTag do
   # end
   #
   # it 'should limit the name length to 255 or less characters' do
-  #   tag.name = 'fgkgnkkgjymkypbuozmwwghblmzpqfsgjasflblywhgkwndnkzeifalfcpeaeqychjuuowlacmuidnnrkprgpcpybarbkrmziqihcrxirlokhnzfvmtzixgvhlxzncyywficpraxfnjptxxhkqmvicbcdcynkjvziefqzyndxkjmsjlvyvbwraklbalykyxoliqdlreeykuphdtmzfdwpphmrqvwvqffojkqhlzvinqajsxbszyvrqqyzusxranr'
+  #   tag.name = 'fgkgnkkgjymkypbuozmwwghblmzpqfsgjasflblywhgkwndnkzeifalfcpeaeqychjuuowlacmuidnnrkprgpcpybarbkrmziqihcrxirlokhnzfvmtz
+  # ixgvhlxzncyywficpraxfnjptxxhkqmvicbcdcynkjvziefqzyndxkjmsjlvyvbwraklbalykyxoliqdlreeykuphdtmzfdwpphmrqvwvqffojkqhlzvinqajsxbszyvrqqyzusxranr'
   #   tag.valid?
   #   #TODO, we should find another way to check this
   #   expect(tag.errors[:name]).to eq(['is too long (maximum is 255 characters)'])
   #
-  #   tag.name = 'fgkgnkkgjymkypbuozmwwghblmzpqfsgjasflblywhgkwndnkzeifalfcpeaeqychjuuowlacmuidnnrkprgpcpybarbkrmziqihcrxirlokhnzfvmtzixgvhlxzncyywficpraxfnjptxxhkqmvicbcdcynkjvziefqzyndxkjmsjlvyvbwraklbalykyxoliqdlreeykuphdtmzfdwpphmrqvwvqffojkqhlzvinqajsxbszyvrqqyzusxran'
+  #   tag.name = 'fgkgnkkgjymkypbuozmwwghblmzpqfsgjasflblywhgkwndnkzeifalfcpeaeqychjuuowlacmuidnnrkprgpcpybarbkrmziqihcrxirlokhnzfvmtz
+  # ixgvhlxzncyywficpraxfnjptxxhkqmvicbcdcynkjvziefqzyndxkjmsjlvyvbwraklbalykyxoliqdlreeykuphdtmzfdwpphmrqvwvqffojkqhlzvinqajsxbszyvrqqyzusxran'
   #   tag.valid?
   #   expect(tag.errors[:name]).to be_empty
   # end

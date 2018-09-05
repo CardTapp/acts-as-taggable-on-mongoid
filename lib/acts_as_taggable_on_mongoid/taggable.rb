@@ -1,6 +1,11 @@
 # frozen_string_literal: true
 
 module ActsAsTaggableOnMongoid
+  # This module defines the class methods to be added to the Mongoid model so that
+  # tags can be defined on and added to a model.
+  #
+  # When a tag is added to a model, additional modules will be included to add methods that
+  # are needed only if a tag is actually being used.
   module Taggable
     extend ActiveSupport::Concern
 
@@ -80,6 +85,7 @@ module ActsAsTaggableOnMongoid
         # used by tagging.  We only add them dynamically like this so that they don't bloat the model
         # and add hooks/callbacks that aren't needed without tags.
         [ActsAsTaggableOnMongoid::Taggable::Core,
+         ActsAsTaggableOnMongoid::Taggable::Changeable,
          # include Collection - not sure we will need as done here.  Need to think more on this one.
          # include Cache - TODO: Add this.
          # include Ownership - TODO: Add this.

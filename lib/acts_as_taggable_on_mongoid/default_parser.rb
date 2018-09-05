@@ -48,12 +48,11 @@ module ActsAsTaggableOnMongoid
     def to_s
       tag_list = tags.frozen? ? tags.dup : tags
 
-      d     = ActsAsTaggableOnMongoid::DefaultParser.delimiters.first
-      regex = Regexp.new (Array.wrap(ActsAsTaggableOnMongoid::DefaultParser.delimiters) + %w[" ']).join("|")
+      join_delimiter = ActsAsTaggableOnMongoid::DefaultParser.delimiters.first
 
       tag_list.map do |name|
-        name.index(regex) ? "\"#{name}\"" : name
-      end.join(d)
+        name.index(escape_regex) ? "\"#{name}\"" : name
+      end.join(join_delimiter)
     end
 
     def self.delimiters
@@ -62,6 +61,11 @@ module ActsAsTaggableOnMongoid
 
     private
 
+    def escape_regex
+      @escape_regex ||= Regexp.new((Array.wrap(ActsAsTaggableOnMongoid::DefaultParser.delimiters) + %w[" ']).join("|"))
+    end
+
+    # :reek:UtilityFunction
     def extract_quoted_strings(string, tag_list, quote_pattern)
       string.gsub!(quote_pattern) do
         # Append the matched tag to the tag list
@@ -73,10 +77,10 @@ module ActsAsTaggableOnMongoid
 
     def delimiter
       # Parse the quoted tags
-      d = self.class.delimiters
+      delimiter_list = self.class.delimiters
       # Separate multiple delimiters by bitwise operator
-      d = d.join("|") if d.is_a?(Array)
-      d
+      delimiter_list = delimiter_list.join("|") if delimiter_list.is_a?(Array)
+      delimiter_list
     end
 
     def delimiter_regex
@@ -106,7 +110,7 @@ module ActsAsTaggableOnMongoid
     # (.*?)         # Tag ($2)
     # '\s*          # quote (') optionally followed by whitespace
     # (?=           # Tag end delimiter (not consumed; is zero-length lookahead)
-    # #{delimiter}\s*  | d # Either a delimiter optionally followed by whitespace or
+    # #{delimiter}\s*  | delimiter_list # Either a delimiter optionally followed by whitespace or
     # \z          # string end
     # )
     def single_quote_pattern

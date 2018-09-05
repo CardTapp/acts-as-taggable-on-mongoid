@@ -16,10 +16,17 @@ module ActsAsTaggableOnMongoid
     # autoload :TagsHelper
     # autoload :VERSION
 
+    autoload_under "taggable/tag_type_definition" do
+      autoload :Attributes
+      autoload "Changeable"
+      autoload :Names
+    end
+
     autoload_under :Taggable do
       #   autoload :Cache
       #   autoload :Collection
       autoload :Core
+      autoload :Changeable
       autoload :TagTypeDefinition
       autoload :ListTags
       #   autoload :Dirty
@@ -46,11 +53,13 @@ module ActsAsTaggableOnMongoid
     yield configuration if block_given?
   end
 
+  # :reek:ManualDispatch
   def self.method_missing(method_name, *args, &block)
-    configuration.respond_to?(method_name) ? configuration.send(method_name, *args, &block) : super
+    configuration.respond_to?(method_name) ? configuration.public_send(method_name, *args, &block) : super
   end
 
-  def self.respond_to_missing?(method_name, include_private = false)
+  # :reek:BooleanParameter
+  def self.respond_to_missing?(method_name, _include_private = false)
     configuration.respond_to?(method_name) || super
   end
 end

@@ -27,8 +27,8 @@ module ActsAsTaggableOnMongoid
       validates_presence_of :taggable_type
 
       ### SCOPES:
-      scope :most_used, ->(limit = 20) { order('taggings_count desc').limit(limit) }
-      scope :least_used, ->(limit = 20) { order('taggings_count asc').limit(limit) }
+      scope :most_used, ->(limit = 20) { order("taggings_count desc").limit(limit) }
+      scope :least_used, ->(limit = 20) { order("taggings_count asc").limit(limit) }
 
       scope :named, ->(name) { where(name: as_8bit_ascii(name)) }
       scope :named_any, ->(*names) { where(:name.in => names.map { |name| as_8bit_ascii(name) }) }
@@ -58,7 +58,7 @@ module ActsAsTaggableOnMongoid
                 retry
               end
 
-              raise ActsAsTaggableOnMongoid::Errors::DuplicateTagError.new("'#{tag_name}' has already been taken")
+              raise ActsAsTaggableOnMongoid::Errors::DuplicateTagError.new, "'#{tag_name}' has already been taken"
             end
           end
         end
@@ -72,18 +72,19 @@ module ActsAsTaggableOnMongoid
         end
 
         def as_8bit_ascii(string)
+          string = string.to_s
           if defined?(Encoding)
-            string.to_s.dup.force_encoding('BINARY')
+            string.dup.force_encoding("BINARY")
           else
-            string.to_s.mb_chars
+            string.mb_chars
           end
         end
       end
 
       ### INSTANCE METHODS:
 
-      def ==(object)
-        super || (object.class == self.class && name == object.name)
+      def ==(other)
+        super || (other.class == self.class && name == other.name)
       end
 
       def to_s

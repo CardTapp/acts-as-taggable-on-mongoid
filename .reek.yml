@@ -1,0 +1,5 @@
+---
+detectors:
+  # TooManyStatements is covered by RuboCop.
+  TooManyStatements:
+    enabled: false

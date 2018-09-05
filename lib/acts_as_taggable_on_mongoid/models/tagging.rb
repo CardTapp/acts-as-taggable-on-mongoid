@@ -7,7 +7,7 @@ module ActsAsTaggableOnMongoid
       include Mongoid::Document
       include Mongoid::Timestamps
 
-      DEFAULT_CONTEXT = 'tags'
+      DEFAULT_CONTEXT = "tags"
 
       field :tag_name, type: String
       field :context, type: String
@@ -34,9 +34,9 @@ module ActsAsTaggableOnMongoid
       validates_presence_of :taggable
 
       # validates_uniqueness_of :tag_id, scope: [:taggable_type, :taggable_id, :context, :tagger_id, :tagger_type]
-      validates_uniqueness_of :tag_name, scope: [:taggable_type, :taggable_id, :context]
+      validates_uniqueness_of :tag_name, scope: %i[taggable_type taggable_id context]
       # validates_uniqueness_of :tag_id, scope: [:taggable_type, :taggable_id, :context, :tagger_id, :tagger_type]
-      validates_uniqueness_of :tag_id, scope: [:taggable_type, :taggable_id, :context]
+      validates_uniqueness_of :tag_id, scope: %i[taggable_type taggable_id context]
 
       after_destroy :remove_unused_tags
 
@@ -47,9 +47,9 @@ module ActsAsTaggableOnMongoid
 
         tag_definition = taggable.class.tag_definition(context)
 
-        if tag_definition.remove_unused_tags?
-          tag.destroy if tag.reload.taggings_count.zero?
-        end
+        return unless tag_definition.remove_unused_tags?
+
+        tag.destroy if tag.reload.taggings_count.zero?
       end
     end
   end

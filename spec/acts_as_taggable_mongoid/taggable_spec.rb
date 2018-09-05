@@ -31,6 +31,6 @@ RSpec.describe ActsAsTaggableOnMongoid::Taggable do
     tagged.tag_list = ["tag_2, tag_3, tag_9", parse: true]
     tagged.save
 
-    expect(tagged.reload.tag_list).to eq %w(tag_2 tag_3 tag_9)
+    expect(tagged.reload.tag_list).to eq %w[tag_2 tag_3 tag_9]
   end
 end

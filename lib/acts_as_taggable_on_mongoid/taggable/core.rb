@@ -1,14 +1,17 @@
 # frozen_string_literal: true
 
-# require_relative 'tagged_with_query'
-
-# TODO: to_json override.  I'm worried about adding the tag_list to the attributes because it could then save to the
-#       model or raise an exception if the model doesn't allow attributes that aren't fields.
-#       Instead, I think I need to override the to_json so that it outputs the tag list also.
-#
-#       Maybe/maybe not.  I don't know if the tag_list should be a part of the json automatically or not.
 module ActsAsTaggableOnMongoid
   module Taggable
+    # A collection of generic methods which use the tag definition to perform actions.
+    #
+    # These methods are called by the individual tag generated methods to do their work so that
+    # the code can be defined in only one location and "shared" by all tags rather than putting the code
+    # and definitions into the dynamically defined methods directly.
+    #
+    # This module actually consists almost exclusively of utility functions
+
+    # :reek:FeatureEnvy
+    # :reek:UtilityFunction
     module Core
       extend ActiveSupport::Concern
 
@@ -37,15 +40,6 @@ module ActsAsTaggableOnMongoid
         end
       end
 
-      def reload(*args)
-        self.class.tag_types.each do |_tag_name, tag_definition|
-          instance_variable_set tag_definition.all_tag_list_variable_name, nil
-          instance_variable_set tag_definition.tag_list_variable_name, nil
-        end
-
-        super(*args)
-      end
-
       private
 
       def tag_list_cache_set_on(tag_definition)
@@ -54,34 +48,34 @@ module ActsAsTaggableOnMongoid
         instance_variable_defined?(variable_name) && instance_variable_get(variable_name)
       end
 
-      def tag_list_cache_on(tag_type_definition)
-        variable_name = tag_type_definition.tag_list_variable_name
+      def tag_list_cache_on(tag_definition)
+        variable_name = tag_definition.tag_list_variable_name
 
         # if instance_variable_get(variable_name)
         #   instance_variable_get(variable_name)
-        # elsif cached_tag_list_on(tag_type_definition) && ensure_included_cache_methods! && self.class.caching_tag_list_on?(tag_type_definition)
-        #   instance_variable_set(variable_name, tag_type_definition.parse(cached_tag_list_on(tag_type_definition)))
+        # elsif cached_tag_list_on(tag_definition) && ensure_included_cache_methods! && self.class.caching_tag_list_on?(tag_definition)
+        #   instance_variable_set(variable_name, tag_definition.parse(cached_tag_list_on(tag_definition)))
         # else
-        #   instance_variable_set(variable_name, ActsAsTaggableOnMongoid::TagList.new(tag_type_definition, tags_on(tag_type_definition).map(&:name)))
+        #   tag_list_set(ActsAsTaggableOnMongoid::TagList.new(tag_definition, tags_on(tag_definition).map(&:tag_name)))
         # end
 
         instance_variable_get(variable_name) ||
-            instance_variable_set(variable_name,
-                                  ActsAsTaggableOnMongoid::TagList.new(tag_type_definition, tags_on(tag_type_definition).map(&:tag_name)))
+            tag_list_set(ActsAsTaggableOnMongoid::TagList.new(tag_definition, tags_on(tag_definition).map(&:tag_name)))
       end
 
-      def tag_list_on(tag_type_definition)
-        # add_custom_context(tag_type_definition)
-        tag_list_cache_on(tag_type_definition)
+      def tag_list_on(tag_definition)
+        # add_custom_context(tag_definition)
+
+        tag_list_cache_on(tag_definition)
       end
 
-      def all_tags_list_on(tag_type_definition)
-        variable_name   = tag_type_definition.all_tag_list_variable_name
+      def all_tags_list_on(tag_definition)
+        variable_name   = tag_definition.all_tag_list_variable_name
         cached_variable = instance_variable_get(variable_name)
 
         return cached_variable if instance_variable_defined?(variable_name) && cached_variable
 
-        instance_variable_set(variable_name, ActsAsTaggableOn::TagList.new(tag_type_definition, all_tags_on(tag_type_definition).map(&:name)).freeze)
+        instance_variable_set(variable_name, ActsAsTaggableOn::TagList.new(tag_definition, all_tags_on(tag_definition).map(&:name)).freeze)
       end
 
       ##
@@ -92,21 +86,33 @@ module ActsAsTaggableOnMongoid
 
       ##
       # Returns all tags that are not owned of a given context
-      def tags_on(tag_type_definition)
-        # scope = send(tag_type_definition.taggings_name).where(context: tag_type_definition.tag_type, tagger_id: nil)
-        scope = send(tag_type_definition.taggings_name).where(context: tag_type_definition.tag_type)
+      def tags_on(tag_definition)
+        # scope = send(tag_definition.taggings_name).where(context: tag_definition.tag_type, tagger_id: nil)
+        scope = send(tag_definition.taggings_name).where(context: tag_definition.tag_type)
 
         # # when preserving tag order, return tags in created order
         # # if we added the order to the association this would always apply
-        scope = scope.order_by(:created_at.asc, :id.asc) if tag_type_definition.preserve_tag_order?
+        scope = scope.order_by(:created_at.asc, :id.asc) if tag_definition.preserve_tag_order?
 
         scope
       end
 
-      def tag_list_set(new_list)
-        # add_custom_context(tag_type_definition, owner)
+      def mark_tag_list_changed(new_list)
+        tag_definition   = new_list.tag_definition
+        current_tag_list = send(tag_definition.tag_list_name)
 
-        instance_variable_set(new_list.tag_type_definition.tag_list_variable_name, new_list)
+        if (tag_definition.preserve_tag_order? && new_list != current_tag_list) ||
+            new_list.sort != current_tag_list.sort
+          current_tag_list.notify_will_change
+        end
+      end
+
+      def tag_list_set(new_list)
+        # add_custom_context(tag_definition, owner)
+
+        new_list.taggable = self
+
+        instance_variable_set(new_list.tag_definition.tag_list_variable_name, new_list)
       end
 
       ##
@@ -122,29 +128,16 @@ module ActsAsTaggableOnMongoid
         @saving_tag_list = true
 
         self.class.tag_types.each_value do |tag_definition|
-
           next unless tag_list_cache_set_on(tag_definition)
 
           # List of currently assigned tag names
-          tag_list = tag_list_cache_on(tag_definition).uniq
-
-          # Find existing tags or create non-existing tags:
-          tags               = find_or_create_tags_from_list_with_context(tag_definition, tag_list)
-          current_tags       = tags_on(tag_definition).map(&:tag).compact
-          old_tags           = current_tags - tags
-          new_tags           = tags - current_tags
-
-          old_tags, new_tags = preserve_tag_list_order(tags, current_tags, old_tags, new_tags) if tag_definition.preserve_tag_order?
+          tag_list_diff = extract_tag_list_changes(tag_definition)
 
           # Destroy old taggings:
-          if old_tags.present?
-            send(tag_definition.taggings_name).by_context(tag_definition.tag_type).where(:tag_name.in => old_tags.map(&:name)).destroy_all
-          end
+          tag_list_diff.destroy_old_tags
 
           # Create new taggings:
-          new_tags.each do |tag|
-            send(tag_definition.taggings_name).create!(tag_name: tag.name, context: tag_definition.tag_type, taggable: self, tag: tag)
-          end
+          tag_list_diff.create_new_tags
         end
 
         @saving_tag_list = false
@@ -152,23 +145,20 @@ module ActsAsTaggableOnMongoid
         true
       end
 
-      def preserve_tag_list_order(tags, current_tags, old_tags, new_tags)
-        shared_tags = current_tags & tags
+      def extract_tag_list_changes(tag_definition)
+        tag_list = tag_list_cache_on(tag_definition).uniq
 
-        if shared_tags.any? && tags[0...shared_tags.size] != shared_tags
-          index = shared_tags.each_with_index { |_, i| break i unless shared_tags[i] == tags[i] }
+        # Find existing tags or create non-existing tags:
+        tags         = find_or_create_tags_from_list_with_context(tag_definition, tag_list)
+        current_tags = tags_on(tag_definition).map(&:tag).compact
 
-          # Update arrays of tag objects
-          old_tags |= current_tags[index...current_tags.size]
-          new_tags |= current_tags[index...current_tags.size] & shared_tags
+        tag_list_diff = ActsAsTaggableOnMongoid::Taggable::Utils::TagListDiff.new tag_definition: tag_definition,
+                                                                                  tags:           tags,
+                                                                                  current_tags:   current_tags
 
-          # Order the array of tag objects to match the tag list
-          new_tags = tags.map do |t|
-            new_tags.find { |n| n.name == t.name }
-          end.compact
-        end
+        tag_list_diff.call
 
-        [old_tags, new_tags]
+        tag_list_diff
       end
 
       def dirtify_tag_list(tagging)

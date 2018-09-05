@@ -8,7 +8,7 @@ module ActsAsTaggableOnMongoid
   #
   # All methods that add objects to the list (initialization, concat, etc.) optionally take an array of values including
   # options to parse the values and to optionally specifiy the parser to use.  If no parser is specified, then
-  # parser for the tag_type_definition is used.
+  # parser for the tag_definition is used.
   #
   # If the input value(s) are to be parsed, then all values passed in are parsed.
   #
@@ -24,12 +24,15 @@ module ActsAsTaggableOnMongoid
   #
   #   TagList.new(tag_definition, "value 1, value 2", "value 3, value 4", parser: ActsAsTaggableOnMongoid::GenericParser)
   #   # > TagList<> ["value 1", "value 2", "value 3", "value 4"]
-  class TagList < Array
-    # attr_accessor :owner
-    attr_reader :tag_type_definition
 
-    def initialize(tag_type_definition, *args)
-      @tag_type_definition = tag_type_definition
+  # :reek:SubclassedFromCoreClass
+  class TagList < Array
+    # :reek:Attribute
+    attr_accessor :taggable
+    attr_reader :tag_definition
+
+    def initialize(tag_definition, *args)
+      @tag_definition = tag_definition
 
       add(*args)
     end
@@ -59,12 +62,15 @@ module ActsAsTaggableOnMongoid
     # Concatenation --- Returns a new tag list built by concatenating the
     # two tag lists together to produce a third tag list.
     def +(other)
-      TagList.new(tag_type_definition).add(*self).add(other)
+      TagList.new(tag_definition).add(*self).add(other)
     end
 
     # Appends the elements of +other_tag_list+ to +self+.
     def concat(other_tag_list)
+      notify_will_change
+
       super(other_tag_list).send(:clean!)
+
       self
     end
 
@@ -76,7 +82,9 @@ module ActsAsTaggableOnMongoid
     #   tag_list.remove("Sad", "Lonely")
     #   tag_list.remove("Sad, Lonely", :parse => true)
     def remove(*names)
-      remove_list = ActsAsTaggableOnMongoid::TagList.new(tag_type_definition, *names)
+      remove_list = ActsAsTaggableOnMongoid::TagList.new(tag_definition, *names)
+
+      notify_will_change
 
       delete_if { |name| remove_list.include?(name) }
 
@@ -91,24 +99,43 @@ module ActsAsTaggableOnMongoid
     #   tag_list = TagList.new("Round", "Square,Cube")
     #   tag_list.to_s # 'Round, "Square,Cube"'
     def to_s
-      tag_type_definition.parser.new(*self).to_s
+      tag_definition.parser.new(*self).to_s
+    end
+
+    def notify_will_change
+      return unless taggable
+
+      taggable.tag_list_on_changed tag_definition
+    end
+
+    # :reek:NilCheck
+    def ==(other)
+      if tag_definition.preserve_tag_order?
+        super
+      else
+        self&.sort == other&.sort
+      end
     end
 
     private
 
     # Convert everything to string, remove whitespace, duplicates, and blanks.
+    def clean
+      TagList.new(tag_definition).add(*self).clean!
+    end
+
     def clean!
       reject!(&:blank?)
 
       map!(&:to_s)
       map!(&:strip)
 
-      conditional_clean_rules!
+      conditional_clean_rules
     end
 
-    def conditional_clean_rules!
-      map! { |tag| tag.mb_chars.downcase.to_s } if tag_type_definition.force_lowercase?
-      map!(&:parameterize) if tag_type_definition.force_parameterize?
+    def conditional_clean_rules
+      map! { |tag| tag.mb_chars.downcase.to_s } if tag_definition.force_lowercase?
+      map!(&:parameterize) if tag_definition.force_parameterize?
 
       uniq!
 
@@ -119,7 +146,7 @@ module ActsAsTaggableOnMongoid
       options = args.extract_options!
       options.assert_valid_keys :parse, :parser
 
-      run_parser = options[:parser] || tag_type_definition.parser
+      run_parser = options[:parser] || tag_definition.parser
 
       args.flatten!
       args.map! { |a| run_parser.new(a).parse } if options[:parse] || options[:parser]
