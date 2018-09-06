@@ -25,8 +25,7 @@ module ActsAsTaggableOnMongoid
                                   :force_parameterize,
                                   :remove_unused_tags,
                                   :tags_table,
-                                  :taggings_table,
-                                  :tags_counter)
+                                  :taggings_table)
 
         options.each do |key, value|
           instance_variable_set("@#{key}", value)

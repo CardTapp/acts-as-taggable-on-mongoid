@@ -18,14 +18,6 @@ module ActsAsTaggableOnMongoid
           @taggings_table || ActsAsTaggableOnMongoid.taggings_table
         end
 
-        def tags_counter
-          if defined?(@tags_counter)
-            @tags_counter
-          else
-            ActsAsTaggableOnMongoid.configuration.tags_counter?
-          end
-        end
-
         def force_lowercase
           if defined?(@force_lowercase)
             @force_lowercase
@@ -60,7 +52,6 @@ module ActsAsTaggableOnMongoid
 
         alias preserve_tag_order? preserve_tag_order
         alias cached_in_model? cached_in_model
-        alias tags_counter? tags_counter
         alias force_lowercase? force_lowercase
         alias force_parameterize? force_parameterize
         alias remove_unused_tags? remove_unused_tags

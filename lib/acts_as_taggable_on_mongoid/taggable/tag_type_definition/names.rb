@@ -22,10 +22,6 @@ module ActsAsTaggableOnMongoid
           @all_tag_list_variable_name ||= "@#{tag_list_name}"
         end
 
-        def save_tags_method
-          @save_tags_method ||= "save_#{single_tag_type}_list"
-        end
-
         def single_tag_type
           @single_tag_type ||= tag_type.to_s.singularize
         end
