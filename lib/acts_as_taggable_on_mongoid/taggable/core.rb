@@ -134,10 +134,10 @@ module ActsAsTaggableOnMongoid
           tag_list_diff = extract_tag_list_changes(tag_definition)
 
           # Destroy old taggings:
-          tag_list_diff.destroy_old_tags
+          tag_list_diff.destroy_old_tags self
 
           # Create new taggings:
-          tag_list_diff.create_new_tags
+          tag_list_diff.create_new_tags self
         end
 
         @saving_tag_list = false
@@ -163,6 +163,8 @@ module ActsAsTaggableOnMongoid
 
       def dirtify_tag_list(tagging)
         definition = self.class.tag_definition(tagging.context)
+
+        return unless definition
 
         attribute_will_change! definition.tag_list_name
       end

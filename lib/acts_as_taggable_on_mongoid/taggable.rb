@@ -25,16 +25,16 @@ module ActsAsTaggableOnMongoid
         acts_as_taggable_on :tags, options
       end
 
-      # ##
-      # # This is an alias for calling <tt>acts_as_ordered_taggable_on :tags</tt>.
-      # #
-      # # Example:
-      # #   class Book < ActiveRecord::Base
-      # #     acts_as_ordered_taggable
-      # #   end
-      # def acts_as_ordered_taggable(options = {})
-      #   acts_as_ordered_taggable_on :tags, options
-      # end
+      ##
+      # This is an alias for calling <tt>acts_as_ordered_taggable_on :tags</tt>.
+      #
+      # Example:
+      #   class Book < ActiveRecord::Base
+      #     acts_as_ordered_taggable
+      #   end
+      def acts_as_ordered_taggable(options = {})
+        acts_as_ordered_taggable_on :tags, options
+      end
 
       ##
       # Make a model taggable on specified contexts.
@@ -95,8 +95,11 @@ module ActsAsTaggableOnMongoid
         end
 
         options = tag_types.extract_options!
+        tag_types.flatten!
 
         tag_types.each do |tag_type|
+          next if tag_type.blank?
+
           define_tag tag_type, options
         end
       end

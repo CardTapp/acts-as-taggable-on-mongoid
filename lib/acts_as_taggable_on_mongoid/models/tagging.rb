@@ -28,15 +28,15 @@ module ActsAsTaggableOnMongoid
       scope :by_context, ->(context = DEFAULT_CONTEXT) { by_contexts(context.to_s) }
       scope :for_tag, ->(tag_definition) { where(taggable_type: tag_definition.owner.name).by_context(tag_definition.tag_type) }
 
-      validates_presence_of :tag_name
-      validates_presence_of :context
-      validates_presence_of :tag
-      validates_presence_of :taggable
+      validates :tag_name, presence: true
+      validates :context, presence: true
+      validates :tag, presence: true
+      validates :taggable, presence: true
 
-      # validates_uniqueness_of :tag_id, scope: [:taggable_type, :taggable_id, :context, :tagger_id, :tagger_type]
-      validates_uniqueness_of :tag_name, scope: %i[taggable_type taggable_id context]
-      # validates_uniqueness_of :tag_id, scope: [:taggable_type, :taggable_id, :context, :tagger_id, :tagger_type]
-      validates_uniqueness_of :tag_id, scope: %i[taggable_type taggable_id context]
+      # validates :tag_id, uniqueness: {scope: [:taggable_type, :taggable_id, :context, :tagger_id, :tagger_type]}
+      validates :tag_name, uniqueness: { scope: %i[taggable_type taggable_id context] }
+      # validates :tag_id, uniqueness: {scope: [:taggable_type, :taggable_id, :context, :tagger_id, :tagger_type]}
+      validates :tag_id, uniqueness: { scope: %i[taggable_type taggable_id context] }
 
       after_destroy :remove_unused_tags
 
@@ -47,7 +47,7 @@ module ActsAsTaggableOnMongoid
 
         tag_definition = taggable.class.tag_definition(context)
 
-        return unless tag_definition.remove_unused_tags?
+        return unless tag_definition&.remove_unused_tags?
 
         tag.destroy if tag.reload.taggings_count.zero?
       end

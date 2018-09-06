@@ -22,6 +22,10 @@ module ActsAsTaggableOnMongoid
       autoload :Names
     end
 
+    autoload_under "taggable/utils" do
+      autoload :TagListDiff
+    end
+
     autoload_under :Taggable do
       #   autoload :Cache
       #   autoload :Collection

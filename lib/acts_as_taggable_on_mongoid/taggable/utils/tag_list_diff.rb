@@ -35,16 +35,16 @@ module ActsAsTaggableOnMongoid
           preserve_tag_list_order
         end
 
-        def create_new_tags
+        def create_new_tags(taggable)
           new_tags.each do |tag|
-            send(tag_definition.taggings_name).create!(tag_name: tag.name, context: tag_definition.tag_type, taggable: self, tag: tag)
+            taggable.send(tag_definition.taggings_name).create!(tag_name: tag.name, context: tag_definition.tag_type, taggable: taggable, tag: tag)
           end
         end
 
-        def destroy_old_tags
+        def destroy_old_tags(taggable)
           return if old_tags.blank?
 
-          send(tag_definition.taggings_name).by_context(tag_definition.tag_type).where(:tag_name.in => old_tags.map(&:name)).destroy_all
+          taggable.send(tag_definition.taggings_name).by_context(tag_definition.tag_type).where(:tag_name.in => old_tags.map(&:name)).destroy_all
         end
 
         private
@@ -56,10 +56,8 @@ module ActsAsTaggableOnMongoid
 
           return if share_tags_sorted?
 
-          index = first_ordered_difference
-
           # Update arrays of tag objects
-          @old_tags |= current_tags[index..-1]
+          @old_tags |= current_tags[first_ordered_difference..-1]
 
           preserve_new_tag_list_order
         end
@@ -69,7 +67,7 @@ module ActsAsTaggableOnMongoid
         end
 
         def preserve_new_tag_list_order
-          preserved_tags = new_tags | current_tags[index..-1] & shared_tags
+          preserved_tags = new_tags | current_tags[first_ordered_difference..-1] & shared_tags
 
           # Order the array of tag objects to match the tag list
           @new_tags = tags.map do |t|
@@ -78,13 +76,17 @@ module ActsAsTaggableOnMongoid
         end
 
         def first_ordered_difference
+          return @first_ordered_difference if defined?(@first_ordered_difference)
+
           index = 0
-          shared_tags.while(index < shared_tags.length) do
+
+          while index < shared_tags.length
             break unless shared_tags[index] == tags[index]
 
             index += 1
           end
-          index
+
+          @first_ordered_difference = index
         end
       end
     end

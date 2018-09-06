@@ -43,7 +43,8 @@ module ActsAsTaggableOnMongoid
                   :remove_unused_tags,
                   :default_parser,
                   :tags_table,
-                  :taggings_table
+                  :taggings_table,
+                  :preserve_tag_order
 
     # For duck compatibility with ActsAsTaggableOn.  Do not use.
     def tags_counter
@@ -56,6 +57,7 @@ module ActsAsTaggableOnMongoid
 
     alias force_lowercase? force_lowercase
     alias force_parameterize? force_parameterize
+    alias preserve_tag_order? preserve_tag_order
     alias remove_unused_tags? remove_unused_tags
     alias strict_case_match? strict_case_match
     alias tags_counter? tags_counter
@@ -63,6 +65,7 @@ module ActsAsTaggableOnMongoid
     def initialize
       @force_lowercase    = false
       @force_parameterize = false
+      @preserve_tag_order = false
       @remove_unused_tags = false
       @tags_counter       = true
       @default_parser     = DefaultParser

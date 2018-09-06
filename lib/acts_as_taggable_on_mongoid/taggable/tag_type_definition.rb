@@ -123,7 +123,7 @@ module ActsAsTaggableOnMongoid
 
         owner.taggable_mixin.module_eval do
           define_method tag_definition.tag_type.to_sym do
-            send(base_tags_method).
+            send(tag_definition.base_tags_method).
                 order_by(*tag_definition.taggings_order).
                 for_tag(tag_definition)
           end
@@ -162,7 +162,12 @@ module ActsAsTaggableOnMongoid
 
         owner.taggable_mixin.module_eval do
           define_method("#{tag_definition.tag_list_name}=") do |new_tags|
-            new_list = tag_definition.parse(*Array.wrap(new_tags))
+            new_tags = Array.wrap(new_tags)
+            options  = new_tags.extract_options!
+
+            options.merge!(parse: true)
+
+            new_list = tag_definition.parse(*new_tags, options)
 
             mark_tag_list_changed(new_list)
             tag_list_set(new_list)

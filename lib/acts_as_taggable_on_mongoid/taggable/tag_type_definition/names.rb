@@ -15,7 +15,7 @@ module ActsAsTaggableOnMongoid
         end
 
         def all_tag_list_name
-          @all_tag_list_name ||= "all_#{single_tag_type}_list"
+          @all_tag_list_name ||= "all_#{tag_type}_list"
         end
 
         def all_tag_list_variable_name

@@ -22,9 +22,10 @@ module ActsAsTaggableOnMongoid
 
       ### VALIDATIONS:
 
-      validates_presence_of :name
-      validates_presence_of :context
-      validates_presence_of :taggable_type
+      validates :name, presence: true
+      validates :context, presence: true
+      validates :taggable_type, presence: true
+      validates :name, uniqueness: { scope: %i[context taggable_type] }
 
       ### SCOPES:
       scope :most_used, ->(limit = 20) { order("taggings_count desc").limit(limit) }
@@ -42,7 +43,7 @@ module ActsAsTaggableOnMongoid
 
       class << self
         def find_or_create_all_with_like_by_name(tag_definition, *list)
-          list = TagList.new(tag_definition, *Array.wrap(list).flatten)
+          list = ActsAsTaggableOnMongoid::TagList.new(tag_definition, *Array.wrap(list).flatten)
 
           return [] if list.empty?
 
