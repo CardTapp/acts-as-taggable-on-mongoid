@@ -15,7 +15,8 @@ RSpec.describe ActsAsTaggableOnMongoid::Taggable::ListTags do
     it "returns the tag_defintion" do
       taggable = TaggableModel.new name: "Teth Adam", language_list: "Solomon, Hercules, Atlas, Zeus, Achilles, Mercury"
 
-      expect(taggable.tag_definition("languages")).to eq taggable.language_list.tag_definition
+      expect(taggable.tag_definition("languages").tag_type).to eq taggable.language_list.tag_definition.tag_type
+      expect(taggable.tag_definition("languages")).not_to be_conflicts_with taggable.language_list.tag_definition
       expect(taggable.tag_types.count).to eq 5
       expect(TaggableModel.tag_types.count).to eq 5
     end

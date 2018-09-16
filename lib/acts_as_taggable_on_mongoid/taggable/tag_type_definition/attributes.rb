@@ -65,11 +65,11 @@ module ActsAsTaggableOnMongoid
         private
 
         def default_value=(value)
-          value           = Array.wrap(value)
-          options         = value.extract_options!
-          options[:parse] = true unless options.key?(:parse)
+          dup_value       = Array.wrap(value).dup
+          options         = dup_value.extract_options!.dup
+          options[:parse] = options.fetch(:parse) { true }
 
-          @default = ActsAsTaggableOnMongoid::TagList.new self, value, options
+          @default = ActsAsTaggableOnMongoid::TagList.new self, dup_value, options
         end
       end
     end

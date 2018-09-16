@@ -207,8 +207,7 @@ RSpec.describe ActsAsTaggableOnMongoid::Taggable do
       expect(taggable.skills.count).to eq(2)
     end
 
-    # TODO: Not implemented yet
-    xit "should be able to find by tag" do
+    it "should be able to find by tag" do
       taggable.skill_list = "ruby, rails, css"
       taggable.save
 
@@ -219,20 +218,24 @@ RSpec.describe ActsAsTaggableOnMongoid::Taggable do
     #   taggable.skill_list = "ruby"
     #   taggable.save
     #
-    #   expect(TaggableModel.tagged_with("ruby").group(:created_at).count.count).to eq(1)
+    #   expect(TaggableModel.tagged_with("ruby", on: :skills).group(:created_at).count.count).to eq(1)
     # end
 
-    # it "can be used as scope" do
-    #   taggable.skill_list = "ruby"
-    #   taggable.save
-    #
-    #   untaggable_model = taggable.untaggable_models.create!(name: "foobar")
-    #   scope_tag        = TaggableModel.tagged_with("ruby", any: "distinct", order: "taggable_models.name asc")
-    #   expect(UntaggableModel.joins(:taggable_model).merge(scope_tag).except(:select)).to eq([untaggable_model])
-    # end
+    it "can be used as scope" do
+      TaggableModel.create!(name: "Boby Jones", skill_list: "ruby")
 
-    # TODO: Not implemented yet
-    xit "should be able to find a tag using dates" do
+      taggable.skill_list = "ruby"
+      taggable.save!
+
+      expect(TaggableModel.tagged_with("ruby").count).to eq 2
+      expect(TaggableModel.tagged_with("ruby").where(name: "Bob Jones").count).to eq 1
+    end
+
+    it "should be able to find a tag using dates" do
+      Timecop.travel(2.days.ago) do
+        TaggableModel.create!(name: "Boby Jones", skill_list: "ruby")
+      end
+
       taggable.skill_list = " ruby "
       taggable.save
 
@@ -242,16 +245,14 @@ RSpec.describe ActsAsTaggableOnMongoid::Taggable do
       expect(TaggableModel.tagged_with(" ruby ", start_at: today, end_at: tomorrow).count).to eq(1)
     end
 
-    # TODO: Not implemented yet
-    xit "shouldn't be able to find a tag outside date range" do
+    it "shouldn't be able to find a tag outside date range" do
       taggable.skill_list = "ruby"
       taggable.save
 
       expect(TaggableModel.tagged_with("ruby", start_at: Date.today - 2.days, end_at: Date.today - 1.day).count).to eq(0)
     end
 
-    # TODO: Not implemented yet
-    xit "should be able to find by tag with context" do
+    it "should be able to find by tag with context" do
       taggable.skill_list = "ruby, rails, css, julia"
       taggable.tag_list   = "bob, charlie, julia"
       taggable.save
@@ -262,7 +263,9 @@ RSpec.describe ActsAsTaggableOnMongoid::Taggable do
       expect(TaggableModel.tagged_with("bob", on: :tags).first).to eq(taggable)
       expect(TaggableModel.tagged_with("julia", on: :skills).size).to eq(1)
       expect(TaggableModel.tagged_with("julia", on: :tags).size).to eq(1)
-      expect(TaggableModel.tagged_with("julia", on: nil).size).to eq(2)
+
+      # expect(TaggableModel.tagged_with("julia", on: nil).size).to eq(2)
+      expect(TaggableModel.tagged_with("julia", on: nil).size).to eq(1)
     end
 
     context "should be able to create and find tags in languages without capitalization :" do
@@ -309,18 +312,17 @@ RSpec.describe ActsAsTaggableOnMongoid::Taggable do
       expect(TaggableModel.all_tags(order: "#{ActsAsTaggableOnMongoid.tags_table}.id").first.name).to eq("ruby")
     end
 
-    # TODO: Not implemented yet
-    xit "should be able to use named scopes to chain tag finds by any tags by context" do
+    it "should be able to use named scopes to chain tag finds by any tags by context" do
       bob = TaggableModel.create(name: "Bob", need_list: "rails", offering_list: "c++")
       TaggableModel.create(name: "Frank", need_list: "css", offering_list: "css")
       TaggableModel.create(name: "Steve", need_list: "c++", offering_list: "java")
 
       # Let"s only find those who need rails or css and are offering c++ or java
-      expect(TaggableModel.tagged_with(["rails, css"], on: :needs, any: true).tagged_with(%w[c++ java], on: :offerings, any: true).to_a).to eq([bob])
+      expect(TaggableModel.tagged_with(["rails, css"], on: :needs, any: true).
+          tagged_with(%w[c++ java], on: :offerings, any: true).to_a).to eq([bob])
     end
 
-    # TODO: Not implemented yet
-    xit "should not return read-only records" do
+    it "should not return read-only records" do
       TaggableModel.create(name: "Bob", tag_list: "ruby, rails, css")
       expect(TaggableModel.tagged_with("ruby").first).to_not be_readonly
     end
@@ -393,38 +395,34 @@ RSpec.describe ActsAsTaggableOnMongoid::Taggable do
       expect(bob.tags_on(:rotors)).to_not be_empty
     end
 
-    # TODO: Not implemented yet
-    xit "should be able to find tagged" do
+    it "should be able to find tagged" do
       bob   = TaggableModel.create(name: "Bob", tag_list: "fitter, happier, more productive", skill_list: "ruby, rails, css")
       frank = TaggableModel.create(name: "Frank", tag_list: "weaker, depressed, inefficient", skill_list: "ruby, rails, css")
       steve = TaggableModel.create(name: "Steve", tag_list: "fitter, happier, more productive", skill_list: "c++, java, ruby")
 
-      expect(TaggableModel.tagged_with("ruby", order: "taggable_models.name").to_a).to eq([bob, frank, steve])
-      expect(TaggableModel.tagged_with("ruby, rails", order: "taggable_models.name").to_a).to eq([bob, frank])
-      expect(TaggableModel.tagged_with(%w[ruby rails], order: "taggable_models.name").to_a).to eq([bob, frank])
+      expect(TaggableModel.tagged_with("ruby").order_by(:name.asc).to_a).to eq([bob, frank, steve])
+      expect(TaggableModel.tagged_with("ruby, rails").order_by(:name.asc).to_a).to eq([bob, frank])
+      expect(TaggableModel.tagged_with(%w[ruby rails]).order_by(:name.asc).to_a).to eq([bob, frank])
     end
 
-    # TODO: Not implemented yet
-    xit "should be able to find tagged with quotation marks" do
+    it "should be able to find tagged with quotation marks" do
       bob = TaggableModel.create(name: "Bob", tag_list: "fitter, happier, more productive, \"I love the, comma,\"")
       expect(TaggableModel.tagged_with("\"I love the, comma,\"")).to include(bob)
     end
 
-    # TODO: Not implemented yet
-    xit "should be able to find tagged with invalid tags" do
+    it "should be able to find tagged with invalid tags" do
       bob = TaggableModel.create(name: "Bob", tag_list: "fitter, happier, more productive")
       expect(TaggableModel.tagged_with("sad, happier")).to_not include(bob)
     end
 
-    # TODO: Not implemented yet
-    xit "should be able to find tagged with any tag" do
+    it "should be able to find tagged with any tag" do
       bob   = TaggableModel.create(name: "Bob", tag_list: "fitter, happier, more productive", skill_list: "ruby, rails, css")
       frank = TaggableModel.create(name: "Frank", tag_list: "weaker, depressed, inefficient", skill_list: "ruby, rails, css")
       steve = TaggableModel.create(name: "Steve", tag_list: "fitter, happier, more productive", skill_list: "c++, java, ruby")
 
-      expect(TaggableModel.tagged_with(%w[ruby java], order: "taggable_models.name", any: true).to_a).to eq([bob, frank, steve])
-      expect(TaggableModel.tagged_with(%w[c++ fitter], order: "taggable_models.name", any: true).to_a).to eq([bob, steve])
-      expect(TaggableModel.tagged_with(%w[depressed css], order: "taggable_models.name", any: true).to_a).to eq([bob, frank])
+      expect(TaggableModel.tagged_with(%w[ruby java], any: true).order_by(:name.asc).to_a).to eq([bob, frank, steve])
+      expect(TaggableModel.tagged_with(%w[c++ fitter], any: true).order_by(:name.asc).to_a).to eq([bob, steve])
+      expect(TaggableModel.tagged_with(%w[depressed css], any: true).order_by(:name.asc).to_a).to eq([bob, frank])
     end
 
     # TODO: Not implemented yet
@@ -433,11 +431,20 @@ RSpec.describe ActsAsTaggableOnMongoid::Taggable do
       frank = TaggableModel.create(name: "Frank", tag_list: "weaker, depressed, inefficient", skill_list: "ruby, rails, css")
       steve = TaggableModel.create(name: "Steve", tag_list: "fitter, happier, more productive", skill_list: "c++, java, ruby")
 
-      expect(TaggableModel.tagged_with(%w[ruby java], any: true, order_by_matching_tag_count: true, order: "taggable_models.name").to_a).
+      expect(TaggableModel.tagged_with(%w[ruby java],
+                                       any:                         true,
+                                       order_by_matching_tag_count: true,
+                                       order:                       "taggable_models.name").to_a).
           to eq([steve, bob, frank])
-      expect(TaggableModel.tagged_with(%w[c++ fitter], any: true, order_by_matching_tag_count: true, order: "taggable_models.name").to_a).
+      expect(TaggableModel.tagged_with(%w[c++ fitter],
+                                       any:                         true,
+                                       order_by_matching_tag_count: true,
+                                       order:                       "taggable_models.name").to_a).
           to eq([steve, bob])
-      expect(TaggableModel.tagged_with(%w[depressed css], any: true, order_by_matching_tag_count: true, order: "taggable_models.name").to_a).
+      expect(TaggableModel.tagged_with(%w[depressed css],
+                                       any:                         true,
+                                       order_by_matching_tag_count: true,
+                                       order:                       "taggable_models.name").to_a).
           to eq([frank, bob])
       expect(TaggableModel.tagged_with(%w[fitter happier more productive c++ java ruby],
                                        any:                         true,
@@ -449,8 +456,7 @@ RSpec.describe ActsAsTaggableOnMongoid::Taggable do
     end
 
     context "wild: true" do
-      # TODO: Not implemented yet
-      xit "should use params as wildcards" do
+      it "should use params as wildcards" do
         bob   = TaggableModel.create(name: "Bob", tag_list: "bob, tricia")
         frank = TaggableModel.create(name: "Frank", tag_list: "bobby, jim")
         steve = TaggableModel.create(name: "Steve", tag_list: "john, patricia")
@@ -472,21 +478,19 @@ RSpec.describe ActsAsTaggableOnMongoid::Taggable do
       expect(TaggableModel.tagged_with("spinning", on: :rotors).to_a).to eq([bob])
     end
 
-    # TODO: Not implemented yet
-    xit "should be able to use named scopes to chain tag finds" do
+    it "should be able to use named scopes to chain tag finds" do
       bob   = TaggableModel.create(name: "Bob", tag_list: "fitter, happier, more productive", skill_list: "ruby, rails, css")
       frank = TaggableModel.create(name: "Frank", tag_list: "weaker, depressed, inefficient", skill_list: "ruby, rails, css")
       steve = TaggableModel.create(name: "Steve", tag_list: "fitter, happier, more productive", skill_list: "c++, java, python")
 
       # Let"s only find those productive Rails developers
-      expect(TaggableModel.tagged_with("rails", on: :skills, order: "taggable_models.name").to_a).to eq([bob, frank])
-      expect(TaggableModel.tagged_with("happier", on: :tags, order: "taggable_models.name").to_a).to eq([bob, steve])
+      expect(TaggableModel.tagged_with("rails", on: :skills).order_by(:name.asc).to_a).to eq([bob, frank])
+      expect(TaggableModel.tagged_with("happier", on: :tags).order_by(:name.asc).to_a).to eq([bob, steve])
       expect(TaggableModel.tagged_with("rails", on: :skills).tagged_with("happier", on: :tags).to_a).to eq([bob])
       expect(TaggableModel.tagged_with("rails").tagged_with("happier", on: :tags).to_a).to eq([bob])
     end
 
-    # TODO: Not implemented yet
-    xit "should be able to find tagged with only the matching tags" do
+    it "should be able to find tagged with only the matching tags" do
       TaggableModel.create(name: "Bob", tag_list: "lazy, happier")
       TaggableModel.create(name: "Frank", tag_list: "fitter, happier, inefficient")
       steve = TaggableModel.create(name: "Steve", tag_list: "fitter, happier")
@@ -494,8 +498,7 @@ RSpec.describe ActsAsTaggableOnMongoid::Taggable do
       expect(TaggableModel.tagged_with("fitter, happier", match_all: true).to_a).to eq([steve])
     end
 
-    # TODO: Not implemented yet
-    xit "should be able to find tagged with only the matching tags for a context" do
+    it "should be able to find tagged with only the matching tags for a context" do
       TaggableModel.create(name: "Bob", tag_list: "lazy, happier", skill_list: "ruby, rails, css")
       frank = TaggableModel.create(name: "Frank", tag_list: "fitter, happier, inefficient", skill_list: "css")
       TaggableModel.create(name: "Steve", tag_list: "fitter, happier", skill_list: "ruby, rails, css")
@@ -503,8 +506,7 @@ RSpec.describe ActsAsTaggableOnMongoid::Taggable do
       expect(TaggableModel.tagged_with("css", on: :skills, match_all: true).to_a).to eq([frank])
     end
 
-    # TODO: Not implemented yet
-    xit "should be able to find tagged with some excluded tags" do
+    it "should be able to find tagged with some excluded tags" do
       TaggableModel.create(name: "Bob", tag_list: "happier, lazy")
       frank = TaggableModel.create(name: "Frank", tag_list: "happier")
       steve = TaggableModel.create(name: "Steve", tag_list: "happier")
@@ -513,15 +515,13 @@ RSpec.describe ActsAsTaggableOnMongoid::Taggable do
       expect(TaggableModel.tagged_with("lazy", exclude: true).size).to eq(2)
     end
 
-    # TODO: Not implemented yet
-    xit "should return an empty scope for empty tags" do
+    it "should return an empty scope for empty tags" do
       ["", " ", nil, []].each do |tag|
         expect(TaggableModel.tagged_with(tag)).to be_empty
       end
     end
 
-    # TODO: Not implemented yet
-    xit "should options key not be deleted" do
+    it "should options key not be deleted" do
       options = { exclude: true }
       TaggableModel.tagged_with("foo", options)
       expect(options).to eq(exclude: true)

@@ -23,6 +23,7 @@ end
 require "active_support"
 require "spec_helper"
 require "mongoid"
+require "timecop"
 require "database_cleaner"
 require "acts-as-taggable-on-mongoid"
 

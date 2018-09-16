@@ -17,6 +17,11 @@ RSpec.describe ActsAsTaggableOnMongoid::TagList do
       expect(tag_list.include?("cool")).to be_truthy
     end
 
+    it "should not parse if parse is false" do
+      tag_list.add("cool, wicked", parse: false)
+      expect(tag_list).to include("cool, wicked")
+    end
+
     it "should be able to add delimited lists of words" do
       tag_list.add("cool, wicked", parse: true)
       expect(tag_list).to include("cool", "wicked")

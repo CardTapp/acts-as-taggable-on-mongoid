@@ -60,8 +60,12 @@ RSpec.describe ActsAsTaggableOnMongoid do
     end
 
     # TODO: Not implemented yet
-    xit "should add tagged_with and tag_counts to singleton" do
-      expect(TaggableModel).to respond_to(:tagged_with, :tag_counts)
+    xit "should add tag_counts to singleton" do
+      expect(TaggableModel).to respond_to(:tag_counts)
+    end
+
+    it "should add tagged_with to singleton" do
+      expect(TaggableModel).to respond_to(:tagged_with)
     end
 
     it "should generate a tag_list accessor/setter for each tag type" do
