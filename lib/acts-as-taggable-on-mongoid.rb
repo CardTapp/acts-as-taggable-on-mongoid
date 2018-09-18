@@ -25,6 +25,14 @@ module ActsAsTaggableOnMongoid
       autoload :TagListDiff
     end
 
+    autoload_under "taggable/tagged_with_query" do
+      autoload :Base
+      autoload :AllTagsQuery
+      autoload :AnyTagsQuery
+      autoload :ExcludeTagsQuery
+      autoload :MatchAllTagsQuery
+    end
+
     autoload_under :Taggable do
       #   autoload :Cache
       #   autoload :Collection
@@ -32,6 +40,8 @@ module ActsAsTaggableOnMongoid
       autoload :Changeable
       autoload :TagTypeDefinition
       autoload :ListTags
+      autoload :TaggedWith
+      autoload :TaggedWithQuery
       #   autoload :Ownership
       #   autoload :Related
     end

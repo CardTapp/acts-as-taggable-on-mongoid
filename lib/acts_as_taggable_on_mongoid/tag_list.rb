@@ -46,7 +46,7 @@ module ActsAsTaggableOnMongoid
     #   tag_list.add("Fun", "Happy")
     #   tag_list.add("Fun, Happy", :parse => true)
     def add(*names)
-      extract_and_apply_options!(names)
+      names = extract_and_apply_options!(names)
       concat(names)
       clean!
 
@@ -154,16 +154,18 @@ module ActsAsTaggableOnMongoid
     # :reek:FeatureEnvy
     # :reek:DuplicateMethodCall
     def extract_and_apply_options!(args)
-      options = args.extract_options!
+      dup_args = args.dup
+      options  = dup_args.extract_options!.dup
       options.assert_valid_keys :parse, :parser
 
       options_parser = options[:parser]
       run_parser     = options_parser || tag_definition.parser
 
-      args.flatten!
-      args.map! { |argument| run_parser.new(argument).parse } if options[:parse] || options_parser
+      dup_args.flatten!
+      dup_args.map! { |argument| run_parser.new(argument).parse } if options[:parse] || options_parser
 
-      args.flatten!
+      dup_args.flatten!
+      dup_args
     end
   end
 end

@@ -38,6 +38,12 @@ RSpec.describe ActsAsTaggableOnMongoid::Taggable::TagTypeDefinition do
       expect(parsed).to eq %w[this is a list]
     end
 
+    it "does not parse a list if told not to do so" do
+      parsed = tag_definition.parse("this, is, a, list", parse: false)
+
+      expect(parsed).to eq ["this, is, a, list"]
+    end
+
     it "parses using the specified parser" do
       parsed = tag_definition.parse("this, \"is, a\", list", parser: ActsAsTaggableOnMongoid::GenericParser)
 

@@ -104,26 +104,25 @@ RSpec.describe "Single Table Inheritance" do
     let!(:inherited_different) { AlteredInheritingTaggableModel.new(name: "inherited different") }
 
     # TODO, shared example
-    # TODO: Not implemented yet
-    xit "should be able to save tags for inherited models" do
+    it "should be able to save tags for inherited models" do
       inheriting_model.tag_list = "bob, kelso"
       inheriting_model.save
+
       expect(InheritingTaggableModel.tagged_with("bob").first).to eq(inheriting_model)
     end
 
-    # TODO: Not implemented yet
-    xit "should find STI tagged models on the superclass" do
+    it "should not find STI tagged models on the superclass" do
       inheriting_model.tag_list = "bob, kelso"
       inheriting_model.save
-      expect(TaggableModel.tagged_with("bob").first).to eq(inheriting_model)
+      expect(TaggableModel.tagged_with("bob").first).not_to be
     end
 
-    # TODO: Not implemented yet
-    xit "should be able to add on contexts only to some subclasses" do
+    it "should be able to add on contexts only to some subclasses" do
       altered_inheriting.part_list = "fork, spoon"
       altered_inheriting.save
-      expect(InheritingTaggableModel.tagged_with("fork", on: :parts)).to be_empty
-      expect(AlteredInheritingTaggableModel.tagged_with("fork", on: :parts).first).to eq(altered_inheriting)
+
+      expect(InheritingTaggableModel.tagged_with("fork")).to be_empty
+      expect(AlteredInheritingTaggableModel.tagged_with("fork").first).to eq(altered_inheriting)
     end
 
     # TODO: Not implemented yet
@@ -205,7 +204,7 @@ RSpec.describe "Single Table Inheritance" do
 
     # TODO: Not implemented yet
     xit "should scope objects returned by tagged_with by owners" do
-      student.tag(taggable, with: "ruby, scheme", on: :tags)
+      student.tag(taggable, with: "ruby, scheme")
       expect(TaggableModel.tagged_with(%w[ruby scheme], owned_by: student).count).to eq(1)
     end
   end

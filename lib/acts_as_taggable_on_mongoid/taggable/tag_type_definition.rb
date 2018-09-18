@@ -18,6 +18,8 @@ module ActsAsTaggableOnMongoid
       include ActsAsTaggableOnMongoid::Taggable::TagTypeDefinition::Changeable
 
       def initialize(owner, tag_type, options = {})
+        options = options.dup
+
         options.assert_valid_keys(:parser,
                                   :preserve_tag_order,
                                   :cached_in_model,
@@ -30,15 +32,35 @@ module ActsAsTaggableOnMongoid
 
         self.default_value = options.delete(:default)
 
-        options.each do |key, value|
-          instance_variable_set("@#{key}", value)
-        end
+        save_options(options)
 
         @owner    = owner
         @tag_type = tag_type
       end
 
-      # rubocop:disable Layout/SpaceAroundOperators
+      def self.copy_from(klass, tag_definition)
+        dup_hash = %i[parser
+                      preserve_tag_order
+                      cached_in_model
+                      force_lowercase
+                      force_parameterize
+                      remove_unused_tags
+                      tags_table
+                      taggings_table].each_with_object({}) { |dup_key, opts_hash| opts_hash[dup_key] = tag_definition.public_send(dup_key) }
+
+        dup_hash[:default] = [tag_definition.default, parse: false]
+
+        ActsAsTaggableOnMongoid::Taggable::TagTypeDefinition.new klass,
+                                                                 tag_definition.tag_type,
+                                                                 dup_hash
+      end
+
+      def conflicts_with?(tag_definition)
+        %i[parser preserve_tag_order force_lowercase force_parameterize taggings_table].any? do |setting_name|
+          public_send(setting_name) != tag_definition.public_send(setting_name)
+        end
+      end
+
       # :reek:FeatureEnvy
 
       # I've defined the parser as being required to return an array of strings.
@@ -46,13 +68,12 @@ module ActsAsTaggableOnMongoid
       # to apply the rules to that list (like case sensitivity and parameterization, etc.) to get the final
       # list.
       def parse(*tag_list)
-        options          = tag_list.extract_options!
-        options[:parser] ||= parser if options.key?(:parse) || options.key?(:parser)
+        dup_tag_list     = tag_list.dup
+        options          = dup_tag_list.extract_options!.dup
+        options[:parser] ||= parser if options[:parse] || options.key?(:parser)
 
-        ActsAsTaggableOnMongoid::TagList.new(self, *tag_list, options)
+        ActsAsTaggableOnMongoid::TagList.new(self, *dup_tag_list, options)
       end
-
-      # rubocop:enable Layout/SpaceAroundOperators
 
       def taggings_order
         @taggings_order = if preserve_tag_order?
@@ -163,11 +184,11 @@ module ActsAsTaggableOnMongoid
 
         owner.taggable_mixin.module_eval do
           define_method("#{tag_definition.tag_list_name}=") do |new_tags|
-            new_tags        = Array.wrap(new_tags)
-            options         = new_tags.extract_options!
-            options[:parse] = true unless options.key?(:parse)
+            dup_tags        = Array.wrap(new_tags).dup
+            options         = dup_tags.extract_options!.dup
+            options[:parse] = options.fetch(:parse) { true }
 
-            new_list = tag_definition.parse(*new_tags, options)
+            new_list = tag_definition.parse(*dup_tags, options)
 
             mark_tag_list_changed(new_list)
             tag_list_set(new_list)
@@ -182,6 +203,14 @@ module ActsAsTaggableOnMongoid
           define_method(tag_definition.all_tag_list_name) do
             all_tags_list_on tag_definition
           end
+        end
+      end
+
+      private
+
+      def save_options(options)
+        options.each do |key, value|
+          instance_variable_set("@#{key}", value)
         end
       end
     end

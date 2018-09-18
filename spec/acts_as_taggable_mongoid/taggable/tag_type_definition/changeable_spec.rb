@@ -8,19 +8,8 @@ RSpec.describe ActsAsTaggableOnMongoid::Taggable::TagTypeDefinition::Changeable 
     let(:new_taggable) { TaggableModel.new name: "Billy Batson", attribute_list => "Solomon, Hercules, Atlas, Zeus, Achilles, Mercury" }
 
     context "with a default" do
-      around(:each) do |example_proxy|
-        tag_name       = attribute_list.to_s[0..-6].pluralize
-        tag_definition = TaggableModel.tag_types[tag_name]
-
-        begin
-          tag_definition.instance_variable_set :@default,
-                                               ActsAsTaggableOnMongoid::TagList.new(tag_definition, "Shazam, Black Adam", parse: true)
-
-          example_proxy.run
-        ensure
-          tag_definition.instance_variable_set :@default, ActsAsTaggableOnMongoid::TagList.new(tag_definition)
-        end
-      end
+      let(:taggable) { DefaultedTaggableModel.create! name: "Billy Batson", attribute_list => "Solomon, Hercules, Atlas, Zeus, Achilles, Mercury" }
+      let(:new_taggable) { DefaultedTaggableModel.new name: "Billy Batson", attribute_list => "Solomon, Hercules, Atlas, Zeus, Achilles, Mercury" }
 
       describe "#{attribute_list}_change" do
         it "returns nil for an unchanged value" do
@@ -33,7 +22,7 @@ RSpec.describe ActsAsTaggableOnMongoid::Taggable::TagTypeDefinition::Changeable 
         end
 
         it "new_record returns nil if value not set" do
-          new_rec = TaggableModel.new
+          new_rec = DefaultedTaggableModel.new
 
           expect(new_rec.public_send("#{attribute_list}_change")).to be_nil
         end
@@ -49,7 +38,7 @@ RSpec.describe ActsAsTaggableOnMongoid::Taggable::TagTypeDefinition::Changeable 
         end
 
         it "new_record returns false if value not set" do
-          new_rec = TaggableModel.new
+          new_rec = DefaultedTaggableModel.new
 
           expect(new_rec.public_send("#{attribute_list}_changed?")).to eq false
         end
@@ -67,7 +56,7 @@ RSpec.describe ActsAsTaggableOnMongoid::Taggable::TagTypeDefinition::Changeable 
         end
 
         it "new_record returns the default" do
-          new_rec = TaggableModel.new
+          new_rec = DefaultedTaggableModel.new
 
           expect(new_rec.public_send("#{attribute_list}_was")).to eq ["Shazam", "Black Adam"]
         end

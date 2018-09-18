@@ -83,9 +83,10 @@ module ActsAsTaggableOnMongoid
       #     acts_as_ordered_taggable_on :languages, :skills
       #   end
       def acts_as_ordered_taggable_on(*tag_types)
-        options = tag_types.extract_options!
+        dup_tag_types = tag_types.dup
+        options       = dup_tag_types.extract_options!.dup
 
-        taggable_on(*tag_types, options.merge(preserve_tag_order: true))
+        taggable_on(*dup_tag_types, options.merge(preserve_tag_order: true))
       end
 
       private
@@ -107,6 +108,7 @@ module ActsAsTaggableOnMongoid
         # and add hooks/callbacks that aren't needed without tags.
         [ActsAsTaggableOnMongoid::Taggable::Core,
          ActsAsTaggableOnMongoid::Taggable::Changeable,
+         ActsAsTaggableOnMongoid::Taggable::TaggedWith,
          # include Collection - not sure we will need as done here.  Need to think more on this one.
          # include Cache - TODO: Add this.
          # include Ownership - TODO: Add this.
@@ -115,10 +117,11 @@ module ActsAsTaggableOnMongoid
           include include_module unless included_modules.include?(include_module)
         end
 
-        options = tag_types.extract_options!
-        tag_types.flatten!
+        dup_tag_types = tag_types.dup
+        options       = dup_tag_types.extract_options!.dup
+        dup_tag_types.flatten!
 
-        tag_types.each do |tag_type|
+        dup_tag_types.each do |tag_type|
           next if tag_type.blank?
 
           define_tag tag_type, options

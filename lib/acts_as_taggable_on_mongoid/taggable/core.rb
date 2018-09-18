@@ -138,6 +138,7 @@ module ActsAsTaggableOnMongoid
           next if public_send(tag_list_name).present?
 
           public_send("#{tag_list_name}=", default)
+          changed_attributes.delete tag_list_name
         end
       end
 
