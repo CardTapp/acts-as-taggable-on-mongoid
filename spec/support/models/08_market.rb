@@ -1,12 +1,10 @@
 # frozen_string_literal: true
 
 # A test model used to show that the Tag table can be subclassed and saved into a separate collection.
-class Market < ActsAsTaggableOnMongoid::Models::Tag
-  def self.collection_name
-    "markets"
-  end
+class Market
+  include ActsAsTaggableOnMongoid::Models::Concerns::TagModel
 
   ### ASSOCIATIONS:
 
-  has_many :taggings, dependent: :destroy, class_name: "Market"
+  has_many :taggings, dependent: :destroy, class_name: "ActsAsTaggableOnMongoid::Models::Tagging"
 end

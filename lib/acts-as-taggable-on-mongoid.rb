@@ -48,6 +48,22 @@ module ActsAsTaggableOnMongoid
 
     autoload :Taggable
 
+    autoload_under "models/concerns" do
+      autoload :TagFields
+      autoload :TagAssociations
+      autoload :TagValidations
+      autoload :TagScopes
+      autoload :TagMethods
+      autoload :TagModel
+
+      autoload :TaggingFields
+      autoload :TaggingAssociations
+      autoload :TaggingValidations
+      autoload :TaggingScopes
+      autoload :TaggingMethods
+      autoload :TaggingModel
+    end
+
     autoload_under :Models do
       autoload :Tag
       autoload :Tagging
