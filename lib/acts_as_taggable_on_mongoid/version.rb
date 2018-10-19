@@ -1,5 +1,5 @@
 # frozen_string_literal: true
 
 module ActsAsTaggableOnMongoid
-  VERSION = "6.0.1.2"
+  VERSION = "6.0.1.3"
 end

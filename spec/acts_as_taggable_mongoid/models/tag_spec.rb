@@ -301,6 +301,11 @@ RSpec.describe ActsAsTaggableOnMongoid::Models::Tag do
 
       duplicate_tag.save!
     end
+
+    it "validates separate classes separately" do
+      tag.save!
+      expect { AltTag.create!(tag.attributes) }.to(change { AltTag.count }.by(1))
+    end
   end
 
   describe "taggings" do
