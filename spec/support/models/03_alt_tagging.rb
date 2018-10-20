@@ -4,5 +4,5 @@
 class AltTagging
   include ActsAsTaggableOnMongoid::Models::Concerns::TaggingModel
 
-  belongs_to :tag, polymorphic: true, counter_cache: true, inverse_of: :taggings
+  belongs_to :tag, polymorphic: true, inverse_of: :taggings
 end

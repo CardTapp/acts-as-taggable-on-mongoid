@@ -449,7 +449,7 @@ ActsAsTaggableOnMongoid::Models::Tag.most_used(10)
 ActsAsTaggableOnMongoid::Models::Tag.least_used(10)
 ```
 
-### ~~Finding Tagged Objects~~ Not implimented yet
+### Finding Tagged Objects
 
 Acts As Taggable On uses scopes to create an association for tags.
 This way you can mix and match to filter down your results.
@@ -683,6 +683,79 @@ CSS:
 .css3 { font-size: 1.4em; }
 .css4 { font-size: 1.6em; }
 ```
+
+### Custom Tag and Tagging tables
+
+Each Tag that is defined allows you to specify a custom `Tags` or `Taggings` table for the data.
+This allows you to add custom columns or features as needed.
+
+#### Custom Tags
+To create a custom `Tag`, you can either include `ActsAsTaggableOnMongoid::Models::Concerns::TagModel` or
+you can include one or more of the sub-concerns to add the features you want to inherit and define your own
+version of those features yourself.  If you do not include the `TagModel` concern and you pick the modules
+you want to add yourself, please note that the order of the included modules is important and that if you
+do not include the modules in the order specified, some features may not perform as you expect in some
+fringe cases.
+
+Because the Tags tables and the Taggings tables refer to each other with the `taggings` and `tags` relationships
+respectively, if you create a custom Tags table you should create a custom Taggings table as well.  This means
+that you will need to redefine the respective relationships in the two custom models.
+
+```ruby
+class CustomTag
+  include ActsAsTaggableOnMongoid::Models::Concerns::TagModel
+
+  has_many :taggings, dependent: :destroy, class_name: "CustomTagging"
+end
+
+class CustomTag
+  include ActsAsTaggableOnMongoid::Models::Concerns::TagFields
+  include ActsAsTaggableOnMongoid::Models::Concerns::TagMethods
+
+  has_many :taggings, dependent: :destroy, class_name: "CustomTagging"
+
+  include ActsAsTaggableOnMongoid::Models::Concerns::TagValidations
+  include ActsAsTaggableOnMongoid::Models::Concerns::TagScopes
+end
+```  
+
+#### Custom Taggings
+To create a custom `Tagging`, you can either include `ActsAsTaggableOnMongoid::Models::Concerns::TaggingModel` or
+you can include one or more of the sub-concerns to add the features you want to inherit and define your own
+version of those features yourself.  If you do not include the `TagModel` concern and you pick the modules
+you want to add yourself, please note that the order of the included modules is important and that if you
+do not include the modules in the order specified, some features may not perform as you expect in some
+fringe cases.
+
+Because the Tags tables and the Taggings tables refer to each other with the `taggings` and `tags` relationships
+respectively, if you create a custom Taggings table you should create a custom Tags table as well.  This means
+that you will need to redefine the respective relationships in the two custom models.
+
+NOTE:  If you include the `TaggingAssociations` module, do NOT include the `counter_cache` option in the `belongs_to`
+relationship for the `tag` or the `taggings_count` will be doubled.  If you do not include that module, then you can
+include it or not as you wish to get the count.
+
+```ruby
+class CustomTagging
+  include ActsAsTaggableOnMongoid::Models::Concerns::TaggingModel
+
+  # Do NOT include `counter_cache` here
+  belongs_to :tag, inverse_of: :taggings
+end
+
+class CustomTagging
+  include ActsAsTaggableOnMongoid::Models::Concerns::TaggingFields
+  include ActsAsTaggableOnMongoid::Models::Concerns::TaggingMethods
+
+  # `counter_cache` is optional here.
+  # `remove_unused_tags` will not work properly if this is not included though. 
+  belongs_to :tag, counter_cache: true, inverse_of: :taggings
+  belongs_to :taggable, polymorphic: true
+
+  include ActsAsTaggableOnMongoid::Models::Concerns::TaggingValidations
+  include ActsAsTaggableOnMongoid::Models::Concerns::TaggingScopes
+end
+```  
 
 ## Configuration
 

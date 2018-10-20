@@ -295,5 +295,67 @@ RSpec.describe ActsAsTaggableOnMongoid::Models::Tagging do
             to eq ["awesome", "tag 1", "tag 1", "tag 2", "tag 3", "tag 4", "tag 5"]
       end
     end
+
+    describe "taggings_count" do
+      RSpec.shared_examples("Tagging keeps Tag count") do
+        let(:taggables) do
+          Array.new(3) { taggable_model.create!(name: "Another Tagging", tag_field => "tag 1, tag 2, tag 3") }
+        end
+        let(:tagging) { tag.taggings.to_a.sample }
+        let(:tag) { taggables.sample.send(tags_field).to_a.sample }
+
+        it "updates the tags taggings_count" do
+          expect(tag.taggings_count).to eq 3
+        end
+
+        it "updates the tags taggings_count on delete" do
+          expect(tag.taggings_count).to eq 3
+
+          tagging.destroy
+
+          expect(tag.reload.taggings_count).to eq 2
+        end
+      end
+
+      context "Tagging" do
+        let(:taggable_model) { TaggableModel }
+        let(:tag_field) { :tag_list }
+        let(:tags_field) { :tags }
+
+        it_behaves_like "Tagging keeps Tag count"
+      end
+
+      context "AltTagging" do
+        let(:taggable_model) { AltTagged }
+        let(:tag_field) { :tag_list }
+        let(:tags_field) { :tags }
+
+        it_behaves_like "Tagging keeps Tag count"
+      end
+
+      context "AltTagging - OtherAltTag" do
+        let(:taggable_model) { AltTagged }
+        let(:tag_field) { :alt_tagging_other_tag_list }
+        let(:tags_field) { :alt_tagging_other_tags }
+
+        it_behaves_like "Tagging keeps Tag count"
+      end
+
+      context "OtherTagging" do
+        let(:taggable_model) { AltTagged }
+        let(:tag_field) { :other_tagging_alt_tag_list }
+        let(:tags_field) { :other_tagging_alt_tags }
+
+        it_behaves_like "Tagging keeps Tag count"
+      end
+
+      context "OtherTagging - OtherOtherTag" do
+        let(:taggable_model) { AltTagged }
+        let(:tag_field) { :another_other_tagging_other_tag_list }
+        let(:tags_field) { :another_other_tagging_other_tags }
+
+        it_behaves_like "Tagging keeps Tag count"
+      end
+    end
   end
 end
