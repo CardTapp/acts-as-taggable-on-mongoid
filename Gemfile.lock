@@ -116,7 +116,7 @@ GEM
       ruby-progressbar
     rainbow (2.2.2)
       rake
-    rake (10.5.0)
+    rake (12.3.2)
     reek (5.0.2)
       codeclimate-engine-rb (~> 0.4.0)
       kwalify (~> 0.7.0)
@@ -193,7 +193,7 @@ DEPENDENCIES
   pronto-rails_best_practices
   pronto-reek
   pronto-rubocop
-  rake (~> 10.0)
+  rake (~> 12.3)
   rspec (~> 3.0)
   rspec_junit_formatter (~> 0.3.0)
   rubocop
