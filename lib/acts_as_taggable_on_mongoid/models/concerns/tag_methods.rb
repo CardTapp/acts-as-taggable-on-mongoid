@@ -32,9 +32,9 @@ module ActsAsTaggableOnMongoid
           end
 
           def create_tag(tag_definition, name)
-            tag_definition.tags_table.create(name:          name,
-                                             context:       tag_definition.tag_type,
-                                             taggable_type: tag_definition.owner.name)
+            tag_definition.tags_table.create!(name:          name,
+                                              context:       tag_definition.tag_type,
+                                              taggable_type: tag_definition.owner.name)
           end
 
           def as_8bit_ascii(string)
