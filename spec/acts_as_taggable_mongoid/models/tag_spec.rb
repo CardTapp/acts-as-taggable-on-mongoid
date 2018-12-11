@@ -412,4 +412,50 @@ RSpec.describe ActsAsTaggableOnMongoid::Models::Tag do
       expect(ActsAsTaggableOnMongoid::Models::Tag.for_tag(tag_definition).pluck(:id).sort).to eq regex_matches.map(&:id).sort
     end
   end
+
+  describe "tag_creation conflicts" do
+    it "retries if create conflicts" do
+      Tagged.create!(tag_list: "test tag")
+
+      alt_tagged     = Tagged.new(tag_list: "test tag")
+      tag_definition = Tagged.tag_types["tags"]
+
+      named_scope = double(:named_scope)
+      for_scope   = double(:tag_scope, named: named_scope)
+      allow(tag_definition.tags_table).to receive(:for_tag).and_return for_scope
+
+      count = 0
+      allow(named_scope).to receive(:first) do
+        count += 1
+
+        if count > 1
+          ActsAsTaggableOnMongoid::Models::Tag.where(name: "test tag").first
+        else
+          # First time we look, the tag doesn't exist (simulated race condition)
+          nil
+        end
+      end
+
+      alt_tagged.save!
+
+      expect(alt_tagged.reload).to be_valid
+    end
+
+    it "fails if it retries too often" do
+      Tagged.create!(tag_list: "test tag")
+
+      alt_tagged     = Tagged.new(tag_list: "test tag")
+      tag_definition = Tagged.tag_types["tags"]
+
+      named_scope = double(:named_scope)
+      for_scope   = double(:tag_scope, named: named_scope)
+      allow(tag_definition.tags_table).to receive(:for_tag).and_return for_scope
+
+      allow(named_scope).to receive(:first).and_return nil
+
+      expect { alt_tagged.save! }.to raise_error ActsAsTaggableOnMongoid::Errors::DuplicateTagError
+
+      expect(named_scope).to have_received(:first).exactly(3).times
+    end
+  end
 end
