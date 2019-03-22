@@ -82,7 +82,7 @@ GEM
       sawyer (~> 0.8.0, >= 0.5.3)
     origin (2.3.1)
     parallel (1.14.0)
-    parser (2.6.0.0)
+    parser (2.6.2.0)
       ast (~> 2.4.0)
     pronto (0.10.0)
       gitlab (~> 4.0, >= 4.0.0)
