@@ -98,7 +98,7 @@ module ActsAsTaggableOnMongoid
 
           # Order the array of tag objects to match the tag list
           @new_tags = tags.map do |tag|
-            preserved_tags.find { |preserved_tag| preserved_tag.name == tag.name }
+            preserved_tags.detect { |preserved_tag| preserved_tag.name == tag.name }
           end.compact
         end
 
