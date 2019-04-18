@@ -81,8 +81,8 @@ GEM
     octokit (4.13.0)
       sawyer (~> 0.8.0, >= 0.5.3)
     origin (2.3.1)
-    parallel (1.14.0)
-    parser (2.6.2.0)
+    parallel (1.17.0)
+    parser (2.6.2.1)
       ast (~> 2.4.0)
     pronto (0.10.0)
       gitlab (~> 4.0, >= 4.0.0)
@@ -142,7 +142,7 @@ GEM
     rspec-support (3.8.0)
     rspec_junit_formatter (0.4.1)
       rspec-core (>= 2, < 4, != 2.12.0)
-    rubocop (0.66.0)
+    rubocop (0.67.2)
       jaro_winkler (~> 1.5.1)
       parallel (~> 1.10)
       parser (>= 2.5, != 2.5.1.1)
@@ -150,6 +150,8 @@ GEM
       rainbow (>= 2.2.2, < 4.0)
       ruby-progressbar (~> 1.7)
       unicode-display_width (>= 1.4.0, < 1.6)
+    rubocop-performance (1.1.0)
+      rubocop (>= 0.67.0)
     ruby-progressbar (1.10.0)
     ruby_parser (3.13.0)
       sexp_processor (~> 4.9)
@@ -201,9 +203,10 @@ DEPENDENCIES
   rspec (~> 3.0)
   rspec_junit_formatter (~> 0.4.1)
   rubocop
+  rubocop-performance
   simplecov
   simplecov-rcov
   timecop
 
 BUNDLED WITH
-   1.16.4
+   1.17.1
