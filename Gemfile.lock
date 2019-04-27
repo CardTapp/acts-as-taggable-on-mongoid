@@ -3,7 +3,7 @@ PATH
   specs:
     acts-as-taggable-on-mongoid (6.0.1.4)
       activesupport (~> 4.2)
-      mongoid (>= 5.2, <= 6.4.3)
+      mongoid (>= 5.2, <= 7.0.2)
 
 GEM
   remote: https://rubygems.org/
@@ -206,4 +206,4 @@ DEPENDENCIES
   timecop
 
 BUNDLED WITH
-   1.16.4
+   1.17.1
