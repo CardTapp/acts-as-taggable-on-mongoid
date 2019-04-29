@@ -8,3 +8,4 @@ git_source(:github) { "https://github.com/CardTapp/acts-as-taggable-on-mongoid" 
 gemspec
 
 gem "gem-release"
+gem "cornucopia", git: "https://github.com/CardTapp/cornucopia.git", branch: "jmr/rails_5"
