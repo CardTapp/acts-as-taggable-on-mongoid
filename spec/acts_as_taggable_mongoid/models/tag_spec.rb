@@ -428,12 +428,7 @@ RSpec.describe ActsAsTaggableOnMongoid::Models::Tag do
       allow(named_scope).to receive(:first) do
         count += 1
 
-        if count > 1
-          ActsAsTaggableOnMongoid::Models::Tag.where(name: "test tag").first
-        else
-          # First time we look, the tag doesn't exist (simulated race condition)
-          nil
-        end
+        ActsAsTaggableOnMongoid::Models::Tag.where(name: "test tag").first if count > 1
       end
 
       alt_tagged.save!
