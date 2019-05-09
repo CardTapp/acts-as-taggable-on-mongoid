@@ -89,66 +89,66 @@ RSpec.describe ActsAsTaggableOnMongoid do
   describe "Matching Contexts" do
     # TODO: Not implemented yet
     xit "should find objects with tags of matching contexts" do
-      taggable1 = TaggableModel.create!(name: "Taggable 1")
-      taggable2 = TaggableModel.create!(name: "Taggable 2")
-      taggable3 = TaggableModel.create!(name: "Taggable 3")
+      taggable_one = TaggableModel.create!(name: "Taggable 1")
+      taggable_two = TaggableModel.create!(name: "Taggable 2")
+      taggable_three = TaggableModel.create!(name: "Taggable 3")
 
-      taggable1.offering_list = "one, two"
-      taggable1.save!
+      taggable_one.offering_list = "one, two"
+      taggable_one.save!
 
-      taggable2.need_list = "one, two"
-      taggable2.save!
+      taggable_two.need_list = "one, two"
+      taggable_two.save!
 
-      taggable3.offering_list = "one, two"
-      taggable3.save!
+      taggable_three.offering_list = "one, two"
+      taggable_three.save!
 
-      expect(taggable1.find_matching_contexts(:offerings, :needs)).to include(taggable2)
-      expect(taggable1.find_matching_contexts(:offerings, :needs)).to_not include(taggable3)
+      expect(taggable_one.find_matching_contexts(:offerings, :needs)).to include(taggable_two)
+      expect(taggable_one.find_matching_contexts(:offerings, :needs)).to_not include(taggable_three)
     end
 
     # TODO: Not implemented yet
     xit "should find other related objects with tags of matching contexts" do
-      taggable1 = TaggableModel.create!(name: "Taggable 1")
-      taggable2 = OtherTaggableModel.create!(name: "Taggable 2")
-      taggable3 = OtherTaggableModel.create!(name: "Taggable 3")
+      taggable_one = TaggableModel.create!(name: "Taggable 1")
+      taggable_two = OtherTaggableModel.create!(name: "Taggable 2")
+      taggable_three = OtherTaggableModel.create!(name: "Taggable 3")
 
-      taggable1.offering_list = "one, two"
-      taggable1.save
+      taggable_one.offering_list = "one, two"
+      taggable_one.save
 
-      taggable2.need_list = "one, two"
-      taggable2.save
+      taggable_two.need_list = "one, two"
+      taggable_two.save
 
-      taggable3.offering_list = "one, two"
-      taggable3.save
+      taggable_three.offering_list = "one, two"
+      taggable_three.save
 
-      expect(taggable1.find_matching_contexts_for(OtherTaggableModel, :offerings, :needs)).to include(taggable2)
-      expect(taggable1.find_matching_contexts_for(OtherTaggableModel, :offerings, :needs)).to_not include(taggable3)
+      expect(taggable_one.find_matching_contexts_for(OtherTaggableModel, :offerings, :needs)).to include(taggable_two)
+      expect(taggable_one.find_matching_contexts_for(OtherTaggableModel, :offerings, :needs)).to_not include(taggable_three)
     end
 
     # TODO: Not implemented yet
     xit "should not include the object itself in the list of related objects with tags of matching contexts" do
-      taggable1 = TaggableModel.create!(name: "Taggable 1")
-      taggable2 = TaggableModel.create!(name: "Taggable 2")
+      taggable_one = TaggableModel.create!(name: "Taggable 1")
+      taggable_two = TaggableModel.create!(name: "Taggable 2")
 
-      taggable1.offering_list = "one, two"
-      taggable1.need_list     = "one, two"
-      taggable1.save
+      taggable_one.offering_list = "one, two"
+      taggable_one.need_list     = "one, two"
+      taggable_one.save
 
-      taggable2.need_list = "one, two"
-      taggable2.save
+      taggable_two.need_list = "one, two"
+      taggable_two.save
 
-      expect(taggable1.find_matching_contexts_for(TaggableModel, :offerings, :needs)).to include(taggable2)
-      expect(taggable1.find_matching_contexts_for(TaggableModel, :offerings, :needs)).to_not include(taggable1)
+      expect(taggable_one.find_matching_contexts_for(TaggableModel, :offerings, :needs)).to include(taggable_two)
+      expect(taggable_one.find_matching_contexts_for(TaggableModel, :offerings, :needs)).to_not include(taggable_one)
     end
 
     # TODO: Not implemented yet
     xit "should ensure joins to multiple taggings maintain their contexts when aliasing" do
-      taggable1 = TaggableModel.create!(name: "Taggable 1")
+      taggable_one = TaggableModel.create!(name: "Taggable 1")
 
-      taggable1.offering_list = "one"
-      taggable1.need_list     = "two"
+      taggable_one.offering_list = "one"
+      taggable_one.need_list     = "two"
 
-      taggable1.save
+      taggable_one.save
 
       column      = TaggableModel.connection.quote_column_name("context")
       offer_alias = TaggableModel.connection.quote_table_name(ActsAsTaggableOnMongoid.taggings_table)

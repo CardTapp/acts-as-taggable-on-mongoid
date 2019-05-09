@@ -8,6 +8,7 @@ module ActsAsTaggableOnMongoid
 
         ### CLASS METHODS:
 
+        # rubocop:disable Metrics/BlockLength
         class_methods do
           def find_or_create_all_with_like_by_name(tag_definition, *list)
             list = ActsAsTaggableOnMongoid::TagList.new(tag_definition, *Array.wrap(list).flatten)
@@ -50,6 +51,8 @@ module ActsAsTaggableOnMongoid
             end
           end
         end
+
+        # rubocop:enable Metrics/BlockLength
 
         ### INSTANCE METHODS:
 

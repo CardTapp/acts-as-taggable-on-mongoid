@@ -35,7 +35,8 @@ Naming/FileName:
   Description: Use snake_case for source file names.
   StyleGuide: https://github.com/bbatsov/ruby-style-guide#snake-case-files
   Enabled: true
-  Exclude: []
+  Exclude:
+    - lib/acts-as-taggable-on-mongoid.rb
 Style/GuardClause:
   Description: Check for conditionals that can be replaced with guard clauses
   StyleGuide: https://github.com/bbatsov/ruby-style-guide#no-nested-conditionals
@@ -309,19 +310,19 @@ Layout/MultilineOperationIndentation:
   Enabled: false
 Metrics/LineLength:
   Max: 150
-# TODO: Renable after exclusions cleaned up.
-#Metrics/BlockLength:
-#  Exclude:
-#    - spec/**/*
+Metrics/BlockLength:
+  Exclude:
+    - spec/**/*
+    - acts-as-taggable-on-mongoid.gemspec
 #    - lib/tasks/**/*
 Layout/CaseIndentation:
   EnforcedStyle: case
   IndentOneStep: true
-Layout/IndentArray:
+Layout/IndentFirstArrayElement:
   IndentationWidth: 4
-Layout/IndentHash:
+Layout/IndentFirstHashElement:
   IndentationWidth: 4
-Layout/FirstParameterIndentation:
+Layout/IndentFirstArgument:
   IndentationWidth: 4
 Style/FrozenStringLiteralComment:
   Enabled: true
