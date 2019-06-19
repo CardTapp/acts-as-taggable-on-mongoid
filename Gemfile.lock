@@ -186,7 +186,7 @@ PLATFORMS
 
 DEPENDENCIES
   acts-as-taggable-on-mongoid!
-  bundler (~> 1.16)
+  bundler (~> 2.0)
   codecov (~> 0.1.0, ~> 0.1)
   cornucopia
   database_cleaner
