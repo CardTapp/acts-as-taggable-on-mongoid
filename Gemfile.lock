@@ -62,7 +62,7 @@ GEM
     i18n (0.9.5)
       concurrent-ruby (~> 1.0)
     ice_nine (0.11.2)
-    jaro_winkler (1.5.2)
+    jaro_winkler (1.5.3)
     json (2.2.0)
     kwalify (0.7.2)
     mime-types (3.2.2)
