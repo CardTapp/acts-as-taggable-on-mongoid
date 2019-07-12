@@ -7,7 +7,7 @@ jobs:
   build:
     docker:
       # specify the version you desire here
-       - image: circleci/ruby:2.5.1-stretch
+       - image: circleci/ruby:2.6.3-stretch
          environment:
            PRONTO_GITHUB_ACCESS_TOKEN: testing
        - image: mongo:3.6.7-jessie
@@ -33,6 +33,7 @@ jobs:
       - run:
           name: install dependencies
           command: |
+            gem install bundler
             bundle install --jobs=4 --retry=3 --path vendor/bundle
 
       - save_cache:
