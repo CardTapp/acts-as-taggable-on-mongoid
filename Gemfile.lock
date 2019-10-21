@@ -49,7 +49,7 @@ GEM
     erubis (2.7.0)
     faraday (0.16.2)
       multipart-post (>= 1.2, < 3)
-    fasterer (0.7.0)
+    fasterer (0.7.1)
       colorize (~> 0.7)
       ruby_parser (>= 3.13.0)
     gem-release (2.0.4)
