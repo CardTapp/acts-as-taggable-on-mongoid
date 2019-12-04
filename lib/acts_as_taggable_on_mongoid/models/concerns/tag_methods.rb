@@ -43,11 +43,7 @@ module ActsAsTaggableOnMongoid
           def as_8bit_ascii(string)
             string = string.to_s
 
-            #if defined?(Encoding)
-            #  string.dup.force_encoding("BINARY")
-            #else
             string.mb_chars
-            #end
           end
         end
 
