@@ -1,11 +1,3 @@
-GIT
-  remote: https://github.com/CardTapp/cornucopia.git
-  revision: bca9564ae40e584f8c8f26cd0147ebbd10072929
-  branch: jmr/rails_5
-  specs:
-    cornucopia (0.1.55)
-      activesupport (> 4.0, < 6.0)
-
 PATH
   remote: .
   specs:
@@ -44,6 +36,8 @@ GEM
       descendants_tracker (~> 0.0.1)
     colorize (0.8.1)
     concurrent-ruby (1.1.5)
+    cornucopia (0.1.40)
+      activesupport
     database_cleaner (1.7.0)
     descendants_tracker (0.0.4)
       thread_safe (~> 0.3, >= 0.3.1)
@@ -189,7 +183,7 @@ PLATFORMS
 DEPENDENCIES
   acts-as-taggable-on-mongoid!
   codecov (~> 0.1.0, ~> 0.1)
-  cornucopia!
+  cornucopia
   database_cleaner
   gem-release
   pronto
