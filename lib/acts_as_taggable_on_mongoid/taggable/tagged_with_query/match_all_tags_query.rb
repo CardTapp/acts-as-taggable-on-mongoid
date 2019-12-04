@@ -10,7 +10,7 @@ module ActsAsTaggableOnMongoid
         end
 
         def included_ids
-          selector         = Origin::Selector.new
+          selector         = Mongoid::Criteria::Queryable::Selector.new
           selector[:count] = { "$ne" => tag_list.count }
 
           AllTagsQuery.new(tag_definition, tag_list, options).included_ids -

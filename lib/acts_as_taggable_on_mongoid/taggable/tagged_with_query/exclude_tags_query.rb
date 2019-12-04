@@ -10,7 +10,7 @@ module ActsAsTaggableOnMongoid
         end
 
         def included_ids
-          selector         = Origin::Selector.new
+          selector         = Mongoid::Criteria::Queryable::Selector.new
           selector[:count] = { "$gt" => 0 }
 
           ids = build_ids_from(selector)
