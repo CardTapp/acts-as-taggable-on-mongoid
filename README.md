@@ -577,8 +577,8 @@ end
 @some_user.owned_tags
 Photo.tagged_with("paris", :on => :locations, :owned_by => @some_user)
 @some_photo.locations_from(@some_user) # => ["paris", "normandy"]
-@some_photo.owner_tags_on(@some_user, :locations) # => [#<ActsAsTaggableOnMongoid::Models::Tag id: 1, name: "paris">...]
-@some_photo.owner_tags_on(nil, :locations) # => Ownerships equivalent to saying @some_photo.locations
+@some_photo.tagger_tags_on(@some_user, :locations) # => [#<ActsAsTaggableOnMongoid::Models::Tag id: 1, name: "paris">...]
+@some_photo.tagger_tags_on(nil, :locations) # => Ownerships equivalent to saying @some_photo.locations
 @some_user.tag(@some_photo, :with => "paris, normandy", :on => :locations, :skip_save => true) #won't save @some_photo object
 ```
 

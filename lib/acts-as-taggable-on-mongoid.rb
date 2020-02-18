@@ -11,11 +11,13 @@ module ActsAsTaggableOnMongoid
   eager_autoload do
     autoload :Configuration
     autoload :TagList
+    autoload :TaggerTagList
     autoload :GenericParser
     autoload :DefaultParser
     # autoload :TagsHelper
 
     autoload_under "taggable/tag_type_definition" do
+      autoload :ListMethods
       autoload :Attributes
       autoload "Changeable"
       autoload :Names
@@ -42,11 +44,16 @@ module ActsAsTaggableOnMongoid
       autoload :ListTags
       autoload :TaggedWith
       autoload :TaggedWithQuery
-      #   autoload :Ownership
+      autoload :TaggerRelation
       #   autoload :Related
     end
 
+    autoload_under :Tagger do
+      autoload "TagMethods"
+    end
+
     autoload :Taggable
+    autoload :Tagger
 
     autoload_under "models/concerns" do
       autoload :TagFields
@@ -67,7 +74,6 @@ module ActsAsTaggableOnMongoid
     autoload_under :Models do
       autoload :Tag
       autoload :Tagging
-      # autoload :Tagger
     end
 
     autoload_under :Errors do
@@ -102,5 +108,5 @@ end
 
 ::ActiveSupport.on_load(:mongoid) do
   include ActsAsTaggableOnMongoid::Taggable
-  # include ActsAsTaggableOn::Tagger
+  include ActsAsTaggableOnMongoid::Tagger
 end

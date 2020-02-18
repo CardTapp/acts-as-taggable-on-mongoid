@@ -17,7 +17,9 @@ module ActsAsTaggableOnMongoid
 
           # field :type, type: String
 
-          index({ name: 1, taggable_type: 1, context: 1 }, unique: true)
+          index({ name: 1, taggable_type: 1, context: 1, tagger_id: 1, tagger_type: 1 },
+                unique: true,
+                name:   "name_taggable_type_context_tagger")
         end
       end
     end

@@ -13,26 +13,19 @@ module ActsAsTaggableOnMongoid
       attr_reader :owner,
                   :tag_type
 
+      include ActsAsTaggableOnMongoid::Taggable::TagTypeDefinition::ListMethods
       include ActsAsTaggableOnMongoid::Taggable::TagTypeDefinition::Attributes
       include ActsAsTaggableOnMongoid::Taggable::TagTypeDefinition::Names
       include ActsAsTaggableOnMongoid::Taggable::TagTypeDefinition::Changeable
 
       def initialize(owner, tag_type, options = {})
-        options = options.dup
+        options = extract_tag_definition_options(options)
 
-        options.assert_valid_keys(:parser,
-                                  :preserve_tag_order,
-                                  :cached_in_model,
-                                  :force_lowercase,
-                                  :force_parameterize,
-                                  :remove_unused_tags,
-                                  :tags_table,
-                                  :taggings_table,
-                                  :default)
-
-        self.default_value = options.delete(:default)
+        default_option = options.delete(:default)
 
         save_options(options)
+
+        self.default_value = default_option
 
         @owner    = owner
         @tag_type = tag_type
@@ -48,7 +41,7 @@ module ActsAsTaggableOnMongoid
                       tags_table
                       taggings_table].each_with_object({}) { |dup_key, opts_hash| opts_hash[dup_key] = tag_definition.public_send(dup_key) }
 
-        dup_hash[:default] = [tag_definition.default, parse: false]
+        dup_hash[:default] = tag_definition.default.dup
 
         ActsAsTaggableOnMongoid::Taggable::TagTypeDefinition.new klass,
                                                                  tag_definition.tag_type,
@@ -155,6 +148,8 @@ module ActsAsTaggableOnMongoid
       def add_tag_list
         add_list_getter
         add_list_setter
+        add_tagger_tag_list
+        add_tagger_tag_lists
         add_all_list_getter
         add_list_exists
         add_list_change
@@ -162,51 +157,29 @@ module ActsAsTaggableOnMongoid
         add_changed_from_default?
         add_will_change
         add_get_was
+        add_get_lists_was
+        add_tagger_get_was
         add_reset_list
         add_reset_to_default
       end
 
-      def add_list_getter
-        tag_definition = self
-        tag_list_name  = tag_definition.tag_list_name
-
-        owner.taggable_mixin.module_eval do
-          define_method(tag_list_name) do
-            tag_list_on tag_definition
-          end
-
-          alias_method "#{tag_list_name}_before_type_cast".to_sym, tag_list_name.to_sym
-        end
-      end
-
-      def add_list_setter
-        tag_definition = self
-
-        owner.taggable_mixin.module_eval do
-          define_method("#{tag_definition.tag_list_name}=") do |new_tags|
-            dup_tags        = Array.wrap(new_tags).dup
-            options         = dup_tags.extract_options!.dup
-            options[:parse] = options.fetch(:parse) { true }
-
-            new_list = tag_definition.parse(*dup_tags, options)
-
-            mark_tag_list_changed(new_list)
-            tag_list_set(new_list)
-          end
-        end
-      end
-
-      def add_all_list_getter
-        tag_definition = self
-
-        owner.taggable_mixin.module_eval do
-          define_method(tag_definition.all_tag_list_name) do
-            all_tags_list_on tag_definition
-          end
-        end
-      end
-
       private
+
+      def extract_tag_definition_options(options)
+        options = options.dup
+
+        options.assert_valid_keys(:parser,
+                                  :preserve_tag_order,
+                                  :cached_in_model,
+                                  :force_lowercase,
+                                  :force_parameterize,
+                                  :remove_unused_tags,
+                                  :tags_table,
+                                  :taggings_table,
+                                  :default,
+                                  :tagger)
+        options
+      end
 
       def save_options(options)
         options.each do |key, value|

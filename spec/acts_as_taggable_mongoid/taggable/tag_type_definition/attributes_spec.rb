@@ -202,4 +202,52 @@ RSpec.describe ActsAsTaggableOnMongoid::Taggable::TagTypeDefinition::Attributes 
       expect(tag_definition.default).to eq(["\"Shazam\"", "'Black Adam'"])
     end
   end
+
+  describe "tagger" do
+    it "supports not being set" do
+      tag_definition = ActsAsTaggableOnMongoid::Taggable::TagTypeDefinition.new TaggableModel, "tags"
+
+      expect(tag_definition.tagger?).to be_falsey
+      expect(tag_definition.default_tagger_method).to be_nil
+      expect(tag_definition.tag_list_uses_default_tagger?).to be_falsey
+    end
+
+    it "supports true" do
+      tag_definition = ActsAsTaggableOnMongoid::Taggable::TagTypeDefinition.new TaggableModel, "tags", tagger: true
+
+      expect(tag_definition.tagger?).to be_truthy
+      expect(tag_definition.default_tagger_method).to be_nil
+      expect(tag_definition.tag_list_uses_default_tagger?).to be_falsey
+    end
+
+    it "accepts default_tagger" do
+      tag_definition = ActsAsTaggableOnMongoid::Taggable::TagTypeDefinition.new TaggableModel,
+                                                                                "tags",
+                                                                                tagger: { default_tagger: :owner_method }
+
+      expect(tag_definition.tagger?).to be_truthy
+      expect(tag_definition.default_tagger_method).to eq :owner_method
+      expect(tag_definition.tag_list_uses_default_tagger?).to be_falsey
+    end
+
+    it "does not accept just tag_list_uses_default_tagger" do
+      tag_definition = ActsAsTaggableOnMongoid::Taggable::TagTypeDefinition.new TaggableModel, "tags",
+                                                                                tagger: { tag_list_uses_default_tagger: true }
+
+      expect(tag_definition.tagger?).to be_truthy
+      expect(tag_definition.default_tagger_method).to be_nil
+      expect(tag_definition.tag_list_uses_default_tagger?).to be_falsey
+    end
+
+    it "accepts default_tagger and tag_list_uses_default_tagger" do
+      tag_definition = ActsAsTaggableOnMongoid::Taggable::TagTypeDefinition.new TaggableModel,
+                                                                                "tags",
+                                                                                tagger: { default_tagger:               :owner_method,
+                                                                                          tag_list_uses_default_tagger: true }
+
+      expect(tag_definition.tagger?).to be_truthy
+      expect(tag_definition.default_tagger_method).to eq :owner_method
+      expect(tag_definition.tag_list_uses_default_tagger?).to be_truthy
+    end
+  end
 end

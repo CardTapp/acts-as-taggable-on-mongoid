@@ -120,18 +120,18 @@ RSpec.describe ActsAsTaggableOnMongoid::Models::Tagging do
         end
       end
 
-      describe ".by_context" do
+      describe ".by_tag_type" do
         it "should be found by context" do
-          expect(ActsAsTaggableOnMongoid::Models::Tagging.by_context("Science").length).to eq(2)
+          expect(ActsAsTaggableOnMongoid::Models::Tagging.by_tag_type("Science").length).to eq(2)
         end
       end
 
-      describe ".by_contexts" do
+      describe ".by_tag_types" do
         it "should find taggings by contexts" do
-          expect(ActsAsTaggableOnMongoid::Models::Tagging.by_contexts("Science", "Astronomy").first).to eq(tagging)
-          expect(ActsAsTaggableOnMongoid::Models::Tagging.by_contexts("Science", "Astronomy").second).to eq(tagging_2)
-          expect(ActsAsTaggableOnMongoid::Models::Tagging.by_contexts("Science", "Astronomy").third).to eq(tagging_3)
-          expect(ActsAsTaggableOnMongoid::Models::Tagging.by_contexts("Science", "Astronomy").length).to eq(3)
+          expect(ActsAsTaggableOnMongoid::Models::Tagging.by_tag_types("Science", "Astronomy").first).to eq(tagging)
+          expect(ActsAsTaggableOnMongoid::Models::Tagging.by_tag_types("Science", "Astronomy").second).to eq(tagging_2)
+          expect(ActsAsTaggableOnMongoid::Models::Tagging.by_tag_types("Science", "Astronomy").third).to eq(tagging_3)
+          expect(ActsAsTaggableOnMongoid::Models::Tagging.by_tag_types("Science", "Astronomy").length).to eq(3)
         end
       end
 

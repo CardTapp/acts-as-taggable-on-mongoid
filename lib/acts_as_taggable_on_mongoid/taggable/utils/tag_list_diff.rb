@@ -18,7 +18,7 @@ module ActsAsTaggableOnMongoid
         def initialize(tag_definition:, tags:, current_tags:)
           @tag_definition = tag_definition
           @tags           = tags
-          @current_tags   = current_tags
+          @current_tags   = current_tags.map(&:tag).compact
 
           @old_tags = {}
           @new_tags = {}
@@ -35,7 +35,7 @@ module ActsAsTaggableOnMongoid
           new_tags.each do |tag|
             tagging = taggable.
                 public_send(tag_definition.taggings_name).
-                new(tag_name: tag.name, context: tag_definition.tag_type, taggable: taggable, tag: tag)
+                new(tag_name: tag.name, context: tag_definition.tag_type, taggable: taggable, tag: tag, tag_tagger: tag.tagger)
 
             next if tagging.save
             next if ignore_tagging_error(tagging)
@@ -50,8 +50,8 @@ module ActsAsTaggableOnMongoid
 
           taggable.
               public_send(tag_definition.taggings_name).
-              by_context(tag_definition.tag_type).
-              where(:tag_name.in => old_tags.map(&:name)).
+              by_tag_type(tag_definition.tag_type).
+              where(:tag_id.in => old_tags.map(&:id)).
               destroy_all
         end
 
@@ -94,12 +94,14 @@ module ActsAsTaggableOnMongoid
 
         # :reek:NestedIterators
         def preserve_new_tag_list_order
-          preserved_tags = new_tags | current_tags[first_ordered_difference..-1] & shared_tags
-
           # Order the array of tag objects to match the tag list
           @new_tags = tags.map do |tag|
-            preserved_tags.detect { |preserved_tag| preserved_tag.name == tag.name }
+            preserved_tags.detect { |preserved_tag| preserved_tag.name == tag.name && preserved_tag.tagger == tag.tagger }
           end.compact
+        end
+
+        def preserved_tags
+          @preserved_tags ||= new_tags | current_tags[first_ordered_difference..-1] & shared_tags
         end
 
         def first_ordered_difference

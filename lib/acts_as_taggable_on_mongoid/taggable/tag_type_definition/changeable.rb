@@ -11,16 +11,32 @@ module ActsAsTaggableOnMongoid
       #   * tag_list_will_change!
       #   * tag_list_changed_from_default?
       #   * tag_list_was
+      #   * tagger_tag_list_was
+      #   * tag_lists_was
       #   * reset_tag_list!
       #   * reset_tag_list_to_default!
       module Changeable
+        def default_tagger_tag_list(taggable)
+          list = ActsAsTaggableOnMongoid::TaggerTagList.new(self, nil)
+
+          list_default              = default.dup
+          list_default.taggable     = taggable
+          list_default.tagger       = list_default.tagger
+          list[list_default.tagger] = list_default
+          list.taggable             = taggable
+
+          list
+        end
+
+        private
+
         def add_list_exists
           tag_definition = self
           tag_list_name  = tag_definition.tag_list_name
 
           owner.taggable_mixin.module_eval do
             define_method("#{tag_list_name}?") do
-              public_send(tag_list_name).present?
+              tag_list_cache_on(tag_definition).values.any?(&:present?)
             end
           end
         end
@@ -31,17 +47,10 @@ module ActsAsTaggableOnMongoid
 
           owner.taggable_mixin.module_eval do
             define_method("#{tag_list_name}_change") do
-              return nil unless public_send("#{tag_list_name}_changed?")
-
-              changed_value = public_send("#{tag_list_name}_was")
-              current_value = public_send(tag_list_name)
-
-              [changed_value, current_value] unless current_value == changed_value
+              get_tag_list_change(tag_definition)
             end
           end
         end
-
-        # rubocop:disable Metrics/AbcSize
 
         def add_list_changed
           tag_definition = self
@@ -49,22 +58,10 @@ module ActsAsTaggableOnMongoid
 
           owner.taggable_mixin.module_eval do
             define_method("#{tag_list_name}_changed?") do
-              return false unless changed_attributes.key?(tag_list_name)
-
-              changed_value = new_record? ? tag_definition.default : changed_attributes[tag_list_name]
-              current_value = public_send(tag_list_name)
-
-              unless tag_definition.preserve_tag_order?
-                changed_value.sort!
-                current_value.sort!
-              end
-
-              current_value != changed_value
+              get_tag_list_changed(tag_definition)
             end
           end
         end
-
-        # rubocop:enable Metrics/AbcSize
 
         def add_will_change
           tag_definition = self
@@ -72,7 +69,7 @@ module ActsAsTaggableOnMongoid
 
           owner.taggable_mixin.module_eval do
             define_method("#{tag_list_name}_will_change!") do
-              attribute_wil_change! tag_list_name
+              attribute_will_change! tag_list_name
             end
           end
         end
@@ -83,15 +80,10 @@ module ActsAsTaggableOnMongoid
 
           owner.taggable_mixin.module_eval do
             define_method("#{tag_list_name}_changed_from_default?") do
-              changed_value = tag_definition.default
-              current_value = public_send(tag_list_name)
+              changed_value = tag_definition.default_tagger_tag_list(self)
+              current_value = tag_list_cache_on(tag_definition)
 
-              unless tag_definition.preserve_tag_order?
-                changed_value.sort!
-                current_value.sort!
-              end
-
-              current_value != changed_value
+              !(changed_value <=> current_value)&.zero?
             end
           end
         end
@@ -102,13 +94,28 @@ module ActsAsTaggableOnMongoid
 
           owner.taggable_mixin.module_eval do
             define_method("#{tag_list_name}_was") do
-              return tag_definition.default if new_record?
+              get_tag_list_was tag_definition
+            end
+          end
+        end
 
-              if public_send "#{tag_list_name}_changed?"
-                changed_attributes[tag_list_name]
-              else
-                public_send tag_list_name
-              end
+        def add_get_lists_was
+          tag_definition = self
+
+          owner.taggable_mixin.module_eval do
+            define_method("#{tag_definition.tagger_tag_lists_name}_was") do
+              get_tag_lists_was(tag_definition)
+            end
+          end
+        end
+
+        def add_tagger_get_was
+          tag_definition = self
+          tag_list_name  = tag_definition.tag_list_name
+
+          owner.taggable_mixin.module_eval do
+            define_method("tagger_#{tag_list_name}_was") do |tagger|
+              get_tagger_list_was(tag_definition, tagger)
             end
           end
         end
@@ -119,7 +126,9 @@ module ActsAsTaggableOnMongoid
 
           owner.taggable_mixin.module_eval do
             define_method("reset_#{tag_list_name}!") do
-              public_send "#{tag_list_name}=", public_send("#{tag_list_name}_was")
+              return unless public_send("#{tag_list_name}_changed?")
+
+              tagger_tag_list_set(changed_attributes[tag_list_name].dup)
             end
           end
         end
@@ -130,7 +139,7 @@ module ActsAsTaggableOnMongoid
 
           owner.taggable_mixin.module_eval do
             define_method("reset_#{tag_list_name}_to_default!") do
-              public_send "#{tag_list_name}=", tag_definition.default
+              tagger_tag_list_set(tag_definition.default_tagger_tag_list(self))
             end
           end
         end

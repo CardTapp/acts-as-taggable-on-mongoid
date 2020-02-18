@@ -3,11 +3,7 @@
 module ActsAsTaggableOnMongoid
   module Taggable
     class TagTypeDefinition
-      # This module extracts out the basic configuration type attributes of the tag definition.
-      #
-      # All attributes are based off of the Configuration class and in fact will default to
-      # the corresponding value in the configuration if not explicitly specified/set when the
-      # tag is defined.
+      # This module defines methods used to evaluate the attributes of the Tag Type Definition
       module Attributes
         attr_reader :cached_in_model,
                     :default
@@ -62,14 +58,67 @@ module ActsAsTaggableOnMongoid
         alias force_parameterize? force_parameterize
         alias remove_unused_tags? remove_unused_tags
 
+        def tagger?
+          instance_variable_defined?(:@tagger)
+        end
+
+        def tag_list_uses_default_tagger?
+          return false if !tagger? || default_tagger_method.blank?
+
+          tagger_params.fetch(:tag_list_uses_default_tagger) { false }
+        end
+
+        def default_tagger_method
+          return nil unless tagger?
+
+          tagger_params[:default_tagger]
+        end
+
+        def taggable_default(taggable)
+          taggable_default = default
+
+          return unless taggable_default.present?
+
+          taggable_default          = taggable_default.dup
+          taggable_default.taggable = taggable
+          taggable_default.tagger   = taggable_default.tagger
+
+          taggable_default
+        end
+
+        def default_tagger(taggable)
+          return nil if default_tagger_method.nil?
+          return nil if taggable.blank?
+
+          taggable.public_send(default_tagger_method)
+        end
+
+        def tag_list_default_tagger(taggable)
+          return nil unless tag_list_uses_default_tagger?
+
+          default_tagger(taggable)
+        end
+
         private
+
+        def tagger_params
+          return @tagger_params if defined?(@tagger_params)
+
+          params = instance_variable_get(:@tagger)
+
+          @tagger_params = if tagger? && params.is_a?(Hash)
+                             params.with_indifferent_access
+                           else
+                             HashWithIndifferentAccess.new
+                           end
+        end
 
         def default_value=(value)
           dup_value       = Array.wrap(value).dup
           options         = dup_value.extract_options!.dup
           options[:parse] = options.fetch(:parse) { true }
 
-          @default = ActsAsTaggableOnMongoid::TagList.new self, dup_value, options
+          @default = ActsAsTaggableOnMongoid::TagList.new self, *dup_value, options
         end
       end
     end

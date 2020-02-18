@@ -32,7 +32,7 @@ module ActsAsTaggableOnMongoid
 
           return unless tag_definition
 
-          tag_list = taggable.public_send(tag_definition.tag_list_name)
+          tag_list = taggable.public_send(tag_definition.tagger_tag_lists_name)[tag_tagger]
           tag_list.add_tagging(self)
         end
 
@@ -45,7 +45,7 @@ module ActsAsTaggableOnMongoid
 
           return unless tag_definition
 
-          taggable_was.public_send(tag_definition.tag_list_name).remove(tag_name_was)
+          taggable_was.public_send(tag_definition.tagger_tag_lists_name)[tag_tagger].remove(tag_name_was)
         end
       end
     end

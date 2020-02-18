@@ -10,6 +10,14 @@ module ActsAsTaggableOnMongoid
           @tag_list_name ||= "#{single_tag_type}_list"
         end
 
+        def tagger_tag_list_name
+          @tagger_tag_list_name ||= "tagger_#{single_tag_type}_list"
+        end
+
+        def tagger_tag_lists_name
+          @tagger_tag_lists_name ||= "tagger_#{single_tag_type}_lists"
+        end
+
         def tag_list_variable_name
           @tag_list_variable_name ||= "@#{tag_list_name}"
         end

@@ -34,6 +34,18 @@ module ActsAsTaggableOnMongoid
       #     can be used.  If custom options like `parse` or `parser` are to be used for the default, the value
       #     must be passed in as an array with a hash as the last value.  Like list setters, parsing is assumed.
       #     Example:  default: ["this, is, a, list", parser: ActsAsTaggableOnMongoid::GenericParser]
+      #   * tagger
+      #     Multiple variants
+      #
+      #     true - If simply the value `true`, the tag list supports owners.  No default owner will be used when
+      #            setting or accessing tag_lists
+      #     Hash - A hash of values defining default options for the tag list:
+      #            * default_tagger
+      #              A symbol of a method on the taggable object that owns the HashList which is used to determine
+      #              the default owner for a list if an owner is not specified.
+      #            * tag_list_uses_default_tagger
+      #              true/false indicating if a non-owner method that returns a tag_list should assume the default_tagger
+      #              or return items with no owner.
 
       ##
       # This is an alias for calling <tt>acts_as_taggable_on :tags</tt>.
@@ -111,8 +123,8 @@ module ActsAsTaggableOnMongoid
          ActsAsTaggableOnMongoid::Taggable::TaggedWith,
          # include Collection - not sure we will need as done here.  Need to think more on this one.
          # include Cache - TODO: Add this.
-         # include Ownership - TODO: Add this.
          # include Related - TODO: Add this.
+         ActsAsTaggableOnMongoid::Taggable::TaggerRelation,
          ActsAsTaggableOnMongoid::Taggable::ListTags].each do |include_module|
           include include_module unless included_modules.include?(include_module)
         end

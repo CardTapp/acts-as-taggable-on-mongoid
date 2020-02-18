@@ -14,6 +14,14 @@ RSpec.describe ActsAsTaggableOnMongoid::Taggable::TagTypeDefinition::Names do
     expect(tag_definition.tag_list_name).to eq "some_stupid_tag_list"
   end
 
+  it "returns the tagger_tag_list_name" do
+    expect(tag_definition.tagger_tag_list_name).to eq "tagger_some_stupid_tag_list"
+  end
+
+  it "returns the tagger_tag_lists_name" do
+    expect(tag_definition.tagger_tag_lists_name).to eq "tagger_some_stupid_tag_lists"
+  end
+
   it "returns the tag_list_variable_name" do
     expect(tag_definition.tag_list_variable_name).to eq "@some_stupid_tag_list"
   end

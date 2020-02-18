@@ -144,9 +144,9 @@ RSpec.describe "Single Table Inheritance" do
       altered_inheriting.tag_list = "fork, spoon"
       altered_inheriting.save!
 
-      expect(InheritingTaggableModel.tags_on(:tags, order: "#{ActsAsTaggableOn.tags_table}.id").map(&:name)).to eq(%w[bob kelso])
-      expect(AlteredInheritingTaggableModel.tags_on(:tags, order: "#{ActsAsTaggableOn.tags_table}.id").map(&:name)).to eq(%w[fork spoon])
-      expect(TaggableModel.tags_on(:tags, order: "#{ActsAsTaggableOn.tags_table}.id").map(&:name)).to eq(%w[bob kelso fork spoon])
+      expect(InheritingTaggableModel.tags_on(:tags, order: "#{ActsAsTaggableOnMongoid.tags_table}.id").map(&:tag_name)).to eq(%w[bob kelso])
+      expect(AlteredInheritingTaggableModel.tags_on(:tags, order: "#{ActsAsTaggableOnMongoid.tags_table}.id").map(&:tag_name)).to eq(%w[fork spoon])
+      expect(TaggableModel.tags_on(:tags, order: "#{ActsAsTaggableOnMongoid.tags_table}.id").map(&:tag_name)).to eq(%w[bob kelso fork spoon])
     end
 
     it "should store same tag without validation conflict" do
@@ -157,55 +157,6 @@ RSpec.describe "Single Table Inheritance" do
       inheriting_model.save!
 
       inheriting_model.update_attributes! name: "foo"
-    end
-  end
-
-  describe "ownership" do
-    # TODO: Not implemented yet
-    xit "should have taggings" do
-      student.tag(taggable, with: "ruby,scheme", on: :tags)
-      expect(student.owned_taggings.count).to eq(2)
-    end
-
-    # TODO: Not implemented yet
-    xit "should have tags" do
-      student.tag(taggable, with: "ruby,scheme", on: :tags)
-      expect(student.owned_tags.count).to eq(2)
-    end
-
-    # TODO: Not implemented yet
-    xit "should return tags for the inheriting tagger" do
-      student.tag(taggable, with: "ruby, scheme", on: :tags)
-      expect(taggable.tags_from(student)).to eq(%w[ruby scheme])
-    end
-
-    # TODO: Not implemented yet
-    xit "returns all owner tags on the taggable" do
-      student.tag(taggable, with: "ruby, scheme", on: :tags)
-      student.tag(taggable, with: "skill_one", on: :skills)
-      student.tag(taggable, with: "english, spanish", on: :language)
-      expect(taggable.owner_tags(student).count).to eq(5)
-      expect(taggable.owner_tags(student).sort == %w[english ruby scheme skill_one spanish])
-    end
-
-    # TODO: Not implemented yet
-    xit "returns owner tags on the tagger" do
-      student.tag(taggable, with: "ruby, scheme", on: :tags)
-      expect(taggable.owner_tags_on(student, :tags).count).to eq(2)
-    end
-
-    # TODO: Not implemented yet
-    xit "returns owner tags on the taggable for an array of contexts" do
-      student.tag(taggable, with: "ruby, scheme", on: :tags)
-      student.tag(taggable, with: "skill_one, skill_two", on: :skills)
-      expect(taggable.owner_tags_on(student, %i[tags skills]).count).to eq(4)
-      expect(taggable.owner_tags_on(student, %i[tags skills]).sort == %w[ruby scheme skill_one skill_two])
-    end
-
-    # TODO: Not implemented yet
-    xit "should scope objects returned by tagged_with by owners" do
-      student.tag(taggable, with: "ruby, scheme")
-      expect(TaggableModel.tagged_with(%w[ruby scheme], owned_by: student).count).to eq(1)
     end
   end
 
@@ -223,13 +174,6 @@ RSpec.describe "Single Table Inheritance" do
       company.location_list = "cambridge"
       company.save!
       expect(ActsAsTaggableOnMongoid::Models::Tag.where(name: "cambridge", type: nil)).to_not be_empty
-    end
-
-    # TODO: I don't know what this test is trying to do yet really
-    xit "is returned with proper type through ownership" do
-      user.tag(company, with: "ripoffs, rackets", on: :markets)
-      tags = company.owner_tags_on(user, :markets)
-      expect(tags.all? { |tag| tag.is_a? Market }).to be_truthy
     end
   end
 end

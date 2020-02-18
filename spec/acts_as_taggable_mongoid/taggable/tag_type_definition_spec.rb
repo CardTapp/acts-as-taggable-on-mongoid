@@ -387,11 +387,7 @@ RSpec.describe ActsAsTaggableOnMongoid::Taggable::TagTypeDefinition do
                      "Botanist",
                      "Coil",
                      "Crime Alliance",
-                     "Dark Side Club",
-                     "Dr. Byron Kilgore",
-                     "Don Cornelius",
-                     "Blinder",
-                     "Howell Rice/Commando X"].sort
+                     "Dark Side Club"].sort
         end
       end
 

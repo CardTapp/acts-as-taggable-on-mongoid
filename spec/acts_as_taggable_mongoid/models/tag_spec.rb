@@ -30,11 +30,11 @@ RSpec.describe ActsAsTaggableOnMongoid::Models::Tag do
       end
 
       it "should return tags that have been used in the given context" do
-        expect(ActsAsTaggableOnMongoid::Models::Tag.for_context("skills").pluck(:name)).to include("ruby")
+        expect(ActsAsTaggableOnMongoid::Models::Tag.for_tag_type("skills").pluck(:name)).to include("ruby")
       end
 
       it "should not return tags that have been used in other contexts" do
-        expect(ActsAsTaggableOnMongoid::Models::Tag.for_context("needs").pluck(:name)).to_not include("ruby")
+        expect(ActsAsTaggableOnMongoid::Models::Tag.for_tag_type("needs").pluck(:name)).to_not include("ruby")
       end
     end
 
@@ -45,38 +45,41 @@ RSpec.describe ActsAsTaggableOnMongoid::Models::Tag do
       end
 
       it "should find by name" do
-        expect(ActsAsTaggableOnMongoid::Models::Tag.find_or_create_all_with_like_by_name(tag_definition, "awesome")).to eq([tag])
+        expect(ActsAsTaggableOnMongoid::Models::Tag.find_or_create_all_with_like_by_name_tagger(tag_definition, nil, "awesome")).to eq([tag])
       end
 
       it "should find by name case insensitive" do
         tag_definition = ActsAsTaggableOnMongoid::Taggable::TagTypeDefinition.new TaggableModel, :tags, force_lowercase: true
 
-        expect(ActsAsTaggableOnMongoid::Models::Tag.find_or_create_all_with_like_by_name(tag_definition, "AWESOME")).to eq([tag])
+        expect(ActsAsTaggableOnMongoid::Models::Tag.find_or_create_all_with_like_by_name_tagger(tag_definition, nil, "AWESOME")).to eq([tag])
       end
 
       context "case sensitive" do
         it "should find by name case sensitive" do
           expect do
-            ActsAsTaggableOnMongoid::Models::Tag.find_or_create_all_with_like_by_name(tag_definition, "AWESOME")
+            ActsAsTaggableOnMongoid::Models::Tag.find_or_create_all_with_like_by_name_tagger(tag_definition, nil, "AWESOME")
           end.to change(ActsAsTaggableOnMongoid::Models::Tag, :count).by(1)
         end
       end
 
       it "should create by name" do
         expect do
-          ActsAsTaggableOnMongoid::Models::Tag.find_or_create_all_with_like_by_name(tag_definition, "epic")
+          ActsAsTaggableOnMongoid::Models::Tag.find_or_create_all_with_like_by_name_tagger(tag_definition, nil, "epic")
         end.to change(ActsAsTaggableOnMongoid::Models::Tag, :count).by(1)
       end
 
       it "should find or create by name" do
         expect do
-          expect(ActsAsTaggableOnMongoid::Models::Tag.find_or_create_all_with_like_by_name(tag_definition, "awesome", "epic").map(&:name)).
+          expect(ActsAsTaggableOnMongoid::Models::Tag.find_or_create_all_with_like_by_name_tagger(tag_definition,
+                                                                                                  nil,
+                                                                                                  "awesome",
+                                                                                                  "epic").map(&:name)).
               to eq(%w[awesome epic])
         end.to change(ActsAsTaggableOnMongoid::Models::Tag, :count).by(1)
       end
 
       it "should return an empty array if no tags are specified" do
-        expect(ActsAsTaggableOnMongoid::Models::Tag.find_or_create_all_with_like_by_name(tag_definition, [])).to be_empty
+        expect(ActsAsTaggableOnMongoid::Models::Tag.find_or_create_all_with_like_by_name_tagger(tag_definition, nil, [])).to be_empty
       end
     end
 
@@ -154,12 +157,12 @@ RSpec.describe ActsAsTaggableOnMongoid::Models::Tag do
       end
 
       it "should find by name" do
-        expect(ActsAsTaggableOnMongoid::Models::Tag.find_or_create_all_with_like_by_name(tag_definition, "awesome")).to eq([tag])
+        expect(ActsAsTaggableOnMongoid::Models::Tag.find_or_create_all_with_like_by_name_tagger(tag_definition, nil, "awesome")).to eq([tag])
       end
 
       it "should find by name case sensitively" do
         expect do
-          ActsAsTaggableOnMongoid::Models::Tag.find_or_create_all_with_like_by_name(tag_definition, "AWESOME")
+          ActsAsTaggableOnMongoid::Models::Tag.find_or_create_all_with_like_by_name_tagger(tag_definition, nil, "AWESOME")
         end.to change(ActsAsTaggableOnMongoid::Models::Tag, :count)
 
         expect(ActsAsTaggableOnMongoid::Models::Tag.where(name: "AWESOME").count).to be_positive
@@ -177,7 +180,7 @@ RSpec.describe ActsAsTaggableOnMongoid::Models::Tag do
       it "should not change encoding" do
         name              = "\u3042"
         original_encoding = name.encoding
-        record            = ActsAsTaggableOnMongoid::Models::Tag.find_or_create_all_with_like_by_name(tag_definition, name).first
+        record            = ActsAsTaggableOnMongoid::Models::Tag.find_or_create_all_with_like_by_name_tagger(tag_definition, nil, name).first
 
         record.reload
 
@@ -186,9 +189,14 @@ RSpec.describe ActsAsTaggableOnMongoid::Models::Tag do
     end
 
     describe "name uniqeness validation" do
-      let(:duplicate_tag) { ActsAsTaggableOnMongoid::Models::Tag.new(name: "ror", context: "tags", taggable_type: TaggableModel.name) }
+      let(:tagger) { MyUser.create! name: "My Tagger" }
+      let(:duplicate_tag) do
+        ActsAsTaggableOnMongoid::Models::Tag.new(name: "ror", context: "tags", taggable_type: TaggableModel.name, tagger: tagger)
+      end
 
-      before { ActsAsTaggableOnMongoid::Models::Tag.create(name: "ror", context: "tags", taggable_type: TaggableModel.name) }
+      before do
+        ActsAsTaggableOnMongoid::Models::Tag.create(name: "ror", context: "tags", taggable_type: TaggableModel.name, tagger: tagger)
+      end
 
       context "when do need unique names" do
         it "should run uniqueness validation" do
@@ -200,6 +208,24 @@ RSpec.describe ActsAsTaggableOnMongoid::Models::Tag do
 
           expect(duplicate_tag.errors.size).to eq(1)
           expect(duplicate_tag.errors.messages[:name]).to include("is already taken")
+        end
+
+        it "is valid if you change the context" do
+          duplicate_tag.context = "areas"
+
+          expect(duplicate_tag).to be_valid
+        end
+
+        it "is valid if you change the taggable_type" do
+          duplicate_tag.taggable_type = Company.name
+
+          expect(duplicate_tag).to be_valid
+        end
+
+        it "is valid if you change the tagger" do
+          duplicate_tag.tagger = nil
+
+          expect(duplicate_tag).to be_valid
         end
       end
     end
@@ -420,12 +446,13 @@ RSpec.describe ActsAsTaggableOnMongoid::Models::Tag do
       alt_tagged     = Tagged.new(tag_list: "test tag")
       tag_definition = Tagged.tag_types["tags"]
 
-      named_scope = double(:named_scope)
-      for_scope   = double(:tag_scope, named: named_scope)
+      tagged_scope = double(:tagged_scope)
+      named_scope  = double(:named_scope, tagged_by: tagged_scope)
+      for_scope    = double(:tag_scope, named: named_scope)
       allow(tag_definition.tags_table).to receive(:for_tag).and_return for_scope
 
       count = 0
-      allow(named_scope).to receive(:first) do
+      allow(tagged_scope).to receive(:first) do
         count += 1
 
         ActsAsTaggableOnMongoid::Models::Tag.where(name: "test tag").first if count > 1
@@ -442,15 +469,69 @@ RSpec.describe ActsAsTaggableOnMongoid::Models::Tag do
       alt_tagged     = Tagged.new(tag_list: "test tag")
       tag_definition = Tagged.tag_types["tags"]
 
-      named_scope = double(:named_scope)
-      for_scope   = double(:tag_scope, named: named_scope)
+      tagged_scope = double(:tagged_scope)
+      named_scope  = double(:named_scope, tagged_by: tagged_scope)
+      for_scope    = double(:tag_scope, named: named_scope)
       allow(tag_definition.tags_table).to receive(:for_tag).and_return for_scope
 
-      allow(named_scope).to receive(:first).and_return nil
+      allow(tagged_scope).to receive(:first).and_return nil
 
       expect { alt_tagged.save! }.to raise_error ActsAsTaggableOnMongoid::Errors::DuplicateTagError
 
-      expect(named_scope).to have_received(:first).exactly(3).times
+      expect(tagged_scope).to have_received(:first).exactly(3).times
+    end
+  end
+
+  describe "tagger" do
+    let(:tagger) { MyUser.create! name: "My Tagger" }
+    let(:tag) do
+      ActsAsTaggableOnMongoid::Models::Tag.new(name: "ror", context: "tags", taggable_type: TaggableModel.name)
+    end
+
+    it "does not require a tagger" do
+      expect(tag).to be_valid
+    end
+
+    it "unsets tagger fields if tagger set to nil" do
+      tag.update_attributes! tagger: tagger
+
+      tag.reload
+      expect(tag.attributes).to be_key("tagger_id")
+      expect(tag.attributes).to be_key("tagger_type")
+
+      tag.reload.update_attributes! tagger_id: nil
+
+      tag.reload
+      expect(tag.attributes).not_to be_key("tagger_id")
+      expect(tag.attributes).not_to be_key("tagger_type")
+    end
+
+    describe "tagged_by" do
+      let(:tagger) { MyUser.create! name: "My Tagger" }
+      let(:other_tagger) { MyUser.create! name: "Other Tagger" }
+      let!(:tag) do
+        ActsAsTaggableOnMongoid::Models::Tag.create!(name: "no tagger", context: "tags", taggable_type: TaggableModel.name)
+      end
+      let!(:tag_tagger) do
+        ActsAsTaggableOnMongoid::Models::Tag.create!(name: "tagger", context: "tagger_tags", taggable_type: TaggableModel.name, tagger: tagger)
+      end
+      let!(:tag_other_tagger) do
+        ActsAsTaggableOnMongoid::Models::Tag.create!(name: "tagger", context: "other_tags", taggable_type: TaggableModel.name, tagger: other_tagger)
+      end
+
+      it "filters by tagger" do
+        tags = ActsAsTaggableOnMongoid::Models::Tag.tagged_by(tagger).to_a
+
+        expect(tags.length).to eq 1
+        expect(tags).to eq [tag_tagger]
+      end
+
+      it "filters no tagger" do
+        tags = ActsAsTaggableOnMongoid::Models::Tag.tagged_by(nil).to_a
+
+        expect(tags.length).to eq 1
+        expect(tags).to eq [tag]
+      end
     end
   end
 end
