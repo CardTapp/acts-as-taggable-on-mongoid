@@ -35,10 +35,6 @@ module ActsAsTaggableOnMongoid
   #   TagList.new(tag_definition, "value 1, value 2", "value 3, value 4", parser: ActsAsTaggableOnMongoid::GenericParser)
   #   # > TagList<> ["value 1", "value 2", "value 3", "value 4"]
 
-  # TODO: Address the reek: SubclassedFromCoreClass
-  #       Change this class to not subclass from Array, but instead to have a private array
-  #       variable that we delegate the array functions we want to support to.
-
   # :reek:MissingSafeMethod
   # :reek:SubclassedFromCoreClass
   class TagList < Array

@@ -26,21 +26,21 @@ module ActsAsTaggableOnMongoid
         options = options.with_indifferent_access
 
         add_taggings_tagger_relation(options)
-        add_tags_tagger_relation(options)
+        add_tags_owner_relation(options)
 
         include ActsAsTaggableOnMongoid::Tagger::TagMethods
       end
 
       private
 
-      def add_tags_tagger_relation(options)
+      def add_tags_owner_relation(options)
         tags_table = options[:tags_table] || ActsAsTaggableOnMongoid.tags_table
         tags_name  = "owned_#{tags_table.name.demodulize.underscore.downcase.pluralize.to_sym}"
 
         return if relations[tags_name.to_s]
 
         has_many tags_name,
-                 as:         :tagger,
+                 as:         :owner,
                  dependent:  :destroy,
                  class_name: tags_table.name
       end
@@ -52,7 +52,7 @@ module ActsAsTaggableOnMongoid
         return if relations[taggings_name.to_s]
 
         has_many taggings_name,
-                 as:         :tag_tagger,
+                 as:         :tagger,
                  dependent:  :destroy,
                  class_name: taggings_table.name
       end

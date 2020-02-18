@@ -19,18 +19,19 @@ module ActsAsTaggableOnMongoid
       #     on:           - the tag list within taggable to be set.  This will default to `:tag`
       #     parse:        - Boolean indicating if the tags should be parsed.  This will default to "true"
       #     parser:       - Class to be used to parse the values.
+      #     skip_save:    - Do not save the taggable object with the new tagging.
       def tag(taggable, *args)
-        atom_tag(taggable, *args)
+        options = atom_tag(taggable, *args)
 
-        taggable.save
+        taggable.save unless options[:skip_save]
       end
 
       ##
       # tag, but uses `save!` instead of `save` to save the taggable model.
       def tag!(taggable, *args)
-        atom_tag(taggable, *args)
+        options = atom_tag(taggable, *args)
 
-        taggable.save!
+        taggable.save! unless options[:skip_save]
       end
 
       private
@@ -46,6 +47,8 @@ module ActsAsTaggableOnMongoid
         else
           tag_list.add(*set_list, options.slice(:parse, :parser))
         end
+
+        options
       end
 
       def atom_extract_tag_options(set_list)
@@ -55,7 +58,8 @@ module ActsAsTaggableOnMongoid
                                   :on,
                                   :replace,
                                   :parse,
-                                  :parser
+                                  :parser,
+                                  :skip_save
 
         options[:parse] = options.fetch(:parse) { true } || options.key?(:parser)
 

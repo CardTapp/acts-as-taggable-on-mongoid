@@ -51,6 +51,16 @@ module ActsAsTaggableOnMongoid
           end
         end
 
+        def add_tag_list_from
+          tag_definition = self
+
+          owner.taggable_mixin.module_eval do
+            define_method(tag_definition.from_list_name) do |owner|
+              public_send(tag_definition.tagger_tag_list_name, owner)
+            end
+          end
+        end
+
         def add_tagger_tag_lists
           tag_definition = self
           tag_list_name  = tag_definition.tagger_tag_lists_name

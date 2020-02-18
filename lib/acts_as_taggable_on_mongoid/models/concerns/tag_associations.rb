@@ -10,18 +10,18 @@ module ActsAsTaggableOnMongoid
           ### ASSOCIATIONS:
 
           has_many :taggings, dependent: :destroy, class_name: "ActsAsTaggableOnMongoid::Models::Tagging"
-          belongs_to :tagger, polymorphic: true, optional: true, index: true
+          belongs_to :owner, polymorphic: true, optional: true, index: true
 
-          after_save :atom_unset_blank_tagger
+          after_save :atom_unset_blank_owner
         end
 
         private
 
-        def atom_unset_blank_tagger
-          return if !attributes.key?("tagger_id") && !attributes.key?("tagger_type")
-          return if tagger_id.present? && tagger_type.present?
+        def atom_unset_blank_owner
+          return if !attributes.key?("owner_id") && !attributes.key?("owner_type")
+          return if owner_id.present? && owner_type.present?
 
-          unset(:tagger_id, :tagger_type)
+          unset(:owner_id, :owner_type)
         end
       end
     end

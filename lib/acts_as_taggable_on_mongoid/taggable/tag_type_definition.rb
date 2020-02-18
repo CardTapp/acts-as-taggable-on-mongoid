@@ -148,6 +148,7 @@ module ActsAsTaggableOnMongoid
       def add_tag_list
         add_list_getter
         add_list_setter
+        add_tag_list_from
         add_tagger_tag_list
         add_tagger_tag_lists
         add_all_list_getter

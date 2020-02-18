@@ -18,6 +18,7 @@ module ActsAsTaggableOnMongoid
                 name:   "tagging_taggable_tagger_context_tag_name")
           index(tag_name: 1)
           index(tag_id: 1, tag_type: 1)
+          index(tagger_id: 1, tagger_type: 1)
         end
       end
     end

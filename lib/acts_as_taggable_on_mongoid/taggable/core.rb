@@ -157,7 +157,7 @@ module ActsAsTaggableOnMongoid
         tagger_tag_list = ActsAsTaggableOnMongoid::TaggerTagList.new(tag_definition, self)
 
         taggings.each do |tagging|
-          tagger_tag_list[tagging.tag_tagger].silent_concat [tagging.tag_name]
+          tagger_tag_list[tagging.tagger].silent_concat [tagging.tag_name]
         end
 
         tagger_tag_list
@@ -188,7 +188,7 @@ module ActsAsTaggableOnMongoid
       ##
       # Returns all tags that are not owned of a given context
       def tags_on(tag_definition)
-        scope = public_send(tag_definition.taggings_name).where(context: tag_definition.tag_type, :tag_tagger_id.exists => false)
+        scope = public_send(tag_definition.taggings_name).where(context: tag_definition.tag_type, :tagger_id.exists => false)
 
         # when preserving tag order, return tags in created order
         # if we added the order to the association this would always apply
@@ -200,7 +200,7 @@ module ActsAsTaggableOnMongoid
       ##
       # Returns all tags that are owned by a given tagger of a given context
       def tagger_tags_on(tagger, tag_definition)
-        scope = public_send(tag_definition.taggings_name).where(context: tag_definition.tag_type, tag_tagger: tagger)
+        scope = public_send(tag_definition.taggings_name).where(context: tag_definition.tag_type, tagger: tagger)
 
         # when preserving tag order, return tags in created order
         # if we added the order to the association this would always apply

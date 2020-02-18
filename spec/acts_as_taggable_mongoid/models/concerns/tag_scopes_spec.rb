@@ -5,8 +5,8 @@ require "rails_helper"
 RSpec.describe ActsAsTaggableOnMongoid::Models::Concerns::TagScopes do
   let(:taggable_type) { TaggableModel.name }
   let(:other_taggable_type) { TaggerTaggableModel.name }
-  let(:tagger) { MyUser.create! name: "My User" }
-  let(:other_tagger) { MyUser.create! name: "My User" }
+  let(:owner) { MyUser.create! name: "My User" }
+  let(:other_owner) { MyUser.create! name: "My User" }
   let!(:my_type_tag) do
     ActsAsTaggableOnMongoid::Models::Tag.create!(name:          "my name",
                                                  taggable_type: taggable_type,
@@ -22,17 +22,17 @@ RSpec.describe ActsAsTaggableOnMongoid::Models::Concerns::TagScopes do
                                                  taggable_type: other_taggable_type,
                                                  context:       "tag")
   end
-  let!(:my_other_tag_tagger) do
+  let!(:my_other_tag_owner) do
     ActsAsTaggableOnMongoid::Models::Tag.create!(name:          "my name",
                                                  taggable_type: other_taggable_type,
                                                  context:       "tag",
-                                                 tagger:        tagger)
+                                                 owner:         owner)
   end
   let!(:my_type_second_other) do
     ActsAsTaggableOnMongoid::Models::Tag.create!(name:          "my name",
                                                  taggable_type: taggable_type,
                                                  context:       "secondary_tag",
-                                                 tagger:        other_tagger)
+                                                 owner:         other_owner)
   end
   let!(:your_type_tag) do
     ActsAsTaggableOnMongoid::Models::Tag.create!(name:          "your name",
@@ -49,17 +49,17 @@ RSpec.describe ActsAsTaggableOnMongoid::Models::Concerns::TagScopes do
                                                  taggable_type: other_taggable_type,
                                                  context:       "tag")
   end
-  let!(:your_other_tag_tagger) do
+  let!(:your_other_tag_owner) do
     ActsAsTaggableOnMongoid::Models::Tag.create!(name:          "your name",
                                                  taggable_type: other_taggable_type,
                                                  context:       "tag",
-                                                 tagger:        tagger)
+                                                 owner:         owner)
   end
   let!(:your_type_second_other) do
     ActsAsTaggableOnMongoid::Models::Tag.create!(name:          "your name",
                                                  taggable_type: taggable_type,
                                                  context:       "secondary_tag",
-                                                 tagger:        other_tagger)
+                                                 owner:         other_owner)
   end
   let!(:not_type_tag) do
     ActsAsTaggableOnMongoid::Models::Tag.create!(name:          "not to be found",
@@ -76,17 +76,17 @@ RSpec.describe ActsAsTaggableOnMongoid::Models::Concerns::TagScopes do
                                                  taggable_type: other_taggable_type,
                                                  context:       "tag")
   end
-  let!(:not_other_tag_tagger) do
+  let!(:not_other_tag_owner) do
     ActsAsTaggableOnMongoid::Models::Tag.create!(name:          "not to be found",
                                                  taggable_type: other_taggable_type,
                                                  context:       "tag",
-                                                 tagger:        tagger)
+                                                 owner:         owner)
   end
   let!(:not_type_second_other) do
     ActsAsTaggableOnMongoid::Models::Tag.create!(name:          "not to be found",
                                                  taggable_type: taggable_type,
                                                  context:       "secondary_tag",
-                                                 tagger:        other_tagger)
+                                                 owner:         other_owner)
   end
 
   describe "named" do
@@ -94,7 +94,7 @@ RSpec.describe ActsAsTaggableOnMongoid::Models::Concerns::TagScopes do
       tags = [my_type_tag,
               my_type_second,
               my_other_tag,
-              my_other_tag_tagger,
+              my_other_tag_owner,
               my_type_second_other]
 
       expect(ActsAsTaggableOnMongoid::Models::Tag.named("my name").to_a.sort).to eq tags.sort
@@ -106,12 +106,12 @@ RSpec.describe ActsAsTaggableOnMongoid::Models::Concerns::TagScopes do
       tags = [my_type_tag,
               my_type_second,
               my_other_tag,
-              my_other_tag_tagger,
+              my_other_tag_owner,
               my_type_second_other,
               your_type_tag,
               your_type_second,
               your_other_tag,
-              your_other_tag_tagger,
+              your_other_tag_owner,
               your_type_second_other]
 
       expect(ActsAsTaggableOnMongoid::Models::Tag.named_any("my name", "your name").to_a.sort).to eq tags.sort
@@ -123,12 +123,12 @@ RSpec.describe ActsAsTaggableOnMongoid::Models::Concerns::TagScopes do
       tags = [my_type_tag,
               my_type_second,
               my_other_tag,
-              my_other_tag_tagger,
+              my_other_tag_owner,
               my_type_second_other,
               your_type_tag,
               your_type_second,
               your_other_tag,
-              your_other_tag_tagger,
+              your_other_tag_owner,
               your_type_second_other]
 
       expect(ActsAsTaggableOnMongoid::Models::Tag.named_like("name").to_a.sort).to eq tags.sort
@@ -140,28 +140,28 @@ RSpec.describe ActsAsTaggableOnMongoid::Models::Concerns::TagScopes do
       tags = [not_type_tag,
               not_type_second,
               not_other_tag,
-              not_other_tag_tagger,
+              not_other_tag_owner,
               not_type_second_other,
               your_type_tag,
               your_type_second,
               your_other_tag,
-              your_other_tag_tagger,
+              your_other_tag_owner,
               your_type_second_other]
 
       expect(ActsAsTaggableOnMongoid::Models::Tag.named_like_any("not", "your").to_a.sort).to eq tags.sort
     end
   end
 
-  describe "tagged_by" do
-    it "finds all tags that are tagged by a tagger" do
-      tags = [my_other_tag_tagger,
-              your_other_tag_tagger,
-              not_other_tag_tagger]
+  describe "owned_by" do
+    it "finds all tags that are tagged by a owner" do
+      tags = [my_other_tag_owner,
+              your_other_tag_owner,
+              not_other_tag_owner]
 
-      expect(ActsAsTaggableOnMongoid::Models::Tag.tagged_by(tagger).to_a.sort).to eq tags.sort
+      expect(ActsAsTaggableOnMongoid::Models::Tag.owned_by(owner).to_a.sort).to eq tags.sort
     end
 
-    it "finds all tags that are tagged by no tagger" do
+    it "finds all tags that are tagged by no owner" do
       tags = [my_type_tag,
               my_type_second,
               my_other_tag,
@@ -172,7 +172,7 @@ RSpec.describe ActsAsTaggableOnMongoid::Models::Concerns::TagScopes do
               not_type_second,
               not_other_tag]
 
-      expect(ActsAsTaggableOnMongoid::Models::Tag.tagged_by(nil).to_a.sort).to eq tags.sort
+      expect(ActsAsTaggableOnMongoid::Models::Tag.owned_by(nil).to_a.sort).to eq tags.sort
     end
   end
 
@@ -192,11 +192,11 @@ RSpec.describe ActsAsTaggableOnMongoid::Models::Concerns::TagScopes do
   describe "for_taggable_class" do
     it "finds all tags for a particular taggable class" do
       tags = [my_other_tag,
-              my_other_tag_tagger,
+              my_other_tag_owner,
               your_other_tag,
-              your_other_tag_tagger,
+              your_other_tag_owner,
               not_other_tag,
-              not_other_tag_tagger]
+              not_other_tag_owner]
 
       expect(ActsAsTaggableOnMongoid::Models::Tag.for_taggable_class(TaggerTaggableModel).to_a.sort).to eq tags.sort
     end

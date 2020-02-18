@@ -85,29 +85,27 @@ RSpec.describe ActsAsTaggableOnMongoid::Models::Tagging do
     describe "context scopes" do
       let(:tagging_2) { ActsAsTaggableOnMongoid::Models::Tagging.new }
       let(:tagging_3) { ActsAsTaggableOnMongoid::Models::Tagging.new }
+      let(:tagger) { MyUser.new }
+      let(:tagger_2) { MyUser.new }
 
       before(:each) do
-        # TODO: Not currently supported.
-        # tagger   = User.new
-        # tagger_2 = User.new
-
         tagging.taggable = TaggableModel.create(name: "Black holes")
         tagging.tag      = ActsAsTaggableOnMongoid::Models::Tag.create(name: "Physics")
-        # tagging.tagger   = tagger
+        tagging.tagger   = tagger
         tagging.context  = "Science"
         tagging.tag_name = "Physics"
         tagging.save!
 
         tagging_2.taggable = TaggableModel.create(name: "Satellites")
         tagging_2.tag      = ActsAsTaggableOnMongoid::Models::Tag.create(name: "Technology")
-        # tagging_2.tagger   = tagger_2
+        tagging_2.tagger   = tagger_2
         tagging_2.context  = "Science"
         tagging_2.tag_name = "Technology"
         tagging_2.save!
 
         tagging_3.taggable = TaggableModel.create(name: "Satellites")
         tagging_3.tag      = ActsAsTaggableOnMongoid::Models::Tag.create(name: "Engineering")
-        # tagging_3.tagger   = tagger_2
+        tagging_3.tagger   = tagger_2
         tagging_3.context  = "Astronomy"
         tagging_3.tag_name = "Engineering"
         tagging_3.save!
@@ -115,7 +113,7 @@ RSpec.describe ActsAsTaggableOnMongoid::Models::Tagging do
 
       # TODO: Not implemented yet
       describe ".owned_by" do
-        xit "should belong to a specific user" do
+        it "should belong to a specific user" do
           expect(ActsAsTaggableOnMongoid::Models::Tagging.owned_by(tagger).first).to eq(tagging)
         end
       end

@@ -10,7 +10,7 @@ module ActsAsTaggableOnMongoid
           ### ASSOCIATIONS:
 
           belongs_to :tag, counter_cache: true, inverse_of: :taggings
-          belongs_to :tag_tagger, polymorphic: true, optional: true
+          belongs_to :tagger, polymorphic: true, optional: true
           belongs_to :taggable, polymorphic: true
 
           before_validation :atom_unset_blank_owner
@@ -19,9 +19,9 @@ module ActsAsTaggableOnMongoid
         private
 
         def atom_unset_blank_owner
-          return if tag_tagger_id.present? && tag_tagger_type.present?
+          return if tagger_id.present? && tagger_type.present?
 
-          unset(:tag_tagger_id, :tag_tagger_type)
+          unset(:tagger_id, :tagger_type)
         end
       end
     end

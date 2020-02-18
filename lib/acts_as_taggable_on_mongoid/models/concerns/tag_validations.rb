@@ -12,7 +12,7 @@ module ActsAsTaggableOnMongoid
           validates :name, presence: true
           validates :context, presence: true
           validates :taggable_type, presence: true
-          validates :name, uniqueness: { scope: %i[context taggable_type tagger] }
+          validates :name, uniqueness: { scope: %i[context taggable_type owner] }
         end
       end
     end

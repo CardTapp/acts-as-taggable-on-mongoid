@@ -35,7 +35,7 @@ module ActsAsTaggableOnMongoid
           new_tags.each do |tag|
             tagging = taggable.
                 public_send(tag_definition.taggings_name).
-                new(tag_name: tag.name, context: tag_definition.tag_type, taggable: taggable, tag: tag, tag_tagger: tag.tagger)
+                new(tag_name: tag.name, context: tag_definition.tag_type, taggable: taggable, tag: tag, tagger: tag.owner)
 
             next if tagging.save
             next if ignore_tagging_error(tagging)
@@ -96,7 +96,7 @@ module ActsAsTaggableOnMongoid
         def preserve_new_tag_list_order
           # Order the array of tag objects to match the tag list
           @new_tags = tags.map do |tag|
-            preserved_tags.detect { |preserved_tag| preserved_tag.name == tag.name && preserved_tag.tagger == tag.tagger }
+            preserved_tags.detect { |preserved_tag| preserved_tag.name == tag.name && preserved_tag.owner == tag.owner }
           end.compact
         end
 

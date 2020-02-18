@@ -27,32 +27,32 @@ RSpec.describe ActsAsTaggableOnMongoid::Models::Concerns::TagScopes do
                                                      context:  "tag"
   end
   let(:tag_basic_tagger) do
-    ActsAsTaggableOnMongoid::Models::Tagging.create! tag:        fake_tags.sample,
-                                                     tag_name:   "tag_basic_tagger",
-                                                     taggable:   taggables[1],
-                                                     tag_tagger: tagger,
-                                                     context:    "tag"
+    ActsAsTaggableOnMongoid::Models::Tagging.create! tag:      fake_tags.sample,
+                                                     tag_name: "tag_basic_tagger",
+                                                     taggable: taggables[1],
+                                                     tagger:   tagger,
+                                                     context:  "tag"
   end
   let(:tag_other_tagger) do
-    ActsAsTaggableOnMongoid::Models::Tagging.create! tag:        fake_tags.sample,
-                                                     tag_name:   "tag_other_tagger",
-                                                     taggable:   other_taggables[1],
-                                                     tag_tagger: tagger,
-                                                     context:    "tag"
+    ActsAsTaggableOnMongoid::Models::Tagging.create! tag:      fake_tags.sample,
+                                                     tag_name: "tag_other_tagger",
+                                                     taggable: other_taggables[1],
+                                                     tagger:   tagger,
+                                                     context:  "tag"
   end
   let(:tag_basic_other) do
-    ActsAsTaggableOnMongoid::Models::Tagging.create! tag:        fake_tags.sample,
-                                                     tag_name:   "tag_basic_other",
-                                                     taggable:   taggables[2],
-                                                     tag_tagger: other_tagger,
-                                                     context:    "tag"
+    ActsAsTaggableOnMongoid::Models::Tagging.create! tag:      fake_tags.sample,
+                                                     tag_name: "tag_basic_other",
+                                                     taggable: taggables[2],
+                                                     tagger:   other_tagger,
+                                                     context:  "tag"
   end
   let(:tag_other_other) do
-    ActsAsTaggableOnMongoid::Models::Tagging.create! tag:        fake_tags.sample,
-                                                     tag_name:   "tag_other_other",
-                                                     taggable:   other_taggables[2],
-                                                     tag_tagger: other_tagger,
-                                                     context:    "tag"
+    ActsAsTaggableOnMongoid::Models::Tagging.create! tag:      fake_tags.sample,
+                                                     tag_name: "tag_other_other",
+                                                     taggable: other_taggables[2],
+                                                     tagger:   other_tagger,
+                                                     context:  "tag"
   end
   let(:secondary_basic_none) do
     ActsAsTaggableOnMongoid::Models::Tagging.create! tag:      fake_tags.sample,
@@ -67,32 +67,32 @@ RSpec.describe ActsAsTaggableOnMongoid::Models::Concerns::TagScopes do
                                                      context:  "secondary_tag"
   end
   let(:secondary_basic_tagger) do
-    ActsAsTaggableOnMongoid::Models::Tagging.create! tag:        fake_tags.sample,
-                                                     tag_name:   "secondary_basic_tagger",
-                                                     taggable:   taggables[1],
-                                                     tag_tagger: tagger,
-                                                     context:    "secondary_tag"
+    ActsAsTaggableOnMongoid::Models::Tagging.create! tag:      fake_tags.sample,
+                                                     tag_name: "secondary_basic_tagger",
+                                                     taggable: taggables[1],
+                                                     tagger:   tagger,
+                                                     context:  "secondary_tag"
   end
   let(:secondary_other_tagger) do
-    ActsAsTaggableOnMongoid::Models::Tagging.create! tag:        fake_tags.sample,
-                                                     tag_name:   "secondary_other_tagger",
-                                                     taggable:   other_taggables[1],
-                                                     tag_tagger: tagger,
-                                                     context:    "secondary_tag"
+    ActsAsTaggableOnMongoid::Models::Tagging.create! tag:      fake_tags.sample,
+                                                     tag_name: "secondary_other_tagger",
+                                                     taggable: other_taggables[1],
+                                                     tagger:   tagger,
+                                                     context:  "secondary_tag"
   end
   let(:secondary_basic_other) do
-    ActsAsTaggableOnMongoid::Models::Tagging.create! tag:        fake_tags.sample,
-                                                     tag_name:   "secondary_basic_other",
-                                                     taggable:   taggables[2],
-                                                     tag_tagger: other_tagger,
-                                                     context:    "secondary_tag"
+    ActsAsTaggableOnMongoid::Models::Tagging.create! tag:      fake_tags.sample,
+                                                     tag_name: "secondary_basic_other",
+                                                     taggable: taggables[2],
+                                                     tagger:   other_tagger,
+                                                     context:  "secondary_tag"
   end
   let(:secondary_other_other) do
-    ActsAsTaggableOnMongoid::Models::Tagging.create! tag:        fake_tags.sample,
-                                                     tag_name:   "secondary_other_other",
-                                                     taggable:   other_taggables[2],
-                                                     tag_tagger: other_tagger,
-                                                     context:    "secondary_tag"
+    ActsAsTaggableOnMongoid::Models::Tagging.create! tag:      fake_tags.sample,
+                                                     tag_name: "secondary_other_other",
+                                                     taggable: other_taggables[2],
+                                                     tagger:   other_tagger,
+                                                     context:  "secondary_tag"
   end
   let(:third_basic_none) do
     ActsAsTaggableOnMongoid::Models::Tagging.create! tag:      fake_tags.sample,
@@ -107,32 +107,32 @@ RSpec.describe ActsAsTaggableOnMongoid::Models::Concerns::TagScopes do
                                                      context:  "third_tag"
   end
   let(:third_basic_tagger) do
-    ActsAsTaggableOnMongoid::Models::Tagging.create! tag:        fake_tags.sample,
-                                                     tag_name:   "third_basic_tagger",
-                                                     taggable:   taggables[1],
-                                                     tag_tagger: tagger,
-                                                     context:    "third_tag"
+    ActsAsTaggableOnMongoid::Models::Tagging.create! tag:      fake_tags.sample,
+                                                     tag_name: "third_basic_tagger",
+                                                     taggable: taggables[1],
+                                                     tagger:   tagger,
+                                                     context:  "third_tag"
   end
   let(:third_other_tagger) do
-    ActsAsTaggableOnMongoid::Models::Tagging.create! tag:        fake_tags.sample,
-                                                     tag_name:   "third_other_tagger",
-                                                     taggable:   other_taggables[1],
-                                                     tag_tagger: tagger,
-                                                     context:    "third_tag"
+    ActsAsTaggableOnMongoid::Models::Tagging.create! tag:      fake_tags.sample,
+                                                     tag_name: "third_other_tagger",
+                                                     taggable: other_taggables[1],
+                                                     tagger:   tagger,
+                                                     context:  "third_tag"
   end
   let(:third_basic_other) do
-    ActsAsTaggableOnMongoid::Models::Tagging.create! tag:        fake_tags.sample,
-                                                     tag_name:   "third_basic_other",
-                                                     taggable:   taggables[2],
-                                                     tag_tagger: other_tagger,
-                                                     context:    "third_tag"
+    ActsAsTaggableOnMongoid::Models::Tagging.create! tag:      fake_tags.sample,
+                                                     tag_name: "third_basic_other",
+                                                     taggable: taggables[2],
+                                                     tagger:   other_tagger,
+                                                     context:  "third_tag"
   end
   let(:third_other_other) do
-    ActsAsTaggableOnMongoid::Models::Tagging.create! tag:        fake_tags.sample,
-                                                     tag_name:   "third_other_other",
-                                                     taggable:   other_taggables[2],
-                                                     tag_tagger: other_tagger,
-                                                     context:    "third_tag"
+    ActsAsTaggableOnMongoid::Models::Tagging.create! tag:      fake_tags.sample,
+                                                     tag_name: "third_other_other",
+                                                     taggable: other_taggables[2],
+                                                     tagger:   other_tagger,
+                                                     context:  "third_tag"
   end
 
   describe "by_tag_types" do

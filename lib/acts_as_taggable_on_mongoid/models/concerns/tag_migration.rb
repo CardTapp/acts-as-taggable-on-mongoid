@@ -5,17 +5,34 @@ module ActsAsTaggableOnMongoid
     module Concerns
       # A module that defines methods to migrate a Tag model.
       #
-      # Include the module on your Tag class and call `atom_migrate_up` to migrate from 0.x to 1.x versions
-      # of the model.
+      # Mongoid does not have a standardized migration scheme, but migrations of one kind or another
+      # are often a fact of life, and are in this situation because of the need to change an existing
+      # index.
       #
-      # Migrations:
-      #   * tagger was added to the model and indexes.
-      #     Drop the old indexes and create the new ones.
+      # Using whatever migration methodology you prefer, you need to run the appropriate migration method
+      # or methods on the Tag module used by your project.
+      #
+      # The migrations are named for the ActsAsTaggableMongoid versions upon which they need to be run.
+      # Run the correct migration(s) for the version of ActsAsTaggableOnMongoid you are currently using
+      # This module does not and cannot verify the version you are migrating from nor if the migration
+      # has been run before.  Doing so is assumed to be the responsibility of your chosen
+      # Migration methodology.
+      #
+      # Example:
+      #
+      # # When a migration is needed, the method "up" is called:
+      # def up
+      #   TagModel.include ActsAsTaggableOnMongoid::Models::Concerns::TagMigration
+      #   TagModel.atom_migrate_up_6_0_1_to_6_1_1
+      # end
+      #
+      # The migration methods should only be run once if possible, but every reasonable effort is made to
+      # ensure that the migration methods are safe to re-run.
       module TagMigration
         extend ActiveSupport::Concern
 
         class_methods do
-          def atom_migrate_up
+          def atom_migrate_up_6_0_1_to_6_1_1
             collection.indexes.drop_one "name_1_taggable_type_1_context_1" if collection.indexes.get "name_1_taggable_type_1_context_1"
 
             create_indexes

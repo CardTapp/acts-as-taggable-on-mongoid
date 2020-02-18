@@ -45,41 +45,41 @@ RSpec.describe ActsAsTaggableOnMongoid::Models::Tag do
       end
 
       it "should find by name" do
-        expect(ActsAsTaggableOnMongoid::Models::Tag.find_or_create_all_with_like_by_name_tagger(tag_definition, nil, "awesome")).to eq([tag])
+        expect(ActsAsTaggableOnMongoid::Models::Tag.find_or_create_all_with_like_by_name_owner(tag_definition, nil, "awesome")).to eq([tag])
       end
 
       it "should find by name case insensitive" do
         tag_definition = ActsAsTaggableOnMongoid::Taggable::TagTypeDefinition.new TaggableModel, :tags, force_lowercase: true
 
-        expect(ActsAsTaggableOnMongoid::Models::Tag.find_or_create_all_with_like_by_name_tagger(tag_definition, nil, "AWESOME")).to eq([tag])
+        expect(ActsAsTaggableOnMongoid::Models::Tag.find_or_create_all_with_like_by_name_owner(tag_definition, nil, "AWESOME")).to eq([tag])
       end
 
       context "case sensitive" do
         it "should find by name case sensitive" do
           expect do
-            ActsAsTaggableOnMongoid::Models::Tag.find_or_create_all_with_like_by_name_tagger(tag_definition, nil, "AWESOME")
+            ActsAsTaggableOnMongoid::Models::Tag.find_or_create_all_with_like_by_name_owner(tag_definition, nil, "AWESOME")
           end.to change(ActsAsTaggableOnMongoid::Models::Tag, :count).by(1)
         end
       end
 
       it "should create by name" do
         expect do
-          ActsAsTaggableOnMongoid::Models::Tag.find_or_create_all_with_like_by_name_tagger(tag_definition, nil, "epic")
+          ActsAsTaggableOnMongoid::Models::Tag.find_or_create_all_with_like_by_name_owner(tag_definition, nil, "epic")
         end.to change(ActsAsTaggableOnMongoid::Models::Tag, :count).by(1)
       end
 
       it "should find or create by name" do
         expect do
-          expect(ActsAsTaggableOnMongoid::Models::Tag.find_or_create_all_with_like_by_name_tagger(tag_definition,
-                                                                                                  nil,
-                                                                                                  "awesome",
-                                                                                                  "epic").map(&:name)).
+          expect(ActsAsTaggableOnMongoid::Models::Tag.find_or_create_all_with_like_by_name_owner(tag_definition,
+                                                                                                 nil,
+                                                                                                 "awesome",
+                                                                                                 "epic").map(&:name)).
               to eq(%w[awesome epic])
         end.to change(ActsAsTaggableOnMongoid::Models::Tag, :count).by(1)
       end
 
       it "should return an empty array if no tags are specified" do
-        expect(ActsAsTaggableOnMongoid::Models::Tag.find_or_create_all_with_like_by_name_tagger(tag_definition, nil, [])).to be_empty
+        expect(ActsAsTaggableOnMongoid::Models::Tag.find_or_create_all_with_like_by_name_owner(tag_definition, nil, [])).to be_empty
       end
     end
 
@@ -157,12 +157,12 @@ RSpec.describe ActsAsTaggableOnMongoid::Models::Tag do
       end
 
       it "should find by name" do
-        expect(ActsAsTaggableOnMongoid::Models::Tag.find_or_create_all_with_like_by_name_tagger(tag_definition, nil, "awesome")).to eq([tag])
+        expect(ActsAsTaggableOnMongoid::Models::Tag.find_or_create_all_with_like_by_name_owner(tag_definition, nil, "awesome")).to eq([tag])
       end
 
       it "should find by name case sensitively" do
         expect do
-          ActsAsTaggableOnMongoid::Models::Tag.find_or_create_all_with_like_by_name_tagger(tag_definition, nil, "AWESOME")
+          ActsAsTaggableOnMongoid::Models::Tag.find_or_create_all_with_like_by_name_owner(tag_definition, nil, "AWESOME")
         end.to change(ActsAsTaggableOnMongoid::Models::Tag, :count)
 
         expect(ActsAsTaggableOnMongoid::Models::Tag.where(name: "AWESOME").count).to be_positive
@@ -180,7 +180,7 @@ RSpec.describe ActsAsTaggableOnMongoid::Models::Tag do
       it "should not change encoding" do
         name              = "\u3042"
         original_encoding = name.encoding
-        record            = ActsAsTaggableOnMongoid::Models::Tag.find_or_create_all_with_like_by_name_tagger(tag_definition, nil, name).first
+        record            = ActsAsTaggableOnMongoid::Models::Tag.find_or_create_all_with_like_by_name_owner(tag_definition, nil, name).first
 
         record.reload
 
@@ -189,13 +189,13 @@ RSpec.describe ActsAsTaggableOnMongoid::Models::Tag do
     end
 
     describe "name uniqeness validation" do
-      let(:tagger) { MyUser.create! name: "My Tagger" }
+      let(:owner) { MyUser.create! name: "My Tagger" }
       let(:duplicate_tag) do
-        ActsAsTaggableOnMongoid::Models::Tag.new(name: "ror", context: "tags", taggable_type: TaggableModel.name, tagger: tagger)
+        ActsAsTaggableOnMongoid::Models::Tag.new(name: "ror", context: "tags", taggable_type: TaggableModel.name, owner: owner)
       end
 
       before do
-        ActsAsTaggableOnMongoid::Models::Tag.create(name: "ror", context: "tags", taggable_type: TaggableModel.name, tagger: tagger)
+        ActsAsTaggableOnMongoid::Models::Tag.create(name: "ror", context: "tags", taggable_type: TaggableModel.name, owner: owner)
       end
 
       context "when do need unique names" do
@@ -222,8 +222,8 @@ RSpec.describe ActsAsTaggableOnMongoid::Models::Tag do
           expect(duplicate_tag).to be_valid
         end
 
-        it "is valid if you change the tagger" do
-          duplicate_tag.tagger = nil
+        it "is valid if you change the owner" do
+          duplicate_tag.owner = nil
 
           expect(duplicate_tag).to be_valid
         end
@@ -446,13 +446,13 @@ RSpec.describe ActsAsTaggableOnMongoid::Models::Tag do
       alt_tagged     = Tagged.new(tag_list: "test tag")
       tag_definition = Tagged.tag_types["tags"]
 
-      tagged_scope = double(:tagged_scope)
-      named_scope  = double(:named_scope, tagged_by: tagged_scope)
-      for_scope    = double(:tag_scope, named: named_scope)
+      owned_scope = double(:owned_scope)
+      named_scope = double(:named_scope, owned_by: owned_scope)
+      for_scope   = double(:tag_scope, named: named_scope)
       allow(tag_definition.tags_table).to receive(:for_tag).and_return for_scope
 
       count = 0
-      allow(tagged_scope).to receive(:first) do
+      allow(owned_scope).to receive(:first) do
         count += 1
 
         ActsAsTaggableOnMongoid::Models::Tag.where(name: "test tag").first if count > 1
@@ -469,65 +469,65 @@ RSpec.describe ActsAsTaggableOnMongoid::Models::Tag do
       alt_tagged     = Tagged.new(tag_list: "test tag")
       tag_definition = Tagged.tag_types["tags"]
 
-      tagged_scope = double(:tagged_scope)
-      named_scope  = double(:named_scope, tagged_by: tagged_scope)
-      for_scope    = double(:tag_scope, named: named_scope)
+      owned_scope = double(:owned_scope)
+      named_scope = double(:named_scope, owned_by: owned_scope)
+      for_scope   = double(:tag_scope, named: named_scope)
       allow(tag_definition.tags_table).to receive(:for_tag).and_return for_scope
 
-      allow(tagged_scope).to receive(:first).and_return nil
+      allow(owned_scope).to receive(:first).and_return nil
 
       expect { alt_tagged.save! }.to raise_error ActsAsTaggableOnMongoid::Errors::DuplicateTagError
 
-      expect(tagged_scope).to have_received(:first).exactly(3).times
+      expect(owned_scope).to have_received(:first).exactly(3).times
     end
   end
 
-  describe "tagger" do
-    let(:tagger) { MyUser.create! name: "My Tagger" }
+  describe "owner" do
+    let(:owner) { MyUser.create! name: "My Tagger" }
     let(:tag) do
       ActsAsTaggableOnMongoid::Models::Tag.new(name: "ror", context: "tags", taggable_type: TaggableModel.name)
     end
 
-    it "does not require a tagger" do
+    it "does not require a owner" do
       expect(tag).to be_valid
     end
 
-    it "unsets tagger fields if tagger set to nil" do
-      tag.update_attributes! tagger: tagger
+    it "unsets owner fields if owner set to nil" do
+      tag.update_attributes! owner: owner
 
       tag.reload
-      expect(tag.attributes).to be_key("tagger_id")
-      expect(tag.attributes).to be_key("tagger_type")
+      expect(tag.attributes).to be_key("owner_id")
+      expect(tag.attributes).to be_key("owner_type")
 
-      tag.reload.update_attributes! tagger_id: nil
+      tag.reload.update_attributes! owner_id: nil
 
       tag.reload
-      expect(tag.attributes).not_to be_key("tagger_id")
-      expect(tag.attributes).not_to be_key("tagger_type")
+      expect(tag.attributes).not_to be_key("owner_id")
+      expect(tag.attributes).not_to be_key("owner_type")
     end
 
-    describe "tagged_by" do
-      let(:tagger) { MyUser.create! name: "My Tagger" }
-      let(:other_tagger) { MyUser.create! name: "Other Tagger" }
+    describe "owned_by" do
+      let(:owner) { MyUser.create! name: "My Tagger" }
+      let(:other_owner) { MyUser.create! name: "Other Tagger" }
       let!(:tag) do
-        ActsAsTaggableOnMongoid::Models::Tag.create!(name: "no tagger", context: "tags", taggable_type: TaggableModel.name)
+        ActsAsTaggableOnMongoid::Models::Tag.create!(name: "no owner", context: "tags", taggable_type: TaggableModel.name)
       end
-      let!(:tag_tagger) do
-        ActsAsTaggableOnMongoid::Models::Tag.create!(name: "tagger", context: "tagger_tags", taggable_type: TaggableModel.name, tagger: tagger)
+      let!(:tag_with_owner) do
+        ActsAsTaggableOnMongoid::Models::Tag.create!(name: "owner", context: "owner_tags", taggable_type: TaggableModel.name, owner: owner)
       end
-      let!(:tag_other_tagger) do
-        ActsAsTaggableOnMongoid::Models::Tag.create!(name: "tagger", context: "other_tags", taggable_type: TaggableModel.name, tagger: other_tagger)
+      let!(:tag_other_owner) do
+        ActsAsTaggableOnMongoid::Models::Tag.create!(name: "owner", context: "other_tags", taggable_type: TaggableModel.name, owner: other_owner)
       end
 
-      it "filters by tagger" do
-        tags = ActsAsTaggableOnMongoid::Models::Tag.tagged_by(tagger).to_a
+      it "filters by owner" do
+        tags = ActsAsTaggableOnMongoid::Models::Tag.owned_by(owner).to_a
 
         expect(tags.length).to eq 1
-        expect(tags).to eq [tag_tagger]
+        expect(tags).to eq [tag_with_owner]
       end
 
-      it "filters no tagger" do
-        tags = ActsAsTaggableOnMongoid::Models::Tag.tagged_by(nil).to_a
+      it "filters no owner" do
+        tags = ActsAsTaggableOnMongoid::Models::Tag.owned_by(nil).to_a
 
         expect(tags.length).to eq 1
         expect(tags).to eq [tag]

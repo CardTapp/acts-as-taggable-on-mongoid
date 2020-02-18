@@ -11,28 +11,28 @@ RSpec.describe ActsAsTaggableOnMongoid::Tagger do
         ActsAsTaggableOnMongoid::Models::Tag.create! name:          "Some Tag",
                                                      context:       "tags",
                                                      taggable_type: Company.name,
-                                                     tagger:        user
+                                                     owner:         user
       end
       let!(:tagging) do
-        ActsAsTaggableOnMongoid::Models::Tagging.create! tag_name:   "Some Tag",
-                                                         context:    "tags",
-                                                         tag:        tag,
-                                                         tag_tagger: user,
-                                                         taggable:   taggable
+        ActsAsTaggableOnMongoid::Models::Tagging.create! tag_name: "Some Tag",
+                                                         context:  "tags",
+                                                         tag:      tag,
+                                                         tagger:   user,
+                                                         taggable: taggable
       end
       let(:other_user) { MyUser.create! name: "My User" }
       let(:other_tag) do
         ActsAsTaggableOnMongoid::Models::Tag.create! name:          "Some Other Tag",
                                                      context:       "tags",
                                                      taggable_type: Company.name,
-                                                     tagger:        other_user
+                                                     owner:         other_user
       end
       let!(:other_tagging) do
-        ActsAsTaggableOnMongoid::Models::Tagging.create! tag_name:   "Some Other Tag",
-                                                         context:    "tags",
-                                                         tag:        other_tag,
-                                                         tag_tagger: other_user,
-                                                         taggable:   taggable
+        ActsAsTaggableOnMongoid::Models::Tagging.create! tag_name: "Some Other Tag",
+                                                         context:  "tags",
+                                                         tag:      other_tag,
+                                                         tagger:   other_user,
+                                                         taggable: taggable
       end
       let(:tagger) { MyUser }
 
@@ -59,28 +59,28 @@ RSpec.describe ActsAsTaggableOnMongoid::Tagger do
         AltTag.create! name:          "Some Tag",
                        context:       "tags",
                        taggable_type: Company.name,
-                       tagger:        user
+                       owner:         user
       end
       let!(:tagging) do
-        AltTagging.create! tag_name:   "Some Tag",
-                           context:    "tags",
-                           tag:        tag,
-                           tag_tagger: user,
-                           taggable:   taggable
+        AltTagging.create! tag_name: "Some Tag",
+                           context:  "tags",
+                           tag:      tag,
+                           tagger:   user,
+                           taggable: taggable
       end
       let(:other_user) { MyUser.create! name: "My User" }
       let(:other_tag) do
         AltTag.create! name:          "Some Other Tag",
                        context:       "tags",
                        taggable_type: Company.name,
-                       tagger:        other_user
+                       owner:         other_user
       end
       let!(:other_tagging) do
-        AltTagging.create! tag_name:   "Some Other Tag",
-                           context:    "tags",
-                           tag:        other_tag,
-                           tag_tagger: other_user,
-                           taggable:   taggable
+        AltTagging.create! tag_name: "Some Other Tag",
+                           context:  "tags",
+                           tag:      other_tag,
+                           tagger:   other_user,
+                           taggable: taggable
       end
       let(:tagger) { AltMyUser }
 
