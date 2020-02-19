@@ -57,8 +57,6 @@ Naming/PredicateName:
     - is_
     - has_
     - have_
-  NamePrefixBlacklist:
-    - is_
 Naming/RescuedExceptionsVariableName:
   PreferredName: error
 
@@ -204,7 +202,7 @@ Lint/AssignmentInCondition:
   AllowSafeAssignment: true
 Lint/DisjunctiveAssignmentInConstructor:
   Enabled: false
-Layout/AlignParameters:
+Layout/ParameterAlignment:
   Description: Align the parameters of a method call if they span more than one line.
   Enabled: true
   EnforcedStyle: with_first_parameter
@@ -262,14 +260,14 @@ Style/WhenThen:
   Description: Use when x then ... for one-line cases.
   StyleGuide: https://github.com/bbatsov/ruby-style-guide#one-line-cases
   Enabled: false
-Layout/TrailingBlankLines:
+Layout/TrailingEmptyLines:
   Description: 'Checks trailing blank lines and final newline.'
   StyleGuide: '#newline-eof'
   Enabled: false
 Lint/EachWithObjectArgument:
   Description: Check for immutable argument given to each_with_object.
   Enabled: true
-Lint/HandleExceptions:
+Lint/SuppressedException:
   Description: Don't suppress exception.
   StyleGuide: https://github.com/bbatsov/ruby-style-guide#dont-hide-exceptions
   Enabled: true
@@ -308,7 +306,7 @@ Layout/MultilineOperationIndentation:
   EnforcedStyle: indented
   IndentationWidth: 4
   Enabled: false
-Metrics/LineLength:
+Layout/LineLength:
   Max: 150
 Metrics/BlockLength:
   Exclude:
@@ -318,16 +316,16 @@ Metrics/BlockLength:
 Layout/CaseIndentation:
   EnforcedStyle: case
   IndentOneStep: true
-Layout/IndentFirstArrayElement:
+Layout/FirstArrayElementIndentation:
   IndentationWidth: 4
-Layout/IndentFirstHashElement:
+Layout/FirstHashElementIndentation:
   IndentationWidth: 4
-Layout/IndentFirstArgument:
+Layout/FirstArgumentIndentation:
   IndentationWidth: 4
 Style/FrozenStringLiteralComment:
   Enabled: true
 
-Layout/AlignHash:
+Layout/HashAlignment:
   Description: >-
     Align the elements of a hash literal if they span more than
     one line.

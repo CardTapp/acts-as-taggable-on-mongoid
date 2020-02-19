@@ -52,6 +52,13 @@ Or install it yourself as:
   **NOTE**: Unlike the `ActsAsTaggableOn` gem, I group Tags by context.  Tags with the same
   name for different contexts keep separate counts and are considered different Tags.
   It is simpler to combine Tags and their counts by name then it is to split them out.
+* **Tagger** - A database object which is given credit for creating a Tagging.  This
+  object is an external model from this gem.  Tagger objects can be specified
+  as being a Tagger using the `acts_as_tagger` method which allows a
+  Tagger object to `tag` Taggable objects.
+* **Owner** - A database object which is given ownership of a Tag object.
+  This object is an external model from this gem.  By default when Tags
+  are created, the owner of a Tag is the same as the Tagger for the Tagging.
 
 The database structure is:
   ```
@@ -559,7 +566,7 @@ ActsAsTaggableOnMongoid.default_parser = MyParser
 @user.tag_list # => ["east", "south"]
 ```
 
-### ~~Tag Ownership~~ Not implimented yet
+### Tag Ownership
 
 Tags can have owners:
 
@@ -577,45 +584,97 @@ end
 @some_user.owned_tags
 Photo.tagged_with("paris", :on => :locations, :owned_by => @some_user)
 @some_photo.locations_from(@some_user) # => ["paris", "normandy"]
-@some_photo.owner_tags_on(@some_user, :locations) # => [#<ActsAsTaggableOnMongoid::Models::Tag id: 1, name: "paris">...]
-@some_photo.owner_tags_on(nil, :locations) # => Ownerships equivalent to saying @some_photo.locations
+@some_photo.tagger_location_lists[@some_user] # => [#<ActsAsTaggableOnMongoid::Models::Tag id: 1, name: "paris">...]
+@some_photo.tagger_location_lists[nil] # => Ownerships equivalent to saying @some_photo.locations
 @some_user.tag(@some_photo, :with => "paris, normandy", :on => :locations, :skip_save => true) #won't save @some_photo object
 ```
 
 #### Working with Owned Tags
-Note that `tag_list` only returns tags whose taggings do not have an owner. Continuing from the above example:
+Note that by default `tag_list` only returns tags whose taggings do not
+have an owner. Continuing from the above example:
 ```ruby
 @some_photo.tag_list # => []
 ```
-To retrieve all tags of an object (regardless of ownership) or if only one owner can tag the object, use `all_tags_list`.
+To retrieve all tags of an object (regardless of ownership) or if only
+one owner can tag the object, you can use `all_tags_list`.
 
-##### Adding owned tags
-Note that **owned tags** are added all at once, in the form of ***comma seperated tags*** in string.
-Also, when you try to add **owned tags** again, it simply overwrites the previous set of **owned tags**.
-So to append tags in previously existing **owned tags** list, go as follows:
+Tags are stored in a Hash grouped by `Tagger`.  You can access this list
+using `tagger_<tag_type>_lists`.  This allows you to directly access and
+use the `TagList` for any owner just like you would the `<tag_type>_list`
+methods.
+
+Examples:
 ```ruby
-def add_owned_tag
-    @some_item = Item.find(params[:id])
-    owned_tag_list = @some_item.all_tags_list - @some_item.tag_list
-    owned_tag_list += [(params[:tag])]
-    @tag_owner.tag(@some_item, :with => stringify(owned_tag_list), :on => :tags)
-    @some_item.save
-end
+tag_lists = @some_photo.tagger_location_lists
+tag_lists.keys # => [@some_user]
 
-def stringify(tag_list)
-    tag_list.inject('') { |memo, tag| memo += (tag + ',') }[0..-1]
-end
+# Add tags for @some_user
+tag_lists[@some_user].add "berlin, london", parse: true
+# Remove tags for @some_user
+tag_lists[@some_user].remove "paris"
+# Set the list for @some_user (replacing existing tags)
+tag_lists[@some_user] = "new york, chicago, brussels, rome"
+
+# Add tags for a new owner:
+tag_lists[@other_user] = "moscow, bejing, tokyo"
 ```
-##### Removing owned tags
-Similarly as above, removing will be as follows:
+#### Owned Tags and defaults
+
+Owned Tags can be difficult to work with having to manage owners
+manually.  To ease that process, I have added the concept of defaults
+to use when working with Owned tags.
+
+When a tag is defined, you can also define default behavior when
+creating the tag and accessing it, simplifying using the tag in
+everyday access.
+
+Options:
+  * tagger: true - Simply defines that a Tag definition supports
+    the concept of Taggers and allows setting the Tagger for a list.
+  * tagger: { default_tagger: :method_name} - This allows you to
+    specify that when a Tagging is created on a Taggable object
+    that the Taggable object will supply the default tagger using
+    the indicated method.
+  * tagger: { tag_list_uses_default_tagger: true } - A
+    shortcut/syntax sugar to treat `<tag_type>_list` to return
+    the tags for the `default_tagger` instead of no taggers
+
 ```ruby
-def remove_owned_tag
-    @some_item = Item.find(params[:id])
-    owned_tag_list = @some_item.all_tags_list - @some_item.tag_list
-    owned_tag_list -= [(params[:tag])]
-    @tag_owner.tag(@some_item, :with => stringify(owned_tag_list), :on => :tags)
-    @some_item.save
+class Car
+  acts_as_taggable_on tagger: { default_tagger: :owner, tag_list_uses_default_tagger: true }
+
+  belongs_to :owner, class_name: "User"
 end
+
+class User
+  acts_as_tagger
+
+  has_many :cars
+end
+
+car = @some_user.cars.first
+car.tag_list = "antique, warrantied, registered"
+car.tag_lists[car.owner] # => ["antique", "warrantied", "registerd"]
+car.tag_lists[nil] # => []
+
+car.tag_lists[@potential_buyer] = ["inspected", "test drove", "good value"]
+car.tagger_tag_list(@potential_buyer) # => ["inspected", "test drove", "good value"]
+
+all_list = car.all_tag_list # => ["antique", "warrantied", "registerd", "inspected", "test drove", "good value"]
+all_list.tagger # => @some_user
+
+# Changing `all_list` does NOT affect/change the tags on `car`
+# Changing other lists will:
+all_list.remove "warrantied", "test drove"
+car.tag_lists[car.owner] # => ["antique", "warrantied", "registerd"]
+car.tagger_tag_list(@potential_buyer) # => ["inspected", "test drove", "good value"]
+car.all_tag_list # => ["antique", "warrantied", "registerd", "inspected", "test drove", "good value"]
+
+car.tag_lists[car.owner].add "deposit"
+car.tagger_tag_list(@potential_buyer).remove "good value"
+car.tag_lists[car.owner] # => ["antique", "warrantied", "registerd", "deposit"]
+car.tagger_tag_list(@potential_buyer) # => ["inspected", "test drove"]
+car.all_tag_list # => ["antique", "warrantied", "registerd", "deposit", "inspected", "test drove"]
 ```
 
 ### Dirty objects
@@ -632,6 +691,21 @@ end
 @bobby.skill_list_changed? #=> true
 
 @bobby.skill_list_change.should == ["jogging, diving", ["swimming"]]
+```
+
+If the object allows for Taggers, there could be multiple Taggers each
+with their own changes.  In this case, the changes (and corresponding
+was values) will be hashes of the Tagger and the tag lists.
+
+```ruby
+@bobby = User.find_by_name("Bobby")
+@bobby.skill_list_from(@teacher).add "attentive, assertive, gold star", parse: true
+@bobby.skill_list_from(@parent).add "forger, standing in corner, truant", parse: true
+
+@bobby.skill_list_change
+# => [ {},
+# =>   { @teacher => ["attentive", "assertive", "gold star"],
+# =>     @parent => ["forger", "standing in corner", "truant"] } ]
 ```
 
 ### ~~Tag cloud calculations~~ Not implimented yet

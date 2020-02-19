@@ -24,7 +24,6 @@ RSpec.describe ActsAsTaggableOnMongoid::Taggable do
     it "should return tag list in the order the tags were created" do
       # create
       taggable.tag_list = "rails, ruby, css"
-      expect(taggable.instance_variable_get("@tag_list").instance_of?(ActsAsTaggableOnMongoid::TagList)).to be_truthy
 
       expect { taggable.save }.to change(ActsAsTaggableOnMongoid::Models::Tag, :count).by(3)
 
@@ -67,7 +66,6 @@ RSpec.describe ActsAsTaggableOnMongoid::Taggable do
     it "should return tag objects in the order the tags were created" do
       # create
       taggable.tag_list = "pow, ruby, rails"
-      expect(taggable.instance_variable_get("@tag_list").instance_of?(ActsAsTaggableOnMongoid::TagList)).to be_truthy
 
       expect { taggable.save }.to change(ActsAsTaggableOnMongoid::Models::Tag, :count).by(3)
 
@@ -161,7 +159,6 @@ RSpec.describe ActsAsTaggableOnMongoid::Taggable do
 
     it "should be able to create tags" do
       taggable.skill_list = "ruby, rails, css"
-      expect(taggable.instance_variable_get("@skill_list").instance_of?(ActsAsTaggableOnMongoid::TagList)).to be_truthy
 
       expect { taggable.save }.to change(ActsAsTaggableOnMongoid::Models::Tag, :count).by(3)
 

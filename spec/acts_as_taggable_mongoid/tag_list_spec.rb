@@ -6,6 +6,8 @@ RSpec.describe ActsAsTaggableOnMongoid::TagList do
   let(:tag_definition) { ActsAsTaggableOnMongoid::Taggable::TagTypeDefinition.new TaggableModel, "tags" }
   let(:tag_list) { ActsAsTaggableOnMongoid::TagList.new(tag_definition, "awesome", "radical") }
   let(:another_tag_list) { ActsAsTaggableOnMongoid::TagList.new(tag_definition, "awesome", "crazy", "alien") }
+  let(:my_user) { MyUser.create! name: "My User" }
+  let(:other_user) { MyUser.create! name: "Other User" }
 
   it "is an Array" do
     expect(tag_list).to be_kind_of Array
@@ -174,6 +176,127 @@ RSpec.describe ActsAsTaggableOnMongoid::TagList do
       tag_list.add("new, tag", parse: true)
 
       expect(parser).to have_received(:parse)
+    end
+  end
+
+  context "no tagger allowed" do
+    it "does not set tagger on assignment" do
+      tag_list.add "A, tag, list", tagger: my_user
+
+      expect(tag_list.instance_variable_defined?(:@tagger)).to be_falsey
+    end
+
+    it "does not set tagger when set explicitly" do
+      tag_list.tagger = my_user
+
+      expect(tag_list.instance_variable_defined?(:@tagger)).to be_falsey
+    end
+  end
+
+  context "tagger allowed" do
+    let(:tag_definition) { ActsAsTaggableOnMongoid::Taggable::TagTypeDefinition.new TaggableModel, "tags", tagger: true }
+
+    it "tagger_list= allows setting tagger" do
+      tag_list.add "A, tag, list", tagger: my_user
+
+      expect(tag_list.instance_variable_defined?(:@tagger)).to be_truthy
+    end
+
+    it "The tagger can be set explicitly" do
+      tag_list.tagger = my_user
+
+      expect(tag_list.instance_variable_defined?(:@tagger)).to be_truthy
+    end
+
+    it "uses nil default tagger if non specified and no method" do
+      expect(tag_list.tagger).to be_nil
+    end
+  end
+
+  context "tagger default method" do
+    let(:tag_definition) do
+      ActsAsTaggableOnMongoid::Taggable::TagTypeDefinition.new TaggableModel, "tags", tagger: { default_tagger: :my_user }
+    end
+    let(:taggable) { TaggerTaggableModel.create! my_user: my_user }
+
+    it "defaulted tagger tagger_list= allows setting tagger" do
+      tag_list.taggable = taggable
+      tag_list.set "A, tag, list", tagger: other_user
+
+      expect(tag_list.tagger).to eq other_user
+    end
+
+    it "uses the default_method on the taggable if method available" do
+      tag_list.taggable = taggable
+      tag_list.set "A, tag, list"
+
+      expect(tag_list.tagger).to eq my_user
+    end
+
+    describe "dup" do
+      let(:dup) { tag_list.dup }
+
+      it "creates a new list with the same taggable" do
+        tag_list.set "\"A, list\", is, set", parse: true
+        tag_list.taggable = taggable
+
+        expect(dup.taggable).to eq taggable
+      end
+
+      it "creates a new list with the same tags" do
+        tag_list.set "\"A, list\", is, set", parse: true
+        tag_list.taggable = taggable
+
+        expect(dup).to eq ["A, list", "is", "set"]
+      end
+
+      it "creates a new list with the same tagger if tagger is not default" do
+        tag_list.set "\"A, list\", is, set", parse: true, tagger: other_user
+        tag_list.taggable = taggable
+
+        expect(dup.tagger).to eq other_user
+      end
+
+      it "creates a new list with the same tagger if tagger is not nil" do
+        tag_list.set "\"A, list\", is, set", parse: true
+        tag_list.taggable = taggable
+
+        expect(dup.tagger).to eq my_user
+      end
+
+      it "creates a new list without a tagger if tagger is not set" do
+        tag_list.set "\"A, list\", is, set", parse: true, tagger: nil
+        tag_list.taggable = taggable
+
+        expect(dup.tagger).to be_nil
+      end
+    end
+  end
+
+  describe "set" do
+    it "replaces existing values" do
+      tag_list.add %w[This is a list]
+      tag_list.set %w[What is this to you]
+
+      expect(tag_list).to eq %w[What is this to you]
+    end
+
+    it "parses values if set" do
+      tag_list.set "This, is, a list", parse: true
+
+      expect(tag_list).to eq ["This", "is", "a list"]
+    end
+
+    it "doesn't parse values by default" do
+      tag_list.set "This, is, a list"
+
+      expect(tag_list).to eq ["This, is, a list"]
+    end
+
+    it "uses a custom parser" do
+      tag_list.set "This, is, \"a, list\"", parser: ActsAsTaggableOnMongoid::GenericParser
+
+      expect(tag_list).to eq ["This", "is", "\"a", "list\""]
     end
   end
 end

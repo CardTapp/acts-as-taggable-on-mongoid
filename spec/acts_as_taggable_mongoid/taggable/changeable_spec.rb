@@ -17,15 +17,12 @@ RSpec.describe ActsAsTaggableOnMongoid::Taggable::Changeable do
   describe "reload" do
     it "resets the language_list and all_language_list instance variables" do
       taggable.language_list
-      taggable.all_languages_list
 
       expect(taggable.instance_variable_get(:@language_list)).to be_present
-      expect(taggable.instance_variable_get(:@all_languages_list)).to be_present
 
       taggable.reload
 
       expect(taggable.instance_variable_get(:@language_list)).to be_nil
-      expect(taggable.instance_variable_get(:@all_languages_list)).to be_nil
     end
   end
 

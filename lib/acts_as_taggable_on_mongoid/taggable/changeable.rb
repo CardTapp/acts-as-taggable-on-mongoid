@@ -40,9 +40,9 @@ module ActsAsTaggableOnMongoid
         tag_types.each_value do |tag_definition|
           tag_list_name = tag_definition.tag_list_name
 
-          next unless changed_attributes.key? tag_list_name
+          next unless public_send("#{tag_list_name}_changed?")
 
-          changed_values[tag_list_name] = [changed_attributes[tag_list_name], public_send(tag_list_name)]
+          changed_values[tag_list_name] = public_send("#{tag_list_name}_change")
         end
 
         changed_values
@@ -60,11 +60,12 @@ module ActsAsTaggableOnMongoid
       private
 
       def attribute_will_change!(attribute_name)
-        return super if tag_types.none? { |_tag_name, tag_definition| tag_definition.tag_list_name.to_s == attribute_name.to_s }
+        tag_definition = tag_types.detect { |_tag_name, tag_def| tag_def.tag_list_name.to_s == attribute_name.to_s }&.last
+        return super if tag_definition.blank?
 
         return if changed_attributes.key?(attribute_name)
 
-        changed_attributes[attribute_name] = public_send(attribute_name)&.dup
+        changed_attributes[attribute_name] = tag_list_cache_on(tag_definition)&.dup
       end
     end
   end

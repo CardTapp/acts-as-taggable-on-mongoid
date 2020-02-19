@@ -12,6 +12,16 @@ module ActsAsTaggableOnMongoid
   #
   # If the input value(s) are to be parsed, then all values passed in are parsed.
   #
+  # Options:
+  #   parse   - True/False - indicates if all of the strings that are passed in are to be parsed
+  #             to split them into an array of strings.
+  #             Please note - if the passed in value is an array of strings, every string in the array
+  #             will be parsed.  If it is a single array, then just that string is parsed.
+  #   parser  - Class - A class that is used to parse the passed in strings.
+  #             If this parameter is supplied, parse is assumed to be truthy even if it is not passed in.
+  #   tagger  - object - An object that is to be used as the Tagger for the Taggable object.
+  #             This parameter is ignored if the tag does not support Taggers.
+  #
   # Examples:
   #   TagList.new(tag_definition, "value 1", "value 2")
   #   # > TagList<> ["value 1", "value 2"]
@@ -38,6 +48,40 @@ module ActsAsTaggableOnMongoid
       add(*args)
     end
 
+    class << self
+      def new_taggable_list(tag_definition, taggable)
+        list = ActsAsTaggableOnMongoid::TagList.new(tag_definition)
+
+        list.taggable = taggable
+
+        list
+      end
+    end
+
+    def dup
+      list          = ActsAsTaggableOnMongoid::TagList.new(tag_definition, *self)
+      list.tagger   = instance_variable_get(:@tagger) if instance_variable_defined?(:@tagger)
+      list.taggable = taggable
+
+      list
+    end
+
+    def tagger=(value)
+      return unless tag_definition.tagger?
+
+      instance_variable_set(:@tagger, value)
+    end
+
+    def tagger
+      return nil unless tag_definition.tagger?
+      return tag_definition.default_tagger(taggable) unless instance_variable_defined?(:@tagger)
+
+      tagger = instance_variable_get(:@tagger)
+      tagger = taggable&.public_send(tagger) if tagger.is_a?(Symbol)
+
+      instance_variable_set(:@tagger, tagger)
+    end
+
     ##
     # Add tags to the tag_list. Duplicate or blank tags will be ignored.
     # Use the <tt>:parse</tt> option to add an unparsed tag string.
@@ -53,6 +97,17 @@ module ActsAsTaggableOnMongoid
       self
     end
 
+    ##
+    # Replaces the tags with the tags passed in.
+    #
+    # Example:
+    #   tag_list.set("Fun", "Happy")
+    #   tag_list.set("Fun, Happy", :parse => true)
+    def set(*names)
+      clear
+      add(*names)
+    end
+
     # Append---Add the tag to the tag_list. This
     # expression returns the tag_list itself, so several appends
     # may be chained together.
@@ -63,7 +118,13 @@ module ActsAsTaggableOnMongoid
     # Concatenation --- Returns a new tag list built by concatenating the
     # two tag lists together to produce a third tag list.
     def +(other)
-      TagList.new(tag_definition).add(*self).add(other)
+      dup.add(other)
+    end
+
+    # Removal --- Returns a new tag list built by removing the
+    # passed in tag list to produce a third tag list.
+    def -(other)
+      dup.remove(other)
     end
 
     # Appends the elements of +other_tag_list+ to +self+.
@@ -71,6 +132,27 @@ module ActsAsTaggableOnMongoid
       notify_will_change
 
       super(other_tag_list).send(:clean!)
+
+      self
+    end
+
+    # Appends the elements of +other_tag_list+ to +self+.
+    def clear
+      notify_will_change
+
+      super
+
+      self
+    end
+
+    # Appends the elements of +other_tag_list+ to +self+.
+    def silent_concat(other_tag_list)
+      temp_taggable = taggable
+      self.taggable = nil
+
+      concat(other_tag_list)
+
+      self.taggable = temp_taggable
 
       self
     end
@@ -151,13 +233,18 @@ module ActsAsTaggableOnMongoid
       self
     end
 
-    # :reek:FeatureEnvy
-    # :reek:DuplicateMethodCall
     def extract_and_apply_options!(args)
       dup_args = args.dup
       options  = dup_args.extract_options!.dup
-      options.assert_valid_keys :parse, :parser
 
+      options.assert_valid_keys :parse, :parser, :tagger
+
+      instance_variable_set(:@tagger, options[:tagger]) if options.key?(:tagger) && tag_definition.tagger?
+
+      parse_args_values(dup_args, options)
+    end
+
+    def parse_args_values(dup_args, options)
       options_parser = options[:parser]
       run_parser     = options_parser || tag_definition.parser
 

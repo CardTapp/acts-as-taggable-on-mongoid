@@ -85,29 +85,27 @@ RSpec.describe ActsAsTaggableOnMongoid::Models::Tagging do
     describe "context scopes" do
       let(:tagging_2) { ActsAsTaggableOnMongoid::Models::Tagging.new }
       let(:tagging_3) { ActsAsTaggableOnMongoid::Models::Tagging.new }
+      let(:tagger) { MyUser.new }
+      let(:tagger_2) { MyUser.new }
 
       before(:each) do
-        # TODO: Not currently supported.
-        # tagger   = User.new
-        # tagger_2 = User.new
-
         tagging.taggable = TaggableModel.create(name: "Black holes")
         tagging.tag      = ActsAsTaggableOnMongoid::Models::Tag.create(name: "Physics")
-        # tagging.tagger   = tagger
+        tagging.tagger   = tagger
         tagging.context  = "Science"
         tagging.tag_name = "Physics"
         tagging.save!
 
         tagging_2.taggable = TaggableModel.create(name: "Satellites")
         tagging_2.tag      = ActsAsTaggableOnMongoid::Models::Tag.create(name: "Technology")
-        # tagging_2.tagger   = tagger_2
+        tagging_2.tagger   = tagger_2
         tagging_2.context  = "Science"
         tagging_2.tag_name = "Technology"
         tagging_2.save!
 
         tagging_3.taggable = TaggableModel.create(name: "Satellites")
         tagging_3.tag      = ActsAsTaggableOnMongoid::Models::Tag.create(name: "Engineering")
-        # tagging_3.tagger   = tagger_2
+        tagging_3.tagger   = tagger_2
         tagging_3.context  = "Astronomy"
         tagging_3.tag_name = "Engineering"
         tagging_3.save!
@@ -115,23 +113,23 @@ RSpec.describe ActsAsTaggableOnMongoid::Models::Tagging do
 
       # TODO: Not implemented yet
       describe ".owned_by" do
-        xit "should belong to a specific user" do
+        it "should belong to a specific user" do
           expect(ActsAsTaggableOnMongoid::Models::Tagging.owned_by(tagger).first).to eq(tagging)
         end
       end
 
-      describe ".by_context" do
+      describe ".by_tag_type" do
         it "should be found by context" do
-          expect(ActsAsTaggableOnMongoid::Models::Tagging.by_context("Science").length).to eq(2)
+          expect(ActsAsTaggableOnMongoid::Models::Tagging.by_tag_type("Science").length).to eq(2)
         end
       end
 
-      describe ".by_contexts" do
+      describe ".by_tag_types" do
         it "should find taggings by contexts" do
-          expect(ActsAsTaggableOnMongoid::Models::Tagging.by_contexts("Science", "Astronomy").first).to eq(tagging)
-          expect(ActsAsTaggableOnMongoid::Models::Tagging.by_contexts("Science", "Astronomy").second).to eq(tagging_2)
-          expect(ActsAsTaggableOnMongoid::Models::Tagging.by_contexts("Science", "Astronomy").third).to eq(tagging_3)
-          expect(ActsAsTaggableOnMongoid::Models::Tagging.by_contexts("Science", "Astronomy").length).to eq(3)
+          expect(ActsAsTaggableOnMongoid::Models::Tagging.by_tag_types("Science", "Astronomy").first).to eq(tagging)
+          expect(ActsAsTaggableOnMongoid::Models::Tagging.by_tag_types("Science", "Astronomy").second).to eq(tagging_2)
+          expect(ActsAsTaggableOnMongoid::Models::Tagging.by_tag_types("Science", "Astronomy").third).to eq(tagging_3)
+          expect(ActsAsTaggableOnMongoid::Models::Tagging.by_tag_types("Science", "Astronomy").length).to eq(3)
         end
       end
 
