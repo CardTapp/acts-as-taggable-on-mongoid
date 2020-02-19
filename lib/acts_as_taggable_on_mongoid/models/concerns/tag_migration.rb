@@ -32,8 +32,10 @@ module ActsAsTaggableOnMongoid
         extend ActiveSupport::Concern
 
         class_methods do
+          # :reek:UncommunicativeMethodName - The name indicates what gem versions the migration is from/to
           def atom_migrate_up_6_0_1_to_6_1_1
-            collection.indexes.drop_one "name_1_taggable_type_1_context_1" if collection.indexes.get "name_1_taggable_type_1_context_1"
+            indexes = collection.indexes
+            indexes.drop_one "name_1_taggable_type_1_context_1" if indexes.get "name_1_taggable_type_1_context_1"
 
             create_indexes
           end

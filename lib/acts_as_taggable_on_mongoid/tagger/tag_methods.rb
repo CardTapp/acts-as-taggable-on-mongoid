@@ -5,6 +5,8 @@ module ActsAsTaggableOnMongoid
     # A module defining Tagger methods allowing the Tagger object to tag Taggable objects
     #
     # This module is dynamically added to a model when the model calls acts_as_tagger
+
+    # :reek:DataClump
     module TagMethods
       ##
       # Taggs the passed in taggable object with the tag values passed in to it.
@@ -34,24 +36,7 @@ module ActsAsTaggableOnMongoid
         taggable.save! unless options[:skip_save]
       end
 
-      private
-
-      def atom_tag(taggable, *args)
-        set_list = args.dup
-        options  = atom_extract_tag_options(set_list)
-        set_list = Array.wrap(options[:with]) if options.key?(:with)
-
-        tag_list = taggable.public_send("tagger_#{options.fetch(:on) { :tag }}_list", self)
-        if options[:replace]
-          tag_list.set(*set_list, options.slice(:parse, :parser))
-        else
-          tag_list.add(*set_list, options.slice(:parse, :parser))
-        end
-
-        options
-      end
-
-      def atom_extract_tag_options(set_list)
+      def self.atom_extract_tag_options(set_list)
         options = set_list.extract_options!
 
         options.assert_valid_keys :with,
@@ -62,6 +47,25 @@ module ActsAsTaggableOnMongoid
                                   :skip_save
 
         options[:parse] = options.fetch(:parse) { true } || options.key?(:parser)
+
+        options
+      end
+
+      private
+
+      # :reek:FeatureEnvy
+      def atom_tag(taggable, *args)
+        set_list = args.dup
+        options  = ActsAsTaggableOnMongoid::Tagger::TagMethods.atom_extract_tag_options(set_list)
+        set_list = Array.wrap(options[:with]) if options.key?(:with)
+
+        tag_list     = taggable.public_send("tagger_#{options.fetch(:on) { :tag }}_list", self)
+        list_options = options.slice(:parse, :parser)
+        if options[:replace]
+          tag_list.set(*set_list, list_options)
+        else
+          tag_list.add(*set_list, list_options)
+        end
 
         options
       end

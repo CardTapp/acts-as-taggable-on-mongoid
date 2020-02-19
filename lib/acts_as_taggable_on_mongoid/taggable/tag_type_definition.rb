@@ -19,7 +19,7 @@ module ActsAsTaggableOnMongoid
       include ActsAsTaggableOnMongoid::Taggable::TagTypeDefinition::Changeable
 
       def initialize(owner, tag_type, options = {})
-        options = extract_tag_definition_options(options)
+        options = ActsAsTaggableOnMongoid::Taggable::TagTypeDefinition.extract_tag_definition_options(options)
 
         default_option = options.delete(:default)
 
@@ -153,6 +153,11 @@ module ActsAsTaggableOnMongoid
         add_tagger_tag_lists
         add_all_list_getter
         add_list_exists
+
+        add_tag_list_change_methods
+      end
+
+      def add_tag_list_change_methods
         add_list_change
         add_list_changed
         add_changed_from_default?
@@ -164,9 +169,7 @@ module ActsAsTaggableOnMongoid
         add_reset_to_default
       end
 
-      private
-
-      def extract_tag_definition_options(options)
+      def self.extract_tag_definition_options(options)
         options = options.dup
 
         options.assert_valid_keys(:parser,
@@ -181,6 +184,8 @@ module ActsAsTaggableOnMongoid
                                   :tagger)
         options
       end
+
+      private
 
       def save_options(options)
         options.each do |key, value|

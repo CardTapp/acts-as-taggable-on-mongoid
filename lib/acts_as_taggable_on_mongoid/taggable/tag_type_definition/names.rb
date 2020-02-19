@@ -11,7 +11,7 @@ module ActsAsTaggableOnMongoid
         end
 
         def from_list_name
-          @tag_list_name ||= "#{tag_type.to_s.pluralize}_from"
+          @from_list_name ||= "#{tag_type.to_s.pluralize}_from"
         end
 
         def tagger_tag_list_name

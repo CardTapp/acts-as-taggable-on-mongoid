@@ -15,6 +15,9 @@ module ActsAsTaggableOnMongoid
       #   * tag_lists_was
       #   * reset_tag_list!
       #   * reset_tag_list_to_default!
+
+      # :reek:FeatureEnvy
+      # :reek:DuplicateMethodCall
       module Changeable
         def default_tagger_tag_list(taggable)
           list = ActsAsTaggableOnMongoid::TaggerTagList.new(self, nil)
@@ -23,7 +26,8 @@ module ActsAsTaggableOnMongoid
           list_default.taggable     = taggable
           list_default.tagger       = list_default.tagger
           list[list_default.tagger] = list_default
-          list.taggable             = taggable
+
+          list.taggable = taggable
 
           list
         end

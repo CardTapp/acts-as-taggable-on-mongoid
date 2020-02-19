@@ -96,12 +96,13 @@ module ActsAsTaggableOnMongoid
       end
 
       def get_tag_list_was(tag_definition)
-        return tag_definition.default_tagger_tag_list(self)[tag_definition.tag_list_default_tagger(self)].dup if new_record?
+        default_tagger = tag_definition.tag_list_default_tagger(self)
+        return tag_definition.default_tagger_tag_list(self)[default_tagger].dup if new_record?
 
         tag_list_name = tag_definition.tag_list_name
 
         if public_send "#{tag_list_name}_changed?"
-          changed_attributes[tag_list_name][tag_definition.tag_list_default_tagger(self)].dup
+          changed_attributes[tag_list_name][default_tagger].dup
         else
           public_send(tag_list_name).dup
         end
@@ -226,11 +227,12 @@ module ActsAsTaggableOnMongoid
         # add_custom_context(tag_definition, owner)
 
         new_list.taggable = self
-        tagger_tag_list   = ActsAsTaggableOnMongoid::TaggerTagList.new(new_list.tag_definition, self)
+        tag_definition    = new_list.tag_definition
+        tagger_tag_list   = ActsAsTaggableOnMongoid::TaggerTagList.new(tag_definition, self)
 
         tagger_tag_list[new_list.tagger] = new_list
 
-        instance_variable_set(new_list.tag_definition.tag_list_variable_name, tagger_tag_list)
+        instance_variable_set(tag_definition.tag_list_variable_name, tagger_tag_list)
       end
 
       ##

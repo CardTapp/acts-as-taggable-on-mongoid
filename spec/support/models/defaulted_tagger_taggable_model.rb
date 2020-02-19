@@ -26,10 +26,12 @@ class DefaultedTaggerTaggableModel
 
   attr_reader :tag_list_submethod_called
 
+  # :reek:UtilityFunction
   def language_user
     MyUser.find_or_create_by! name: "Language User"
   end
 
+  # :reek:UtilityFunction
   def default_tagger
     MyUser.find_or_create_by! name: "Default Tagger"
   end

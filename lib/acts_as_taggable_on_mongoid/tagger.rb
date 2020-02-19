@@ -9,6 +9,8 @@ module ActsAsTaggableOnMongoid
   module Tagger
     extend ActiveSupport::Concern
 
+    # rubocop:disable Metrics/BlockLength
+
     class_methods do
       # Options include:
       #   * tags_table
@@ -35,27 +37,31 @@ module ActsAsTaggableOnMongoid
 
       def add_tags_owner_relation(options)
         tags_table = options[:tags_table] || ActsAsTaggableOnMongoid.tags_table
-        tags_name  = "owned_#{tags_table.name.demodulize.underscore.downcase.pluralize.to_sym}"
+        table_name = tags_table.name
+        tags_name  = "owned_#{table_name.demodulize.underscore.downcase.pluralize.to_sym}"
 
         return if relations[tags_name.to_s]
 
         has_many tags_name,
                  as:         :owner,
                  dependent:  :destroy,
-                 class_name: tags_table.name
+                 class_name: table_name
       end
 
       def add_taggings_tagger_relation(options)
         taggings_table = options[:taggings_table] || ActsAsTaggableOnMongoid.taggings_table
-        taggings_name  = "owned_#{taggings_table.name.demodulize.underscore.downcase.pluralize.to_sym}"
+        table_name     = taggings_table.name
+        taggings_name  = "owned_#{table_name.demodulize.underscore.downcase.pluralize.to_sym}"
 
         return if relations[taggings_name.to_s]
 
         has_many taggings_name,
                  as:         :tagger,
                  dependent:  :destroy,
-                 class_name: taggings_table.name
+                 class_name: table_name
       end
     end
+
+    # rubocop:enable Metrics/BlockLength
   end
 end

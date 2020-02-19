@@ -74,16 +74,18 @@ module ActsAsTaggableOnMongoid
           tagger_params[:default_tagger]
         end
 
+        # :reek:FeatureEnvy
+        # :reek:DuplicateMethodCall
         def taggable_default(taggable)
-          taggable_default = default
+          default_list = default
 
-          return unless taggable_default.present?
+          return unless default_list.present?
 
-          taggable_default          = taggable_default.dup
-          taggable_default.taggable = taggable
-          taggable_default.tagger   = taggable_default.tagger
+          default_list          = default_list.dup
+          default_list.taggable = taggable
+          default_list.tagger   = default_list.tagger
 
-          taggable_default
+          default_list
         end
 
         def default_tagger(taggable)

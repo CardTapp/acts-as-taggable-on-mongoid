@@ -2,6 +2,8 @@
 
 module ActsAsTaggableOnMongoid
   # A hash like collection of tag lists grouped by tagger
+
+  # :reek:RepeatedConditional
   class TaggerTagList
     include Comparable
 
@@ -19,7 +21,6 @@ module ActsAsTaggableOnMongoid
              :map,
              to: :tagger_tag_lists
 
-    attr_accessor :fully_loaded
     attr_reader :taggable,
                 :tag_definition
 
@@ -72,8 +73,10 @@ module ActsAsTaggableOnMongoid
     end
 
     def []=(tagger, value)
+      tagger_list = self[tagger]
+
       if value.is_a?(ActsAsTaggableOnMongoid::TagList)
-        self[tagger].set(value)
+        tagger_list.set(value)
       else
         value           = Array.wrap(value).dup
         options         = value.extract_options!
@@ -81,7 +84,7 @@ module ActsAsTaggableOnMongoid
 
         value = [*value, options]
 
-        self[tagger].set(*value)
+        tagger_list.set(*value)
       end
     end
 
@@ -129,10 +132,12 @@ module ActsAsTaggableOnMongoid
       return sub_compare unless sub_compare&.zero?
 
       any? do |key, tag_list|
+        other_tag_list = other[key]
+
         sub_compare = if tag_definition.preserve_tag_order
-                        tag_list <=> other[key]
+                        tag_list <=> other_tag_list
                       else
-                        tag_list.sort <=> other[key].sort
+                        tag_list.sort <=> other_tag_list.sort
                       end
 
         !sub_compare&.zero?
@@ -155,10 +160,11 @@ module ActsAsTaggableOnMongoid
       sub_compare = compare_tag_list_properties(other)
       return sub_compare unless sub_compare&.zero?
 
+      tagger_list = values.first
       if tag_definition.preserve_tag_order
-        values.first <=> other
+        tagger_list <=> other
       else
-        values.first.sort <=> other.sort
+        tagger_list.sort <=> other.sort
       end
     end
   end

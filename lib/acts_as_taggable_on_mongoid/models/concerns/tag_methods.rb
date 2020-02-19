@@ -38,6 +38,7 @@ module ActsAsTaggableOnMongoid
             end
           end
 
+          # :reek:UtilityFunction
           def create_tag(tag_definition, owner, name)
             tag_definition.tags_table.create!(name:          name,
                                               owner:         owner,

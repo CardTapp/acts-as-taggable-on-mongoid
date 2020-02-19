@@ -33,7 +33,7 @@ module ActsAsTaggableOnMongoid
         defaulted_attributes = {}
 
         sanitize_for_mass_assignment(attrs)&.each do |key, value|
-          tag_def = tag_types.detect { |_type, tag_definition| tag_definition.tag_list_name == key.to_s }&.last
+          tag_def = atom_tag_definition_from_type(key)
 
           if tag_def&.tag_list_uses_default_tagger?
             defaulted_attributes[key] = value
@@ -43,6 +43,10 @@ module ActsAsTaggableOnMongoid
         end
 
         [return_attributes, defaulted_attributes]
+      end
+
+      def atom_tag_definition_from_type(key)
+        tag_types.detect { |_type, tag_definition| tag_definition.tag_list_name == key.to_s }&.last
       end
     end
   end
