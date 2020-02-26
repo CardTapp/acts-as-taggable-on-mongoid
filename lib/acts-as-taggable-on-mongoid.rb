@@ -36,7 +36,7 @@ module ActsAsTaggableOnMongoid
     end
 
     autoload_under :Taggable do
-      #   autoload :Cache
+      autoload :Cache
       #   autoload :Collection
       autoload :Core
       autoload :Changeable

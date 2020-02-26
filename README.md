@@ -190,6 +190,7 @@ end
 class MyTaggable
   include ::Mongoid::Document
 
+  # See lib/acts_as_taggable_on_mongoid/taggable.rb for more details on options.
   acts_as_taggable_on :my_tags,
                       :your_tags,
                       :other_tags,

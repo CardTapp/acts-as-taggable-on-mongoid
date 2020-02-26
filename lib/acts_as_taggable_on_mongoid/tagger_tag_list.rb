@@ -101,7 +101,7 @@ module ActsAsTaggableOnMongoid
     def taggable=(value)
       @taggable = value
 
-      tagger_tag_lists.values.each do |tag_list|
+      tagger_tag_lists.each_value do |tag_list|
         tag_list.taggable = taggable
       end
     end

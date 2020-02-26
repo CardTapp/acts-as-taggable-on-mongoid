@@ -58,6 +58,7 @@ module ActsAsTaggableOnMongoid
           self.my_tag_types = new_tag_types
           tag_definition    = new_tag_types[tag_type] = ActsAsTaggableOnMongoid::Taggable::TagTypeDefinition.new(self, tag_type, options)
 
+          tag_definition.define_cache_field
           tag_definition.define_base_relations
           tag_definition.define_relations
           tag_definition.add_tag_list
