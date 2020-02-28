@@ -52,6 +52,14 @@ module ActsAsTaggableOnMongoid
           end
         end
 
+        def cached_in_model_field
+          @cached_in_model_field ||= cache_hash.fetch(:field) { "cached_#{tag_list_name}" }
+        end
+
+        def cached_in_model_as_list?
+          @cached_in_model_as_list ||= cache_hash.fetch(:as_list) { true }
+        end
+
         alias preserve_tag_order? preserve_tag_order
         alias cached_in_model? cached_in_model
         alias force_lowercase? force_lowercase
@@ -102,6 +110,10 @@ module ActsAsTaggableOnMongoid
         end
 
         private
+
+        def cache_hash
+          @cache_hash ||= cached_in_model.is_a?(Hash) ? cached_in_model : {}
+        end
 
         def tagger_params
           return @tagger_params if defined?(@tagger_params)

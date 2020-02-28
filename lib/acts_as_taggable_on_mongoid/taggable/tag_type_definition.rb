@@ -76,6 +76,18 @@ module ActsAsTaggableOnMongoid
                           end
       end
 
+      def define_cache_field
+        tag_definition = self
+
+        return unless tag_definition.cached_in_model?
+
+        owner.class_eval do
+          field_type = tag_definition.cached_in_model_as_list? ? Array : String
+
+          field tag_definition.cached_in_model_field, type: field_type
+        end
+      end
+
       def define_base_relations
         tag_definition = self
 

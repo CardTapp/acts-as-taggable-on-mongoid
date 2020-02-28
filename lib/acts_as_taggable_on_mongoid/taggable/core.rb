@@ -22,6 +22,7 @@ module ActsAsTaggableOnMongoid
         # attr_writer :custom_contexts
 
         after_save :save_tags
+        before_save :save_cached_tag_lists
       end
 
       class_methods do
@@ -171,7 +172,7 @@ module ActsAsTaggableOnMongoid
       end
 
       def all_tags_list_on(tag_definition)
-        tag_list_on(tag_definition).flatten
+        tag_list_cache_on(tag_definition).flatten
       end
 
       ##

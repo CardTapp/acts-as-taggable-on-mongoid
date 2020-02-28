@@ -39,7 +39,10 @@ RSpec.describe ActsAsTaggableOnMongoid::Models::Tagging do
       end
 
       expect do
-        2.times { ActsAsTaggableOnMongoid::Models::Tagging.create(taggable: taggable, tag: tag, context: "tags", tag_name: "awesome") }
+        2.times do
+          ActsAsTaggableOnMongoid::Models::Tagging.create(taggable: taggable, tag: tag, context: "tags", tag_name: "awesome")
+          taggable.save!
+        end
       end.to raise_error Mongoid::Errors::Validations
     end
 

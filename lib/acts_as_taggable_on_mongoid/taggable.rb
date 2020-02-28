@@ -18,7 +18,11 @@ module ActsAsTaggableOnMongoid
       #   * preserve_tag_order
       #     If true, the _list accessor will save and returns tags in the order they are added to the object.
       #   * cached_in_model
-      #     Not currently supported
+      #     If true, a field is added to de-normalize/cache the list into.  Can also be a hash with options:
+      #       field: The name of the field to cache the list in
+      #       as_list: true/false - If the cached value should be an Array or a String.  No order is guaranteed
+      #                             in either case.
+      #                             Defaults to true.
       #   * force_lowercase
       #     If true, values stored for tags will first be downcased to make the values effectively case-insensitive
       #   * force_parameterize
@@ -122,7 +126,7 @@ module ActsAsTaggableOnMongoid
          ActsAsTaggableOnMongoid::Taggable::Changeable,
          ActsAsTaggableOnMongoid::Taggable::TaggedWith,
          # include Collection - not sure we will need as done here.  Need to think more on this one.
-         # include Cache - TODO: Add this.
+         ActsAsTaggableOnMongoid::Taggable::Cache,
          # include Related - TODO: Add this.
          ActsAsTaggableOnMongoid::Taggable::TaggerRelation,
          ActsAsTaggableOnMongoid::Taggable::ListTags].each do |include_module|
