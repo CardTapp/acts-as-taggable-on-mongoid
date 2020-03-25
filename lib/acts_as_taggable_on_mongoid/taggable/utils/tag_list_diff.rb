@@ -51,7 +51,7 @@ module ActsAsTaggableOnMongoid
           taggable.
               public_send(tag_definition.taggings_name).
               by_tag_type(tag_definition.tag_type).
-              where(:tag_id.in => old_tags.map(&:id)).
+              where(taggable: taggable, :tag_id.in => old_tags.map(&:id)).
               destroy_all
         end
 

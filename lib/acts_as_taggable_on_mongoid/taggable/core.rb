@@ -178,7 +178,7 @@ module ActsAsTaggableOnMongoid
       ##
       # Returns all tags of a given context
       def all_tags_on(tag_definition)
-        scope = public_send(tag_definition.taggings_name).where(context: tag_definition.tag_type)
+        scope = public_send(tag_definition.taggings_name).where(taggable: self, context: tag_definition.tag_type)
 
         # when preserving tag order, return tags in created order
         # if we added the order to the association this would always apply
@@ -190,7 +190,7 @@ module ActsAsTaggableOnMongoid
       ##
       # Returns all tags that are not owned of a given context
       def tags_on(tag_definition)
-        scope = public_send(tag_definition.taggings_name).where(context: tag_definition.tag_type, :tagger_id.exists => false)
+        scope = public_send(tag_definition.taggings_name).where(taggable: self, context: tag_definition.tag_type, :tagger_id.exists => false)
 
         # when preserving tag order, return tags in created order
         # if we added the order to the association this would always apply
@@ -202,7 +202,7 @@ module ActsAsTaggableOnMongoid
       ##
       # Returns all tags that are owned by a given tagger of a given context
       def tagger_tags_on(tagger, tag_definition)
-        scope = public_send(tag_definition.taggings_name).where(context: tag_definition.tag_type, tagger: tagger)
+        scope = public_send(tag_definition.taggings_name).where(taggable: self, context: tag_definition.tag_type, tagger: tagger)
 
         # when preserving tag order, return tags in created order
         # if we added the order to the association this would always apply
