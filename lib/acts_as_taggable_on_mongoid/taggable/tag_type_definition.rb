@@ -37,6 +37,7 @@ module ActsAsTaggableOnMongoid
                       cached_in_model
                       force_lowercase
                       force_parameterize
+                      owner_id_field
                       remove_unused_tags
                       tags_table
                       taggings_table].each_with_object({}) { |dup_key, opts_hash| opts_hash[dup_key] = tag_definition.public_send(dup_key) }
@@ -189,6 +190,7 @@ module ActsAsTaggableOnMongoid
                                   :cached_in_model,
                                   :force_lowercase,
                                   :force_parameterize,
+                                  :owner_id_field,
                                   :remove_unused_tags,
                                   :tags_table,
                                   :taggings_table,

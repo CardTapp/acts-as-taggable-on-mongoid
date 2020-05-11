@@ -12,6 +12,7 @@ module ActsAsTaggableOnMongoid
           include ActsAsTaggableOnMongoid::Models::Concerns::TagAssociations
           include ActsAsTaggableOnMongoid::Models::Concerns::TagValidations
           include ActsAsTaggableOnMongoid::Models::Concerns::TagScopes
+          include ActsAsTaggableOnMongoid::Models::Concerns::TagHooks
         end
       end
     end

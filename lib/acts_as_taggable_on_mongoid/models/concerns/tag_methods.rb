@@ -75,6 +75,12 @@ module ActsAsTaggableOnMongoid
         def to_s
           name
         end
+
+        private
+
+        def tag_definition
+          @tag_definition ||= taggable_type.constantize.tag_types[context]
+        end
       end
     end
   end
