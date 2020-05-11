@@ -6,6 +6,7 @@ module ActsAsTaggableOnMongoid
       # This module defines methods used to evaluate the attributes of the Tag Type Definition
       module Attributes
         attr_reader :cached_in_model,
+                    :owner_id_field,
                     :default
 
         def parser

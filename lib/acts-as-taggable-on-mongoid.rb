@@ -57,6 +57,7 @@ module ActsAsTaggableOnMongoid
 
     autoload_under "models/concerns" do
       autoload :TagFields
+      autoload :TagHooks
       autoload :TagAssociations
       autoload :TagValidations
       autoload :TagScopes

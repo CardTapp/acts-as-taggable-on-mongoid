@@ -23,6 +23,9 @@ module ActsAsTaggableOnMongoid
       #       as_list: true/false - If the cached value should be an Array or a String.  No order is guaranteed
       #                             in either case.
       #                             Defaults to true.
+      #   * owner_id_field
+      #     If cached_in_model is true, if a tag is owned, this is the field that will be checked for a matching
+      #     owner ID for tag updates and deletes.
       #   * force_lowercase
       #     If true, values stored for tags will first be downcased to make the values effectively case-insensitive
       #   * force_parameterize
