@@ -14,7 +14,10 @@ class CachedTaggerTaggableModel
   acts_as_taggable_on :languages, cached_in_model: true, tagger: { tag_list_uses_default_tagger: true, default_tagger: :language_user }
   acts_as_taggable_on :skills, cached_in_model: true, tagger: { default_tagger: :my_user }
   acts_as_taggable_on :needs, :offerings, cached_in_model: true, tagger: { tag_list_uses_default_tagger: true, default_tagger: :my_user }
-  acts_as_taggable_on :preserved, preserve_tag_order: true, cached_in_model: true, tagger: { tag_list_uses_default_tagger: true, default_tagger: :my_user }
+  acts_as_taggable_on :preserved,
+                      preserve_tag_order: true,
+                      cached_in_model:    true,
+                      tagger:             { tag_list_uses_default_tagger: true, default_tagger: :my_user }
 
   attr_reader :tag_list_submethod_called
 

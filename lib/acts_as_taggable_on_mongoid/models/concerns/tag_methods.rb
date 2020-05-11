@@ -22,19 +22,17 @@ module ActsAsTaggableOnMongoid
             return [] if list.empty?
 
             list.map do |tag_name|
-              begin
-                tries ||= 3
+              tries ||= 3
 
-                find_or_create_tag(tag_name, tag_definition, owner)
-              rescue Mongoid::Errors::Validations
-                # :nocov:
-                if (tries -= 1).positive?
-                  retry
-                end
-
-                raise ActsAsTaggableOnMongoid::Errors::DuplicateTagError.new, "'#{tag_name}' has already been taken"
-                # :nocov:
+              find_or_create_tag(tag_name, tag_definition, owner)
+            rescue Mongoid::Errors::Validations
+              # :nocov:
+              if (tries -= 1).positive?
+                retry
               end
+
+              raise ActsAsTaggableOnMongoid::Errors::DuplicateTagError.new, "'#{tag_name}' has already been taken"
+              # :nocov:
             end
           end
 
@@ -51,8 +49,6 @@ module ActsAsTaggableOnMongoid
 
             string.mb_chars
           end
-
-          private
 
           def find_or_create_tag(tag_name, tag_definition, owner)
             existing_tag = tag_definition.tags_table.for_tag(tag_definition).named(tag_name).owned_by(owner).first

@@ -10,7 +10,7 @@ SimpleCov.start "rails" do
   add_filter "acts_as_taggable_on_mongoid/version"
 
   current_branch = `git rev-parse --abbrev-ref HEAD`.tr("\n", "")
-  if current_branch !~ /master/
+  unless current_branch.match?(/master/)
     changed_files = `git diff --name-only #{current_branch} $(git merge-base #{current_branch} origin/master)`.split("\n")
     add_group "Changed" do |source_file|
       changed_files.detect do |filename|

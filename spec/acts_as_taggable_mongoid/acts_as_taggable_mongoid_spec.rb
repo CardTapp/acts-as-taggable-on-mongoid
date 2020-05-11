@@ -89,8 +89,8 @@ RSpec.describe ActsAsTaggableOnMongoid do
   describe "Matching Contexts" do
     # TODO: Not implemented yet
     xit "should find objects with tags of matching contexts" do
-      taggable_one = TaggableModel.create!(name: "Taggable 1")
-      taggable_two = TaggableModel.create!(name: "Taggable 2")
+      taggable_one   = TaggableModel.create!(name: "Taggable 1")
+      taggable_two   = TaggableModel.create!(name: "Taggable 2")
       taggable_three = TaggableModel.create!(name: "Taggable 3")
 
       taggable_one.offering_list = "one, two"
@@ -108,8 +108,8 @@ RSpec.describe ActsAsTaggableOnMongoid do
 
     # TODO: Not implemented yet
     xit "should find other related objects with tags of matching contexts" do
-      taggable_one = TaggableModel.create!(name: "Taggable 1")
-      taggable_two = OtherTaggableModel.create!(name: "Taggable 2")
+      taggable_one   = TaggableModel.create!(name: "Taggable 1")
+      taggable_two   = OtherTaggableModel.create!(name: "Taggable 2")
       taggable_three = OtherTaggableModel.create!(name: "Taggable 3")
 
       taggable_one.offering_list = "one, two"
@@ -161,11 +161,9 @@ RSpec.describe ActsAsTaggableOnMongoid do
 
   describe "Tagging Contexts" do
     around(:each) do |example_proxy|
-      begin
-        example_proxy.run
-      ensure
-        TaggableModel.tag_types.delete(:array)
-      end
+      example_proxy.run
+    ensure
+      TaggableModel.tag_types.delete(:array)
     end
 
     it "should not contain embedded/nested arrays" do

@@ -5,11 +5,9 @@ require "rails_helper"
 RSpec.describe ActsAsTaggableOnMongoid::Taggable::ListTags do
   describe "tag_definition" do
     around(:each) do |test_proxy|
-      begin
-        test_proxy.run
-      ensure
-        TaggableModel.tag_types.delete(:alternate_tags)
-      end
+      test_proxy.run
+    ensure
+      TaggableModel.tag_types.delete(:alternate_tags)
     end
 
     it "returns the tag_defintion" do

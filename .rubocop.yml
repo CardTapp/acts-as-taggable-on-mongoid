@@ -1,7 +1,7 @@
 require: rubocop-performance
 
 AllCops:
-  TargetRubyVersion: 2.3
+  TargetRubyVersion: 2.7.1
   Exclude:
     - 'vendor/**/*'
     - 'db/schema.rb'
@@ -409,3 +409,15 @@ Layout/HashAlignment:
     - always_ignore
     - ignore_implicit
     - ignore_explicit
+
+Layout/SpaceAroundMethodCallOperator:
+  Enabled: true
+
+Lint/RaiseException:
+  Enabled: true
+
+Lint/StructNewOverride:
+  Enabled: true
+
+Style/ExponentialNotation:
+  Enabled: true
