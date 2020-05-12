@@ -38,7 +38,7 @@ GEM
     concurrent-ruby (1.1.6)
     cornucopia (0.1.56)
       activesupport (> 4.0, < 6.0)
-    database_cleaner (1.8.4)
+    database_cleaner (1.8.5)
     descendants_tracker (0.0.4)
       thread_safe (~> 0.3, >= 0.3.1)
     diff-lcs (1.3)
