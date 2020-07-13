@@ -51,7 +51,7 @@ GEM
       colorize (~> 0.7)
       ruby_parser (>= 3.14.1)
     gem-release (2.1.1)
-    gitlab (4.15.0)
+    gitlab (4.16.1)
       httparty (~> 0.14, >= 0.14.0)
       terminal-table (~> 1.5, >= 1.5.1)
     httparty (0.18.1)
