@@ -28,10 +28,10 @@ GEM
       sexp_processor
     codeclimate-engine-rb (0.4.1)
       virtus (~> 1.0)
-    codecov (0.1.17)
+    codecov (0.2.2)
+      colorize
       json
       simplecov
-      url
     coercible (1.0.0)
       descendants_tracker (~> 0.0.1)
     colorize (0.8.1)
@@ -174,7 +174,6 @@ GEM
     tzinfo (1.2.7)
       thread_safe (~> 0.1)
     unicode-display_width (1.7.0)
-    url (0.3.2)
     virtus (1.0.5)
       axiom-types (~> 0.1)
       coercible (~> 1.0)
@@ -186,7 +185,7 @@ PLATFORMS
 
 DEPENDENCIES
   acts-as-taggable-on-mongoid!
-  codecov (~> 0.1.0, ~> 0.1)
+  codecov (~> 0.2.2, ~> 0.1)
   cornucopia
   database_cleaner
   gem-release
