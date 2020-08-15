@@ -35,7 +35,7 @@ GEM
     coercible (1.0.0)
       descendants_tracker (~> 0.0.1)
     colorize (0.8.1)
-    concurrent-ruby (1.1.6)
+    concurrent-ruby (1.1.7)
     cornucopia (0.1.56)
       activesupport (> 4.0, < 6.0)
     database_cleaner (1.8.5)
