@@ -476,7 +476,7 @@ RSpec.describe ActsAsTaggableOnMongoid::Models::Tag do
 
       allow(owned_scope).to receive(:first).and_return nil
 
-      expect { alt_tagged.save! }.to raise_error ActsAsTaggableOnMongoid::Errors::DuplicateTagError
+      expect { alt_tagged.save! }.to raise_error Mongoid::Errors::Validations
 
       expect(owned_scope).to have_received(:first).exactly(3).times
     end

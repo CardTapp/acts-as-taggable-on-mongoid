@@ -25,14 +25,12 @@ module ActsAsTaggableOnMongoid
               tries ||= 3
 
               find_or_create_tag(tag_name, tag_definition, owner)
-            rescue Mongoid::Errors::Validations
-              # :nocov:
+            rescue StandardError
               if (tries -= 1).positive?
                 retry
               end
 
-              raise ActsAsTaggableOnMongoid::Errors::DuplicateTagError.new, "'#{tag_name}' has already been taken"
-              # :nocov:
+              raise
             end
           end
 

@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    acts-as-taggable-on-mongoid (6.1.1.10)
+    acts-as-taggable-on-mongoid (6.1.1.11)
       activesupport (>= 5.0)
       mongoid (>= 6.1.1, <= 7.0.2)
 
@@ -65,7 +65,7 @@ GEM
       mime-types-data (~> 3.2015)
     mime-types-data (3.2020.0512)
     minitest (5.14.2)
-    mongo (2.12.1)
+    mongo (2.13.1)
       bson (>= 4.8.2, < 5.0.0)
     mongoid (7.0.2)
       activemodel (>= 5.1, < 6.0.0)
