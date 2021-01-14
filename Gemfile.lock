@@ -47,7 +47,7 @@ GEM
       faraday-net_http (~> 1.0)
       multipart-post (>= 1.2, < 3)
       ruby2_keywords
-    faraday-net_http (1.0.0)
+    faraday-net_http (1.0.1)
     fasterer (0.8.3)
       colorize (~> 0.7)
       ruby_parser (>= 3.14.1)
