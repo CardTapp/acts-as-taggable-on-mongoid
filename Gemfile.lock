@@ -8,9 +8,9 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    activemodel (5.2.4.5)
-      activesupport (= 5.2.4.5)
-    activesupport (5.2.4.5)
+    activemodel (5.2.6)
+      activesupport (= 5.2.6)
+    activesupport (5.2.6)
       concurrent-ruby (~> 1.0, >= 1.0.2)
       i18n (>= 0.7, < 2)
       minitest (~> 5.1)
@@ -23,7 +23,7 @@ GEM
       ice_nine (~> 0.11.0)
       thread_safe (~> 0.3, >= 0.3.1)
     brakeman (5.0.1)
-    bson (4.12.0)
+    bson (4.12.1)
     code_analyzer (0.5.2)
       sexp_processor
     codeclimate-engine-rb (0.4.1)
