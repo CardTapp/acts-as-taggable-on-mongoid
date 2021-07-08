@@ -1,9 +1,9 @@
 PATH
   remote: .
   specs:
-    acts-as-taggable-on-mongoid (6.1.1.11)
+    acts-as-taggable-on-mongoid (6.1.1.12)
       activesupport (>= 5.0)
-      mongoid (>= 6.1.1, <= 7.0.2)
+      mongoid (>= 6.1.1, < 8.0)
 
 GEM
   remote: https://rubygems.org/

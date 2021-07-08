@@ -9,7 +9,7 @@ module ActsAsTaggableOnMongoid
         included do
           ### ASSOCIATIONS:
 
-          has_many :taggings, dependent: :destroy, class_name: "ActsAsTaggableOnMongoid::Models::Tagging"
+          has_many :taggings, dependent: :destroy, class_name: "ActsAsTaggableOnMongoid::Models::Tagging", inverse_of: :tag
           belongs_to :owner, polymorphic: true, optional: true, index: true
 
           after_save :atom_unset_blank_owner
