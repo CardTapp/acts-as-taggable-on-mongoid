@@ -105,7 +105,7 @@ GEM
     pronto-rubocop (0.11.1)
       pronto (~> 0.11.0)
       rubocop (>= 0.63.1, < 2.0)
-    psych (3.3.2)
+    psych (4.0.1)
     public_suffix (4.0.6)
     rails_best_practices (1.21.0)
       activesupport
@@ -117,10 +117,10 @@ GEM
       ruby-progressbar
     rainbow (3.0.0)
     rake (13.0.6)
-    reek (6.0.4)
+    reek (6.0.5)
       kwalify (~> 0.7.0)
       parser (~> 3.0.0)
-      psych (~> 3.1)
+      psych (>= 3.1, < 5.0)
       rainbow (>= 2.0, < 4.0)
     regexp_parser (2.1.1)
     require_all (3.0.0)
