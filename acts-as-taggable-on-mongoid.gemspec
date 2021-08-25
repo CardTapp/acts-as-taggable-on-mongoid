@@ -34,7 +34,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "activesupport", ">= 5.0"
   spec.add_dependency "mongoid", ">= 6.1.1", "< 8.0"
 
-  spec.add_development_dependency "codecov", "~> 0.1", "~> 0.5.1"
+  spec.add_development_dependency "codecov", "~> 0.1", "~> 0.6.0"
   spec.add_development_dependency "cornucopia"
   spec.add_development_dependency "database_cleaner"
   spec.add_development_dependency "pronto"

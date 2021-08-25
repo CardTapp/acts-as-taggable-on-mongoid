@@ -22,7 +22,7 @@ GEM
     bson (4.12.1)
     code_analyzer (0.5.2)
       sexp_processor
-    codecov (0.5.2)
+    codecov (0.6.0)
       simplecov (>= 0.15, < 0.22)
     colorize (0.8.1)
     concurrent-ruby (1.1.9)
@@ -185,7 +185,7 @@ PLATFORMS
 
 DEPENDENCIES
   acts-as-taggable-on-mongoid!
-  codecov (~> 0.5.1, ~> 0.1)
+  codecov (~> 0.6.0, ~> 0.1)
   cornucopia
   database_cleaner
   gem-release
