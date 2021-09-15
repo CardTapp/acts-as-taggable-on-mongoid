@@ -7,10 +7,10 @@ jobs:
   build:
     docker:
       # specify the version you desire here
-       - image: circleci/ruby:2.6.3-stretch
+       - image: circleci/ruby:3.0.2
          environment:
            PRONTO_GITHUB_ACCESS_TOKEN: testing
-       - image: mongo:3.6.7-jessie
+       - image: mongo:4.2.11-jessie
 
     working_directory: ~/repo
 
