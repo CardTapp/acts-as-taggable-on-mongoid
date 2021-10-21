@@ -63,7 +63,7 @@ GEM
       multi_xml (>= 0.5.2)
     i18n (1.8.10)
       concurrent-ruby (~> 1.0)
-    json (2.5.1)
+    json (2.6.0)
     kwalify (0.7.2)
     mime-types (3.3.1)
       mime-types-data (~> 3.2015)
