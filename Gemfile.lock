@@ -20,7 +20,7 @@ GEM
     ast (2.4.2)
     brakeman (5.2.0)
     bson (4.12.1)
-    code_analyzer (0.5.2)
+    code_analyzer (0.5.5)
       sexp_processor
     codecov (0.6.0)
       simplecov (>= 0.15, < 0.22)
