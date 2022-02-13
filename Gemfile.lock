@@ -122,9 +122,9 @@ GEM
       pronto (~> 0.11.0)
       rubocop (>= 0.63.1, < 2.0)
     public_suffix (4.0.6)
-    rails_best_practices (1.22.1)
+    rails_best_practices (1.23.1)
       activesupport
-      code_analyzer (>= 0.5.2)
+      code_analyzer (~> 0.5.5)
       erubis
       i18n
       json
