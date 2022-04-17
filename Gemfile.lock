@@ -52,7 +52,7 @@ GEM
       httpclient (>= 2.2)
     faraday-multipart (1.0.3)
       multipart-post (>= 1.2, < 3)
-    faraday-net_http (2.0.1)
+    faraday-net_http (2.0.2)
     faraday-net_http_persistent (2.0.1)
       faraday-net_http
       net-http-persistent (~> 4.0)
