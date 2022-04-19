@@ -121,7 +121,7 @@ GEM
     pronto-rubocop (0.11.1)
       pronto (~> 0.11.0)
       rubocop (>= 0.63.1, < 2.0)
-    public_suffix (4.0.6)
+    public_suffix (4.0.7)
     rails_best_practices (1.23.1)
       activesupport
       code_analyzer (~> 0.5.5)
