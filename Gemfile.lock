@@ -73,7 +73,7 @@ GEM
     httpclient (2.8.3)
     i18n (1.10.0)
       concurrent-ruby (~> 1.0)
-    json (2.6.1)
+    json (2.6.2)
     kwalify (0.7.2)
     mime-types (3.4.1)
       mime-types-data (~> 3.2015)
