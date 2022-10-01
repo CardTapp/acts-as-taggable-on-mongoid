@@ -93,7 +93,7 @@ GEM
       pronto (~> 0.11.0)
       rubocop (>= 0.63.1, < 2.0)
     public_suffix (5.0.0)
-    rails_best_practices (1.23.1)
+    rails_best_practices (1.23.2)
       activesupport
       code_analyzer (~> 0.5.5)
       erubis
