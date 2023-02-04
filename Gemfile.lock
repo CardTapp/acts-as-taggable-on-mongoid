@@ -160,7 +160,7 @@ GEM
     thor (1.2.1)
     thread_safe (0.3.6)
     timecop (0.9.4)
-    tzinfo (1.2.10)
+    tzinfo (1.2.11)
       thread_safe (~> 0.1)
     unicode-display_width (2.4.2)
 
