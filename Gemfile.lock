@@ -26,7 +26,7 @@ GEM
     codecov (0.6.0)
       simplecov (>= 0.15, < 0.22)
     colorize (0.8.1)
-    concurrent-ruby (1.2.2)
+    concurrent-ruby (1.3.4)
     cornucopia (0.1.56)
       activesupport (> 4.0, < 6.0)
     csv (3.3.0)
