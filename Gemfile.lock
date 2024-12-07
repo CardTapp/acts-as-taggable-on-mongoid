@@ -139,7 +139,7 @@ GEM
       require_all (~> 3.0)
       ruby-progressbar
     rainbow (3.1.1)
-    rake (13.0.6)
+    rake (13.2.1)
     reek (6.3.0)
       dry-schema (~> 1.13.0)
       parser (~> 3.3.0)
