@@ -71,7 +71,7 @@ GEM
     fasterer (0.10.1)
       colorize (~> 0.7)
       ruby_parser (>= 3.19.1)
-    gem-release (2.2.2)
+    gem-release (2.2.3)
     gitlab (4.20.1)
       httparty (~> 0.20)
       terminal-table (>= 1.5.1)
