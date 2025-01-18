@@ -124,7 +124,7 @@ GEM
     pronto-reek (0.11.1)
       pronto (~> 0.11.0)
       reek (>= 4.2, < 7.0)
-    pronto-rubocop (0.11.5)
+    pronto-rubocop (0.11.6)
       pronto (~> 0.11.0)
       rubocop (>= 0.63.1, < 2.0)
     public_suffix (6.0.1)
