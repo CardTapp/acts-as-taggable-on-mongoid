@@ -17,7 +17,7 @@ GEM
       tzinfo (~> 1.1)
     addressable (2.8.7)
       public_suffix (>= 2.0.2, < 7.0)
-    ast (2.4.2)
+    ast (2.4.3)
     bigdecimal (3.1.9)
     brakeman (5.4.0)
     bson (4.14.1)
