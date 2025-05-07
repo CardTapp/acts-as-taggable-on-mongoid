@@ -62,7 +62,7 @@ GEM
       dry-logic (~> 1.4)
       zeitwerk (~> 2.6)
     erubis (2.7.0)
-    faraday (2.13.0)
+    faraday (2.13.1)
       faraday-net_http (>= 2.0, < 3.5)
       json
       logger
