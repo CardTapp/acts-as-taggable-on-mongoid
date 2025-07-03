@@ -31,8 +31,8 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
-  spec.add_dependency "activesupport", ">= 5.0"
-  spec.add_dependency "mongoid", ">= 6.1.1", "< 9.0"
+  spec.add_dependency "activesupport", ">= 6.0"
+  spec.add_dependency "mongoid", ">= 6.1.1", "<= 9.0"
 
   spec.add_development_dependency "codecov", "~> 0.1", "~> 0.6.0"
   spec.add_development_dependency "cornucopia"
@@ -45,7 +45,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "pronto-reek"
   spec.add_development_dependency "pronto-rubocop"
   spec.add_development_dependency "rake", "~> 13.0"
-  spec.add_development_dependency "rspec", "~> 3.0"
+  spec.add_development_dependency "rspec", "~> 3.13.1"
   spec.add_development_dependency "rspec_junit_formatter", "~> 0.4.1"
   spec.add_development_dependency "rubocop"
   spec.add_development_dependency "rubocop-performance"

@@ -20,6 +20,7 @@ SimpleCov.start "rails" do
   end
 end
 
+require "logger"
 require "active_support"
 require "spec_helper"
 require "mongoid"

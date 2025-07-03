@@ -31,7 +31,7 @@ RSpec.describe ActsAsTaggableOnMongoid::Models::Tagging do
       tag      = ActsAsTaggableOnMongoid::Models::Tag.create(name: "awesome")
 
       allow(ActsAsTaggableOnMongoid::Taggable::Utils::TagListDiff).to receive(:new).and_wrap_original do |orig_method, *args|
-        diff = orig_method.call(*args)
+        diff = orig_method.call(**args[0])
 
         allow(diff).to receive(:ignore_tagging_error).and_return false
 
