@@ -66,6 +66,7 @@ Naming/PredicateName:
     - is_
     - has_
     - have_
+    - does_
 Naming/RescuedExceptionsVariableName:
   PreferredName: error
 

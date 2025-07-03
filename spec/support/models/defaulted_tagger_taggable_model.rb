@@ -19,7 +19,7 @@ class DefaultedTaggerTaggableModel
                       preserve_tag_order: true,
                       tagger:             { tag_list_uses_default_tagger: true, default_tagger: :my_user }
   acts_as_taggable_on :default_with_tagger,
-                      default: ["Shazam, Black Adam", tagger: :default_tagger],
+                      default: ["Shazam, Black Adam", { tagger: :default_tagger }],
                       tagger:  { tag_list_uses_default_tagger: true, default_tagger: :my_user }
 
   has_many :untaggable_models

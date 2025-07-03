@@ -104,7 +104,7 @@ RSpec.describe ActsAsTaggableOnMongoid::Tagger do
   RSpec.shared_examples("it tags items") do
     let(:my_user) { MyUser.create name: "My User" }
     let(:tagger) { MyUser.create name: "My Tagger" }
-    let(:taggable) { TaggerTaggableModel.create my_user: my_user, attribute_list => ["Other, Tags", tagger: tagger] }
+    let(:taggable) { TaggerTaggableModel.create my_user: my_user, attribute_list => ["Other, Tags", { tagger: tagger }] }
     let(:on_name) { attribute_list[0..-6] }
 
     RSpec.shared_examples("on the specified list") do

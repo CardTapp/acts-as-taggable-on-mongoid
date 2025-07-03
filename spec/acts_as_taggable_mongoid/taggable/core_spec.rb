@@ -43,7 +43,7 @@ RSpec.describe ActsAsTaggableOnMongoid::Taggable::Core do
       end
 
       it "uses a specified tagger" do
-        tagger_obj.send(mass_method, my_user: my_user, attribute_list => ["A", "list", tagger: other_user])
+        tagger_obj.send(mass_method, my_user: my_user, attribute_list => ["A", "list", { tagger: other_user }])
 
         tagger_lists = test_taggable.public_send("tagger_#{attribute_list}s")
         expect(tagger_lists[other_user]).to eq %w[A list]
@@ -66,7 +66,7 @@ RSpec.describe ActsAsTaggableOnMongoid::Taggable::Core do
       end
 
       it "does not parse if told not to" do
-        tagger_obj.send(mass_method, my_user: my_user, attribute_list => ["A, list", parse: false])
+        tagger_obj.send(mass_method, my_user: my_user, attribute_list => ["A, list", { parse: false }])
 
         default_list = test_taggable.public_send(attribute_list)
         expect(default_list).to eq ["A, list"]
@@ -74,7 +74,7 @@ RSpec.describe ActsAsTaggableOnMongoid::Taggable::Core do
       end
 
       it "ueses a custom parser" do
-        tagger_obj.send(mass_method, my_user: my_user, attribute_list => ["\"A, list\"", parser: ActsAsTaggableOnMongoid::GenericParser])
+        tagger_obj.send(mass_method, my_user: my_user, attribute_list => ["\"A, list\"", { parser: ActsAsTaggableOnMongoid::GenericParser }])
 
         default_list = test_taggable.public_send(attribute_list)
         expect(default_list).to eq ["\"A", "list\""]

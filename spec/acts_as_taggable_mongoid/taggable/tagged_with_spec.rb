@@ -382,7 +382,7 @@ RSpec.describe ActsAsTaggableOnMongoid::Taggable::TaggedWith do
       end
 
       it "doesn't parse if you tell it not to" do
-        taggable_one = TaggableModel.create!(name: "a", skill_list: ["a, \"b, c\", 'd, e'", parse: false])
+        taggable_one = TaggableModel.create!(name: "a", skill_list: ["a, \"b, c\", 'd, e'", { parse: false }])
 
         expect(TaggableModel.tagged_with("a, \"b, c\", 'd, e'", parse: false).to_a).to eq [taggable_one]
       end
@@ -390,7 +390,7 @@ RSpec.describe ActsAsTaggableOnMongoid::Taggable::TaggedWith do
 
     describe ":parser" do
       it "uses the passed in parser" do
-        taggable_one = TaggableModel.create!(name: "a", skill_list: ["a, \"b, c\", 'd, e'", parser: ActsAsTaggableOnMongoid::GenericParser])
+        taggable_one = TaggableModel.create!(name: "a", skill_list: ["a, \"b, c\", 'd, e'", { parser: ActsAsTaggableOnMongoid::GenericParser }])
 
         expect(TaggableModel.tagged_with("a, \"b, e'", parser: ActsAsTaggableOnMongoid::GenericParser).to_a).to eq [taggable_one]
       end

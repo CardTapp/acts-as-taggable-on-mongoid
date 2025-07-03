@@ -188,7 +188,7 @@ RSpec.describe ActsAsTaggableOnMongoid::Taggable::TagTypeDefinition::Attributes 
     it "does not parse the default if specified not to" do
       tag_definition = ActsAsTaggableOnMongoid::Taggable::TagTypeDefinition.new TaggableModel,
                                                                                 "tags",
-                                                                                default: ["Shazam, Black Adam", parse: false]
+                                                                                default: ["Shazam, Black Adam", { parse: false }]
 
       expect(tag_definition.default).to eq(["Shazam, Black Adam"])
     end
@@ -197,7 +197,7 @@ RSpec.describe ActsAsTaggableOnMongoid::Taggable::TagTypeDefinition::Attributes 
       tag_definition = ActsAsTaggableOnMongoid::Taggable::TagTypeDefinition.new TaggableModel,
                                                                                 "tags",
                                                                                 default: ["\"Shazam\", 'Black Adam'",
-                                                                                          parser: ActsAsTaggableOnMongoid::GenericParser]
+                                                                                          { parser: ActsAsTaggableOnMongoid::GenericParser }]
 
       expect(tag_definition.default).to eq(["\"Shazam\"", "'Black Adam'"])
     end
