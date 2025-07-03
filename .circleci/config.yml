@@ -7,7 +7,7 @@ jobs:
   build:
     docker:
       # specify the version you desire here
-       - image: cimg/ruby:3.4.1
+       - image: circleci/ruby:3.4.4
          environment:
            PRONTO_GITHUB_ACCESS_TOKEN: testing
        - image: mongo:3.6.7-jessie
