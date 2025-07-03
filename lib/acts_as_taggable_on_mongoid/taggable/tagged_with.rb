@@ -49,7 +49,7 @@ module ActsAsTaggableOnMongoid
         #   User.tagged_with("awesome", "cool", on: tags, :owned_by => foo, :start_at => Date.today ) # Users that are tagged with just awesome,
         #                                                                                               cool by 'foo' and starting today
 
-        scope :tagged_with, (->(*tags) { where ::ActsAsTaggableOnMongoid::Taggable::TaggedWithQuery.new(self, *tags).build })
+        scope :tagged_with, ->(*tags) { where ::ActsAsTaggableOnMongoid::Taggable::TaggedWithQuery.new(self, *tags).build }
       end
     end
   end

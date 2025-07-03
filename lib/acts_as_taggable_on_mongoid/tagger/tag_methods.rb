@@ -46,7 +46,7 @@ module ActsAsTaggableOnMongoid
                                   :parser,
                                   :skip_save
 
-        options[:parse] = options.fetch(:parse) { true } || options.key?(:parser)
+        options[:parse] = options.fetch(:parse, true) || options.key?(:parser)
 
         options
       end
@@ -59,7 +59,7 @@ module ActsAsTaggableOnMongoid
         options  = ActsAsTaggableOnMongoid::Tagger::TagMethods.atom_extract_tag_options(set_list)
         set_list = Array.wrap(options[:with]) if options.key?(:with)
 
-        tag_list     = taggable.public_send("tagger_#{options.fetch(:on) { :tag }}_list", self)
+        tag_list     = taggable.public_send("tagger_#{options.fetch(:on, :tag)}_list", self)
         list_options = options.slice(:parse, :parser)
         if options[:replace]
           tag_list.set(*set_list, list_options)

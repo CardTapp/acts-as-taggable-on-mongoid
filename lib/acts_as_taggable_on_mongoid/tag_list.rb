@@ -43,6 +43,7 @@ module ActsAsTaggableOnMongoid
     attr_reader :tag_definition
 
     def initialize(tag_definition, *args)
+      super()
       @tag_definition = tag_definition
 
       add(*args)
@@ -196,7 +197,7 @@ module ActsAsTaggableOnMongoid
       if tag_definition.preserve_tag_order?
         super
       elsif other.respond_to?(:sort)
-        self&.sort == other.sort
+        sort == other.sort
       end
     end
 

@@ -58,7 +58,7 @@ module ActsAsTaggableOnMongoid
         end
 
         def cached_in_model_as_list?
-          @cached_in_model_as_list ||= cache_hash.fetch(:as_list) { true }
+          @cached_in_model_as_list ||= cache_hash.fetch(:as_list, true)
         end
 
         alias preserve_tag_order? preserve_tag_order
@@ -74,7 +74,7 @@ module ActsAsTaggableOnMongoid
         def tag_list_uses_default_tagger?
           return false if !tagger? || default_tagger_method.blank?
 
-          tagger_params.fetch(:tag_list_uses_default_tagger) { false }
+          tagger_params.fetch(:tag_list_uses_default_tagger, false)
         end
 
         def default_tagger_method
@@ -92,7 +92,6 @@ module ActsAsTaggableOnMongoid
 
           default_list          = default_list.dup
           default_list.taggable = taggable
-          default_list.tagger   = default_list.tagger
 
           default_list
         end
@@ -131,7 +130,7 @@ module ActsAsTaggableOnMongoid
         def default_value=(value)
           dup_value       = Array.wrap(value).dup
           options         = dup_value.extract_options!.dup
-          options[:parse] = options.fetch(:parse) { true }
+          options[:parse] = options.fetch(:parse, true)
 
           @default = ActsAsTaggableOnMongoid::TagList.new self, *dup_value, options
         end

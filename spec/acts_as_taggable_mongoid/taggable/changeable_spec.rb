@@ -32,7 +32,7 @@ RSpec.describe ActsAsTaggableOnMongoid::Taggable::Changeable do
       orig_default   = tag_definition&.instance_variable_get(:@default)
 
       begin
-        tag_definition&.send(:default_value=, ["defaulted, tag, \"lists, are\", fun", parser: ActsAsTaggableOnMongoid::GenericParser])
+        tag_definition&.send(:default_value=, ["defaulted, tag, \"lists, are\", fun", { parser: ActsAsTaggableOnMongoid::GenericParser }])
 
         example_proxy.run
       ensure

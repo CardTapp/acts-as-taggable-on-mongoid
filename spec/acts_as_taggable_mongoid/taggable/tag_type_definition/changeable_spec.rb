@@ -227,7 +227,7 @@ RSpec.describe ActsAsTaggableOnMongoid::Taggable::TagTypeDefinition::Changeable 
       end
 
       it "returns true if it has changed via <<" do
-        taggable.public_send(attribute_list) << ["Shu, Heru, Amon, Zehuti, Aton, Mehen", parse: true]
+        taggable.public_send(attribute_list) << ["Shu, Heru, Amon, Zehuti, Aton, Mehen", { parse: true }]
 
         expect(taggable.public_send("#{attribute_list}_changed?")).to eq true
       end
@@ -572,7 +572,7 @@ RSpec.describe ActsAsTaggableOnMongoid::Taggable::TagTypeDefinition::Changeable 
       end
 
       it "returns true if it has changed via <<" do
-        taggable.public_send(attribute_list) << ["Shu, Heru, Amon, Zehuti, Aton, Mehen", parse: true]
+        taggable.public_send(attribute_list) << ["Shu, Heru, Amon, Zehuti, Aton, Mehen", { parse: true }]
 
         expect(taggable.public_send("#{attribute_list}_changed?")).to eq true
       end
@@ -740,7 +740,7 @@ RSpec.describe ActsAsTaggableOnMongoid::Taggable::TagTypeDefinition::Changeable 
           expect(taggable.public_send("#{attribute_list}_changed?")).to be_truthy
 
           taggable.public_send("tagger_#{attribute_list}s")[unspecified_default_tagger] = [%w[Solomon Atlas Zeus Achilles Hercules Mercury],
-                                                                                           tagger: unspecified_default_tagger]
+                                                                                           { tagger: unspecified_default_tagger }]
           taggable.public_send("tagger_#{attribute_list}s")[other_user]                 = %w[Shu Amon Zehuti Aton Heru Mehen]
 
           expect(taggable.public_send("#{attribute_list}_changed?")).to be_falsey
@@ -751,7 +751,7 @@ RSpec.describe ActsAsTaggableOnMongoid::Taggable::TagTypeDefinition::Changeable 
           expect(taggable.public_send("#{attribute_list}_changed?")).to be_falsey
 
           taggable.public_send("tagger_#{attribute_list}", unspecified_default_tagger).remove "Hercules"
-          taggable.public_send(attribute_list).remove ["Mercury", tagger: unspecified_default_tagger]
+          taggable.public_send(attribute_list).remove ["Mercury", { tagger: unspecified_default_tagger }]
           taggable.public_send("tagger_#{attribute_list}s")[other_user] -= "Heru"
 
           expect(taggable.public_send("#{attribute_list}_changed?")).to be_truthy
@@ -794,7 +794,7 @@ RSpec.describe ActsAsTaggableOnMongoid::Taggable::TagTypeDefinition::Changeable 
 
           taggable.public_send("#{attribute_list}=", nil)
           taggable.public_send("tagger_#{attribute_list}s")[other_user] = [%w[Solomon Atlas Zeus Achilles Hercules Mercury],
-                                                                           tagger: unspecified_default_tagger]
+                                                                           { tagger: unspecified_default_tagger }]
 
           expect(taggable.public_send("#{attribute_list}_changed?")).to be_truthy
 
@@ -886,7 +886,7 @@ RSpec.describe ActsAsTaggableOnMongoid::Taggable::TagTypeDefinition::Changeable 
 
           # taggable.public_send("#{attribute_list}=", nil)
           taggable.public_send("tagger_#{attribute_list}s")[unspecified_default_tagger] = [%w[Solomon Atlas Zeus Achilles Hercules Mercury],
-                                                                                           tagger: default_tagger]
+                                                                                           { tagger: default_tagger }]
           taggable.public_send("tagger_#{attribute_list}s")[other_user]                 = %w[Shu Amon Zehuti Aton Heru Mehen]
 
           expect(taggable.public_send("#{attribute_list}_changed?")).to be_falsey
@@ -898,7 +898,7 @@ RSpec.describe ActsAsTaggableOnMongoid::Taggable::TagTypeDefinition::Changeable 
           expect(taggable.public_send("#{attribute_list}_changed?")).to be_falsey
 
           taggable.public_send("tagger_#{attribute_list}", default_tagger).remove "Hercules"
-          taggable.public_send(attribute_list).remove ["Mercury", tagger: default_tagger]
+          taggable.public_send(attribute_list).remove ["Mercury", { tagger: default_tagger }]
 
           expect(taggable.public_send("#{attribute_list}_changed?")).to be_truthy
 
@@ -919,7 +919,7 @@ RSpec.describe ActsAsTaggableOnMongoid::Taggable::TagTypeDefinition::Changeable 
         it "returns if one tagger removed" do
           expect(taggable.public_send("#{attribute_list}_changed?")).to be_falsey
 
-          taggable.public_send("#{attribute_list}=", [%w[Solomon Atlas Zeus Achilles Hercules Mercury], tagger: other_user])
+          taggable.public_send("#{attribute_list}=", [%w[Solomon Atlas Zeus Achilles Hercules Mercury], { tagger: other_user }])
 
           expect(taggable.public_send("#{attribute_list}_changed?")).to be_truthy
 
@@ -1010,7 +1010,7 @@ RSpec.describe ActsAsTaggableOnMongoid::Taggable::TagTypeDefinition::Changeable 
 
           expect(taggable.public_send("#{attribute_list}_changed?")).to be_truthy
 
-          taggable.public_send("#{attribute_list}=", [%w[Solomon Atlas Zeus Achilles Hercules Mercury], tagger: unspecified_default_tagger])
+          taggable.public_send("#{attribute_list}=", [%w[Solomon Atlas Zeus Achilles Hercules Mercury], { tagger: unspecified_default_tagger }])
           taggable.public_send("tagger_#{attribute_list}s")[other_user] = %w[Shu Amon Zehuti Aton Heru Mehen]
 
           expect(taggable.public_send("#{attribute_list}_changed?")).to be_falsey
@@ -1024,7 +1024,7 @@ RSpec.describe ActsAsTaggableOnMongoid::Taggable::TagTypeDefinition::Changeable 
           expect(taggable.public_send("#{attribute_list}_changed?")).to be_falsey
 
           taggable.public_send("tagger_#{attribute_list}", unspecified_default_tagger).remove "Hercules"
-          taggable.public_send(attribute_list).remove ["Mercury", tagger: unspecified_default_tagger]
+          taggable.public_send(attribute_list).remove ["Mercury", { tagger: unspecified_default_tagger }]
 
           expect(taggable.public_send("#{attribute_list}_changed?")).to be_truthy
 
@@ -1049,7 +1049,7 @@ RSpec.describe ActsAsTaggableOnMongoid::Taggable::TagTypeDefinition::Changeable 
         it "returns if one tagger removed" do
           expect(taggable.public_send("#{attribute_list}_changed?")).to be_falsey
 
-          taggable.public_send("#{attribute_list}=", [%w[Solomon Atlas Zeus Achilles Hercules Mercury], tagger: other_user])
+          taggable.public_send("#{attribute_list}=", [%w[Solomon Atlas Zeus Achilles Hercules Mercury], { tagger: other_user }])
 
           expect(taggable.public_send("#{attribute_list}_changed?")).to be_truthy
 
@@ -1140,7 +1140,7 @@ RSpec.describe ActsAsTaggableOnMongoid::Taggable::TagTypeDefinition::Changeable 
 
           expect(taggable.public_send("#{attribute_list}_changed?")).to be_truthy
 
-          taggable.public_send("#{attribute_list}=", [%w[Solomon Atlas Zeus Achilles Hercules Mercury], tagger: unspecified_default_tagger])
+          taggable.public_send("#{attribute_list}=", [%w[Solomon Atlas Zeus Achilles Hercules Mercury], { tagger: unspecified_default_tagger }])
           taggable.public_send("tagger_#{attribute_list}s")[other_user] = %w[Shu Amon Zehuti Aton Heru Mehen]
 
           expect(taggable.public_send("#{attribute_list}_changed?")).to be_falsey
@@ -1156,7 +1156,7 @@ RSpec.describe ActsAsTaggableOnMongoid::Taggable::TagTypeDefinition::Changeable 
           expect(taggable.public_send("#{attribute_list}_changed?")).to be_falsey
 
           taggable.public_send("tagger_#{attribute_list}", unspecified_default_tagger).remove "Hercules"
-          taggable.public_send(attribute_list).remove ["Mercury", tagger: unspecified_default_tagger]
+          taggable.public_send(attribute_list).remove ["Mercury", { tagger: unspecified_default_tagger }]
 
           expect(taggable.public_send("#{attribute_list}_changed?")).to be_truthy
 
@@ -1185,7 +1185,7 @@ RSpec.describe ActsAsTaggableOnMongoid::Taggable::TagTypeDefinition::Changeable 
         it "returns if one tagger removed" do
           expect(taggable.public_send("#{attribute_list}_changed?")).to be_falsey
 
-          taggable.public_send("#{attribute_list}=", [%w[Solomon Atlas Zeus Achilles Hercules Mercury], tagger: other_user])
+          taggable.public_send("#{attribute_list}=", [%w[Solomon Atlas Zeus Achilles Hercules Mercury], { tagger: other_user }])
 
           expect(taggable.public_send("#{attribute_list}_changed?")).to be_truthy
 

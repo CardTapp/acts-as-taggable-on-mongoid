@@ -238,13 +238,13 @@ RSpec.describe ActsAsTaggableOnMongoid::TaggerTagList do
     end
 
     it "does not parse values if told not to" do
-      tagger_tag_list[nil] = ["A, list", parse: false]
+      tagger_tag_list[nil] = ["A, list", { parse: false }]
 
       expect(tagger_tag_list[nil]).to eq ["A, list"]
     end
 
     it "uses a custom parser" do
-      tagger_tag_list[nil] = ["\"A, list\"", parser: ActsAsTaggableOnMongoid::GenericParser]
+      tagger_tag_list[nil] = ["\"A, list\"", { parser: ActsAsTaggableOnMongoid::GenericParser }]
 
       expect(tagger_tag_list[nil]).to eq ["\"A", "list\""]
     end

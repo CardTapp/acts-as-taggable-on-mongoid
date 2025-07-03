@@ -17,6 +17,7 @@ module ActsAsTaggableOnMongoid
         super(*args)
       end
 
+      # rubocop:disable Metrics/PerceivedComplexity
       def changed
         changed_values = super
         tag_list_names = tag_types.values.map(&:tag_list_name).map(&:to_s)
@@ -33,6 +34,7 @@ module ActsAsTaggableOnMongoid
 
         changed_values
       end
+      # rubocop:enable Metrics/PerceivedComplexity
 
       def changes
         changed_values = super

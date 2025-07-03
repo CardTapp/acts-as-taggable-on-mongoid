@@ -2,20 +2,20 @@
 
 require "rails_helper"
 
-RSpec.describe ActsAsTaggableOnMongoid::Taggable::Cache do
-  # A test class for testing cacheed_in_model tags
-  class CacheTaggableModel
-    include ::Mongoid::Document
-    include ::Mongoid::Timestamps
+# A test class for testing cacheed_in_model tags
+class CacheTaggableModel
+  include ::Mongoid::Document
+  include ::Mongoid::Timestamps
 
-    field :name, type: String
+  field :name, type: String
 
-    # :reek:UtilityFunction
-    def my_user
-      MyUser.find_or_create_by! name: "My User"
-    end
+  # :reek:UtilityFunction
+  def my_user
+    MyUser.find_or_create_by! name: "My User"
   end
+end
 
+RSpec.describe ActsAsTaggableOnMongoid::Taggable::Cache do
   after(:each) do
     CacheTaggableModel.tag_types.clear
   end

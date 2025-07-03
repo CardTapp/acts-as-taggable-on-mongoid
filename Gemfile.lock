@@ -1,23 +1,25 @@
 PATH
   remote: .
   specs:
-    acts-as-taggable-on-mongoid (6.1.1.12)
-      activesupport (>= 5.0)
-      mongoid (>= 6.1.1, < 8.0)
+    acts-as-taggable-on-mongoid (6.1.2.0)
+      activesupport (>= 6.0)
+      mongoid (>= 6.1.1, <= 9.0)
 
 GEM
   remote: https://rubygems.org/
   specs:
-    activemodel (5.2.7)
-      activesupport (= 5.2.7)
-    activesupport (5.2.7)
+    activemodel (6.1.7.9)
+      activesupport (= 6.1.7.9)
+    activesupport (6.1.7.9)
       concurrent-ruby (~> 1.0, >= 1.0.2)
-      i18n (>= 0.7, < 2)
-      minitest (~> 5.1)
-      tzinfo (~> 1.1)
+      i18n (>= 1.6, < 2)
+      minitest (>= 5.1)
+      tzinfo (~> 2.0)
+      zeitwerk (~> 2.3)
     addressable (2.8.7)
       public_suffix (>= 2.0.2, < 7.0)
     ast (2.4.3)
+    base64 (0.3.0)
     bigdecimal (3.2.2)
     brakeman (5.4.0)
     bson (4.14.1)
@@ -94,6 +96,7 @@ GEM
       ruby2_keywords (~> 0.0.5)
     multi_xml (0.7.2)
       bigdecimal (~> 3.1)
+    mutex_m (0.3.0)
     net-http (0.6.0)
       uri
     octokit (10.0.0)
@@ -203,10 +206,9 @@ GEM
     terminal-table (4.0.0)
       unicode-display_width (>= 1.1.1, < 4)
     thor (1.3.2)
-    thread_safe (0.3.6)
     timecop (0.9.4)
-    tzinfo (1.2.11)
-      thread_safe (~> 0.1)
+    tzinfo (2.0.6)
+      concurrent-ruby (~> 1.0)
     unicode-display_width (3.1.4)
       unicode-emoji (~> 4.0, >= 4.0.4)
     unicode-emoji (4.0.4)
@@ -218,10 +220,12 @@ PLATFORMS
 
 DEPENDENCIES
   acts-as-taggable-on-mongoid!
+  base64
   codecov (~> 0.6.0, ~> 0.1)
   cornucopia
   database_cleaner
   gem-release
+  mutex_m
   pronto
   pronto-brakeman
   pronto-circleci
@@ -230,7 +234,7 @@ DEPENDENCIES
   pronto-reek
   pronto-rubocop
   rake (~> 13.0)
-  rspec (~> 3.0)
+  rspec (~> 3.13.1)
   rspec_junit_formatter (~> 0.4.1)
   rubocop
   rubocop-performance
@@ -239,4 +243,4 @@ DEPENDENCIES
   timecop
 
 BUNDLED WITH
-   2.1.4
+   2.6.7

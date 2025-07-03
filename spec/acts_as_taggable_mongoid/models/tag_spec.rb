@@ -137,7 +137,7 @@ RSpec.describe ActsAsTaggableOnMongoid::Models::Tag do
 
     describe "escape wildcard symbols in like requests" do
       let!(:another_tag) { ActsAsTaggableOnMongoid::Models::Tag.create!(name: "coo%", context: "tags", taggable_type: TaggableModel.name) }
-      let!(:another_tag2) { ActsAsTaggableOnMongoid::Models::Tag.create!(name: "coolish", context: "tags", taggable_type: TaggableModel.name) }
+      let!(:another_tag_2) { ActsAsTaggableOnMongoid::Models::Tag.create!(name: "coolish", context: "tags", taggable_type: TaggableModel.name) }
 
       before(:each) do
         tag.name = "cool"
