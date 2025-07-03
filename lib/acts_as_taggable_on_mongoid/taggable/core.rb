@@ -54,7 +54,7 @@ module ActsAsTaggableOnMongoid
       def set_tag_list(tag_definition, new_tags)
         dup_tags        = Array.wrap(new_tags).dup
         options         = dup_tags.extract_options!.dup
-        options[:parse] = options.fetch(:parse) { true }
+        options[:parse] = options.fetch(:parse, true)
 
         new_list          = tag_definition.parse(*dup_tags, options)
         new_list.taggable = self

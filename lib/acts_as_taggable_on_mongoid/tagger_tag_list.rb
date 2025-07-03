@@ -80,7 +80,7 @@ module ActsAsTaggableOnMongoid
       else
         value           = Array.wrap(value).dup
         options         = value.extract_options!
-        options[:parse] = options.fetch(:parse) { true }
+        options[:parse] = options.fetch(:parse, true)
 
         value = [*value, options]
 

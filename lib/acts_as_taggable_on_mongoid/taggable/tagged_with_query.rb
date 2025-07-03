@@ -40,7 +40,7 @@ module ActsAsTaggableOnMongoid
 
       def cleanup_options
         options[:on]    = Array.wrap(options[:on] || options.delete(:context))
-        options[:parse] = options.fetch(:parse) { true } || options.key?(:parser)
+        options[:parse] = options.fetch(:parse, true) || options.key?(:parser)
 
         validate_options
       end

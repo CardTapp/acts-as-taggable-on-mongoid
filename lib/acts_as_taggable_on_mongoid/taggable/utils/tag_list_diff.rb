@@ -83,7 +83,7 @@ module ActsAsTaggableOnMongoid
           return if share_tags_sorted?
 
           # Update arrays of tag objects
-          @old_tags |= current_tags[first_ordered_difference..-1]
+          @old_tags |= current_tags[first_ordered_difference..]
 
           preserve_new_tag_list_order
         end
@@ -101,7 +101,7 @@ module ActsAsTaggableOnMongoid
         end
 
         def preserved_tags
-          @preserved_tags ||= new_tags | current_tags[first_ordered_difference..-1] & shared_tags
+          @preserved_tags ||= new_tags | current_tags[first_ordered_difference..] & shared_tags
         end
 
         def first_ordered_difference

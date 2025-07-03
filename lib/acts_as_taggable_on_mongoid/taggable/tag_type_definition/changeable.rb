@@ -24,7 +24,6 @@ module ActsAsTaggableOnMongoid
 
           list_default              = default.dup
           list_default.taggable     = taggable
-          list_default.tagger       = list_default.tagger
           list[list_default.tagger] = list_default
 
           list.taggable = taggable
