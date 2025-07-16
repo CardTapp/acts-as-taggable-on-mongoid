@@ -25,7 +25,7 @@ module ActsAsTaggableOnMongoid
         changed_attributes.each_key do |key|
           next unless tag_list_names.include?(key.to_s)
 
-          if public_send("#{key}_changed?")
+          if field_changed?(key)
             changed_values << key unless changed_values.include?(key)
           else
             changed_values.delete(key)
@@ -42,7 +42,7 @@ module ActsAsTaggableOnMongoid
         tag_types.each_value do |tag_definition|
           tag_list_name = tag_definition.tag_list_name
 
-          next unless public_send("#{tag_list_name}_changed?")
+          next unless field_changed?(tag_list_name)
 
           changed_values[tag_list_name] = public_send("#{tag_list_name}_change")
         end
@@ -68,6 +68,15 @@ module ActsAsTaggableOnMongoid
         return if changed_attributes.key?(attribute_name)
 
         changed_attributes[attribute_name] = tag_list_cache_on(tag_definition)&.dup
+      end
+
+      def field_changed?(field_name)
+        changed_method = "#{field_name}_previously_changed?"
+        changed_method = "#{field_name}changed?" unless respond_to?(changed_method)
+
+        public_send(changed_method)
+      rescue NoMethodError
+        false
       end
     end
   end
