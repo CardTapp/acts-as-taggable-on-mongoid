@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    acts-as-taggable-on-mongoid (6.1.2.0)
+    acts-as-taggable-on-mongoid (6.2.0.0)
       activesupport (>= 6.0)
       mongoid (>= 6.1.1, <= 9.0)
 

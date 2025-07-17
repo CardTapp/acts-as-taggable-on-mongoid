@@ -67,7 +67,7 @@ module ActsAsTaggableOnMongoid
       def get_tag_list_change(tag_definition)
         tag_list_name = tag_definition.tag_list_name
 
-        return nil unless public_send("#{tag_list_name}_changed?")
+        return nil unless field_changed?(tag_list_name)
 
         changed_value = new_record? ? tag_definition.default_tagger_tag_list(self) : changed_attributes[tag_list_name]
         current_value = tag_list_cache_on(tag_definition)
@@ -102,7 +102,7 @@ module ActsAsTaggableOnMongoid
 
         tag_list_name = tag_definition.tag_list_name
 
-        if public_send "#{tag_list_name}_changed?"
+        if field_changed?(tag_list_name)
           changed_attributes[tag_list_name][default_tagger].dup
         else
           public_send(tag_list_name).dup
@@ -114,7 +114,7 @@ module ActsAsTaggableOnMongoid
 
         tag_list_name = tag_definition.tag_list_name
 
-        if public_send "#{tag_list_name}_changed?"
+        if field_changed?(tag_list_name)
           changed_attributes[tag_list_name].dup
         else
           public_send(tag_definition.tagger_tag_lists_name).dup
@@ -127,7 +127,7 @@ module ActsAsTaggableOnMongoid
 
         tag_list_name = tag_definition.tag_list_name
 
-        if public_send "#{tag_list_name}_changed?"
+        if field_changed?(tag_list_name)
           changed_attributes[tag_list_name][tagger].dup
         else
           public_send(tag_definition.tagger_tag_list_name, tagger).dup
@@ -337,6 +337,15 @@ module ActsAsTaggableOnMongoid
       # @param [Symbol] tag_definition The tag context for the tag_list
       def find_or_create_tags_from_list_with_context(tag_definition, tagger_tag_list)
         load_tags(tag_definition, tagger_tag_list)
+      end
+
+      def field_changed?(field_name)
+        changed_method = "#{field_name}_previously_changed?"
+        changed_method = "#{field_name}changed?" unless respond_to?(changed_method)
+
+        public_send(changed_method)
+      rescue NoMethodError
+        false
       end
     end
   end
