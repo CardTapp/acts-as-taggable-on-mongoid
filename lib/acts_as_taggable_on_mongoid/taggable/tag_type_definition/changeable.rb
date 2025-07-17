@@ -129,7 +129,7 @@ module ActsAsTaggableOnMongoid
 
           owner.taggable_mixin.module_eval do
             define_method("reset_#{tag_list_name}!") do
-              return unless public_send("#{tag_list_name}_changed?")
+              return unless field_changed?(tag_list_name)
 
               tagger_tag_list_set(changed_attributes[tag_list_name].dup)
             end
@@ -145,6 +145,15 @@ module ActsAsTaggableOnMongoid
               tagger_tag_list_set(tag_definition.default_tagger_tag_list(self))
             end
           end
+        end
+
+        def field_changed?(field_name)
+          changed_method = "#{field_name}_previously_changed?"
+          changed_method = "#{field_name}changed?" unless respond_to?(changed_method)
+
+          public_send(changed_method)
+        rescue NoMethodError
+          false
         end
       end
     end
