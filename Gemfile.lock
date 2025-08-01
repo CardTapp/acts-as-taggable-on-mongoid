@@ -64,7 +64,7 @@ GEM
       dry-logic (~> 1.4)
       zeitwerk (~> 2.6)
     erubis (2.7.0)
-    faraday (2.13.2)
+    faraday (2.13.4)
       faraday-net_http (>= 2.0, < 3.5)
       json
       logger
@@ -82,7 +82,7 @@ GEM
       multi_xml (>= 0.5.2)
     i18n (1.14.7)
       concurrent-ruby (~> 1.0)
-    json (2.13.0)
+    json (2.13.2)
     language_server-protocol (3.17.0.5)
     lint_roller (1.1.0)
     logger (1.7.0)
