@@ -72,7 +72,7 @@ module ActsAsTaggableOnMongoid
 
       def field_changed?(field_name)
         changed_method = "#{field_name}_previously_changed?"
-        changed_method = "#{field_name}changed?" unless respond_to?(changed_method)
+        changed_method = "#{field_name}_changed?" unless respond_to?(changed_method)
 
         public_send(changed_method)
       rescue NoMethodError
