@@ -27,7 +27,7 @@ module ActsAsTaggableOnMongoid
         private
 
         def denormalize_tag_name
-          return unless name_changed?
+          return unless name_previously_changed?
 
           update_taggings
           update_cached_taggings
