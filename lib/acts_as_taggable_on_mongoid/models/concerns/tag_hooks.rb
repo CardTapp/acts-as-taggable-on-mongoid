@@ -48,7 +48,7 @@ module ActsAsTaggableOnMongoid
           return if tag_definition.blank?
           return unless tag_definition.cached_in_model?
 
-          cached_fields_query(name_was).update_all("$set" => { "cached_#{tag_definition.tag_list_name}.$" => name })
+          cached_fields_query(name_previously_was).update_all("$set" => { "cached_#{tag_definition.tag_list_name}.$" => name })
         end
 
         def cached_fields_query(chached_field_value)
