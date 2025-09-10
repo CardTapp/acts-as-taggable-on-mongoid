@@ -20,7 +20,7 @@ GEM
       public_suffix (>= 2.0.2, < 7.0)
     ast (2.4.3)
     base64 (0.3.0)
-    bigdecimal (3.2.2)
+    bigdecimal (3.2.3)
     brakeman (5.4.0)
     bson (4.14.1)
     code_analyzer (0.5.5)
