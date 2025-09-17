@@ -152,7 +152,7 @@ GEM
       rexml (~> 3.1)
     regexp_parser (2.11.2)
     require_all (3.0.0)
-    rexml (3.4.2)
+    rexml (3.4.4)
     rspec (3.13.1)
       rspec-core (~> 3.13.0)
       rspec-expectations (~> 3.13.0)
