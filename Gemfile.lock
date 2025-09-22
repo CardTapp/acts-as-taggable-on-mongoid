@@ -150,7 +150,7 @@ GEM
       parser (~> 3.3.0)
       rainbow (>= 2.0, < 4.0)
       rexml (~> 3.1)
-    regexp_parser (2.11.2)
+    regexp_parser (2.11.3)
     require_all (3.0.0)
     rexml (3.4.4)
     rspec (3.13.1)
