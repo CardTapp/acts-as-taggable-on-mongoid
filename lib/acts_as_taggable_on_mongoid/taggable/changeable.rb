@@ -62,7 +62,6 @@ module ActsAsTaggableOnMongoid
         super(*args)
       end
 
-      # rubocop:disable Metrics/PerceivedComplexity
       def changed
         changed_values = super
 
@@ -74,7 +73,6 @@ module ActsAsTaggableOnMongoid
 
         changed_values
       end
-      # rubocop:enable Metrics/PerceivedComplexity
 
       def changes
         changed_values = super
