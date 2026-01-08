@@ -131,7 +131,7 @@ module ActsAsTaggableOnMongoid
             define_method("reset_#{tag_list_name}!") do
               return unless public_send("#{tag_list_name}_changed?")
 
-              tagger_tag_list_set(changed_attributes[tag_list_name].dup)
+              tagger_tag_list_set(tag_list_changes[tag_list_name].dup)
             end
           end
         end

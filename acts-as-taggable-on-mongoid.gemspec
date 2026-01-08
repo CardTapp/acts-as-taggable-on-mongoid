@@ -14,7 +14,7 @@ Gem::Specification.new do |spec|
   spec.description = "A partial mongoid implementation of tagging based on/inspired by acts-as-taggable-on."
   spec.homepage    = "http://www.cardtapp.com"
   spec.license     = "MIT"
-  spec.required_ruby_version = ">= 3.4.0"
+  spec.required_ruby_version = ">= 3.1"
 
   # # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
   # # to allow pushing to a single host or delete this section to allow pushing to any host.
@@ -33,7 +33,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency "activesupport", ">= 6.0"
-  spec.add_dependency "mongoid", ">= 6.1.1", "<= 9.0"
+  spec.add_dependency "mongoid", "~> 8.0"
 
   spec.add_development_dependency "codecov", "~> 0.1", "~> 0.6.0"
   spec.add_development_dependency "cornucopia"

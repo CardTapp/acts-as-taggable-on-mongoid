@@ -69,7 +69,7 @@ module ActsAsTaggableOnMongoid
 
         return nil unless public_send("#{tag_list_name}_changed?")
 
-        changed_value = new_record? ? tag_definition.default_tagger_tag_list(self) : changed_attributes[tag_list_name]
+        changed_value = tag_list_original_value(tag_definition)
         current_value = tag_list_cache_on(tag_definition)
 
         return nil if (changed_value <=> current_value)&.zero?
@@ -88,9 +88,9 @@ module ActsAsTaggableOnMongoid
       def get_tag_list_changed(tag_definition)
         tag_list_name = tag_definition.tag_list_name
 
-        return false unless changed_attributes.key?(tag_list_name)
+        return false unless tag_list_changes.key?(tag_list_name)
 
-        changed_value = new_record? ? tag_definition.default_tagger_tag_list(self) : changed_attributes[tag_list_name]
+        changed_value = tag_list_original_value(tag_definition)
         current_value = tag_list_cache_on(tag_definition)
 
         !(changed_value <=> current_value)&.zero?
@@ -102,11 +102,9 @@ module ActsAsTaggableOnMongoid
 
         tag_list_name = tag_definition.tag_list_name
 
-        if public_send "#{tag_list_name}_changed?"
-          changed_attributes[tag_list_name][default_tagger].dup
-        else
-          public_send(tag_list_name).dup
-        end
+        return public_send(tag_list_name).dup unless public_send("#{tag_list_name}_changed?")
+
+        tag_list_changes[tag_list_name][default_tagger].dup
       end
 
       def get_tag_lists_was(tag_definition)
@@ -114,11 +112,9 @@ module ActsAsTaggableOnMongoid
 
         tag_list_name = tag_definition.tag_list_name
 
-        if public_send "#{tag_list_name}_changed?"
-          changed_attributes[tag_list_name].dup
-        else
-          public_send(tag_definition.tagger_tag_lists_name).dup
-        end
+        return public_send(tag_definition.tagger_tag_lists_name).dup unless public_send("#{tag_list_name}_changed?")
+
+        tag_list_changes[tag_list_name].dup
       end
 
       def get_tagger_list_was(tag_definition, tagger)
@@ -127,11 +123,9 @@ module ActsAsTaggableOnMongoid
 
         tag_list_name = tag_definition.tag_list_name
 
-        if public_send "#{tag_list_name}_changed?"
-          changed_attributes[tag_list_name][tagger].dup
-        else
-          public_send(tag_definition.tagger_tag_list_name, tagger).dup
-        end
+        return public_send(tag_definition.tagger_tag_list_name, tagger).dup unless public_send("#{tag_list_name}_changed?")
+
+        tag_list_changes[tag_list_name][tagger].dup
       end
 
       def tag_list_cache_set_on(tag_definition)
@@ -163,6 +157,26 @@ module ActsAsTaggableOnMongoid
         end
 
         tagger_tag_list
+      end
+
+      def tag_list_original_value(tag_definition)
+        original_value = tag_list_changes[tag_definition.tag_list_name] || tag_definition.default_tagger_tag_list(self)
+
+        return original_value unless new_record? && tag_definition.tagger?
+
+        default_tagger = tag_definition.default_tagger(self)
+        return original_value unless default_tagger
+
+        adjusted_value = original_value.dup
+
+        if adjusted_value[default_tagger].blank?
+          moved_default = adjusted_value.delete(nil)
+          adjusted_value[default_tagger] = moved_default&.dup || tag_definition.taggable_default(self)&.dup
+        end
+
+        adjusted_value[nil] ||= ActsAsTaggableOnMongoid::TagList.new_taggable_list(tag_definition, self)
+
+        adjusted_value
       end
 
       def tag_list_on(tag_definition)
@@ -217,6 +231,7 @@ module ActsAsTaggableOnMongoid
 
         return if current_tag_list == new_list
 
+        store_tag_list_change(tag_definition)
         current_tag_list.notify_will_change
       end
 
@@ -262,7 +277,7 @@ module ActsAsTaggableOnMongoid
 
       def set_default_value(tag_definition, default)
         public_send(tag_definition.tagger_tag_lists_name)[default.tagger] = default
-        changed_attributes.delete tag_definition.tag_list_name
+        tag_list_changes.delete tag_definition.tag_list_name
       end
 
       def save_tags
