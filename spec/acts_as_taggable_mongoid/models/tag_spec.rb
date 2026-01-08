@@ -207,7 +207,7 @@ RSpec.describe ActsAsTaggableOnMongoid::Models::Tag do
           duplicate_tag.valid?
 
           expect(duplicate_tag.errors.size).to eq(1)
-          expect(duplicate_tag.errors.messages[:name]).to include("is already taken")
+          expect(duplicate_tag.errors.messages[:name]).to include("has already been taken")
         end
 
         it "is valid if you change the context" do
@@ -262,7 +262,7 @@ RSpec.describe ActsAsTaggableOnMongoid::Models::Tag do
       duplicate_tag    = ActsAsTaggableOnMongoid::Models::Tag.new(tag.attributes)
       duplicate_tag.id = BSON::ObjectId.new
       expect(duplicate_tag).not_to be_valid
-      expect(duplicate_tag.errors.messages[:name]).to include("is already taken")
+      expect(duplicate_tag.errors.messages[:name]).to include("has already been taken")
 
       expect { duplicate_tag.save!(validate: false) }.to raise_error Mongo::Error::OperationFailure
     end
@@ -301,7 +301,7 @@ RSpec.describe ActsAsTaggableOnMongoid::Models::Tag do
       duplicate_tag.id = BSON::ObjectId.new
 
       expect(duplicate_tag).not_to be_valid
-      expect(duplicate_tag.errors.messages[:name]).to include("is already taken")
+      expect(duplicate_tag.errors.messages[:name]).to include("has already been taken")
     end
 
     it "allows a duplicate name for a different context" do

@@ -27,7 +27,7 @@ module ActsAsTaggableOnMongoid
         private
 
         def denormalize_tag_name
-          return unless name_changed?
+          return unless saved_change_to_name?
 
           update_taggings
           update_cached_taggings
@@ -48,7 +48,10 @@ module ActsAsTaggableOnMongoid
           return if tag_definition.blank?
           return unless tag_definition.cached_in_model?
 
-          cached_fields_query(name_was).update_all("$set" => { "cached_#{tag_definition.tag_list_name}.$" => name })
+          previous_name = saved_change_to_name&.first
+          return if previous_name.blank?
+
+          cached_fields_query(previous_name).update_all("$set" => { "cached_#{tag_definition.tag_list_name}.$" => name })
         end
 
         def cached_fields_query(chached_field_value)

@@ -73,6 +73,18 @@ RSpec.describe "Dirty behavior of taggable objects" do
         expect(taggable.changes).to be_empty
       end
     end
+
+    context "when tag_list changed by association removal" do
+      it "flags tag_list as changed" do
+        fresh_taggable = TaggableModel.find(taggable.id)
+        tagging = fresh_taggable.taggings.where(tag_name: "epic").first
+
+        fresh_taggable.taggings.delete(tagging)
+
+        expect(fresh_taggable.tag_list_changed?).to be_truthy
+        expect(fresh_taggable.tag_list_change).to eq([%w[awesome epic], ["awesome"]])
+      end
+    end
   end
 
   context "with context tags" do

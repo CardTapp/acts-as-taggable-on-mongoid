@@ -69,7 +69,7 @@ module ActsAsTaggableOnMongoid
 
         return nil unless public_send("#{tag_list_name}_changed?")
 
-        changed_value = new_record? ? tag_definition.default_tagger_tag_list(self) : changed_attributes[tag_list_name]
+        changed_value = tag_list_original_value(tag_definition)
         current_value = tag_list_cache_on(tag_definition)
 
         return nil if (changed_value <=> current_value)&.zero?
@@ -88,9 +88,9 @@ module ActsAsTaggableOnMongoid
       def get_tag_list_changed(tag_definition)
         tag_list_name = tag_definition.tag_list_name
 
-        return false unless changed_attributes.key?(tag_list_name)
+        return false unless tag_list_changes.key?(tag_list_name)
 
-        changed_value = new_record? ? tag_definition.default_tagger_tag_list(self) : changed_attributes[tag_list_name]
+        changed_value = tag_list_original_value(tag_definition)
         current_value = tag_list_cache_on(tag_definition)
 
         !(changed_value <=> current_value)&.zero?
@@ -102,11 +102,9 @@ module ActsAsTaggableOnMongoid
 
         tag_list_name = tag_definition.tag_list_name
 
-        if public_send "#{tag_list_name}_changed?"
-          changed_attributes[tag_list_name][default_tagger].dup
-        else
-          public_send(tag_list_name).dup
-        end
+        return public_send(tag_list_name).dup unless public_send("#{tag_list_name}_changed?")
+
+        tag_list_changes[tag_list_name][default_tagger].dup
       end
 
       def get_tag_lists_was(tag_definition)
@@ -114,11 +112,9 @@ module ActsAsTaggableOnMongoid
 
         tag_list_name = tag_definition.tag_list_name
 
-        if public_send "#{tag_list_name}_changed?"
-          changed_attributes[tag_list_name].dup
-        else
-          public_send(tag_definition.tagger_tag_lists_name).dup
-        end
+        return public_send(tag_definition.tagger_tag_lists_name).dup unless public_send("#{tag_list_name}_changed?")
+
+        tag_list_changes[tag_list_name].dup
       end
 
       def get_tagger_list_was(tag_definition, tagger)
@@ -127,11 +123,9 @@ module ActsAsTaggableOnMongoid
 
         tag_list_name = tag_definition.tag_list_name
 
-        if public_send "#{tag_list_name}_changed?"
-          changed_attributes[tag_list_name][tagger].dup
-        else
-          public_send(tag_definition.tagger_tag_list_name, tagger).dup
-        end
+        return public_send(tag_definition.tagger_tag_list_name, tagger).dup unless public_send("#{tag_list_name}_changed?")
+
+        tag_list_changes[tag_list_name][tagger].dup
       end
 
       def tag_list_cache_set_on(tag_definition)
@@ -163,6 +157,36 @@ module ActsAsTaggableOnMongoid
         end
 
         tagger_tag_list
+      end
+
+      def tag_list_original_value(tag_definition)
+        original_value = tag_list_changes[tag_definition.tag_list_name] || tag_definition.default_tagger_tag_list(self)
+
+        default_tagger = default_tagger_for_original_value(tag_definition)
+        return original_value unless default_tagger
+
+        adjusted_value = original_value.dup
+        move_default_list_to_tagger(adjusted_value, tag_definition, default_tagger)
+        ensure_nil_tagger_list(adjusted_value, tag_definition)
+
+        adjusted_value
+      end
+
+      def default_tagger_for_original_value(tag_definition)
+        return unless new_record? && tag_definition.tagger?
+
+        tag_definition.default_tagger(self)
+      end
+
+      def move_default_list_to_tagger(adjusted_value, tag_definition, default_tagger)
+        return unless adjusted_value[default_tagger].blank?
+
+        moved_default = adjusted_value.delete(nil)
+        adjusted_value[default_tagger] = moved_default&.dup || tag_definition.taggable_default(self)&.dup
+      end
+
+      def ensure_nil_tagger_list(adjusted_value, tag_definition)
+        adjusted_value[nil] ||= ActsAsTaggableOnMongoid::TagList.new_taggable_list(tag_definition, self)
       end
 
       def tag_list_on(tag_definition)
@@ -217,6 +241,7 @@ module ActsAsTaggableOnMongoid
 
         return if current_tag_list == new_list
 
+        store_tag_list_change(tag_definition)
         current_tag_list.notify_will_change
       end
 
@@ -262,7 +287,7 @@ module ActsAsTaggableOnMongoid
 
       def set_default_value(tag_definition, default)
         public_send(tag_definition.tagger_tag_lists_name)[default.tagger] = default
-        changed_attributes.delete tag_definition.tag_list_name
+        tag_list_changes.delete tag_definition.tag_list_name
       end
 
       def save_tags
@@ -310,7 +335,52 @@ module ActsAsTaggableOnMongoid
 
         return unless tag_definition
 
-        attribute_will_change! tag_definition.tag_list_name
+        tag_list_name = tag_definition.tag_list_name
+
+        store_tag_list_change_from_taggings(tag_definition, tag_list_name, tagging)
+
+        attribute_will_change! tag_list_name
+      end
+
+      def store_tag_list_change_from_taggings(tag_definition, tag_list_name, tagging)
+        return if tag_list_changes.key?(tag_list_name) || tag_list_cache_set_on(tag_definition)
+
+        taggings = all_tags_on(tag_definition).to_a
+        tagger_tag_list = tagger_tag_list_from_taggings(tag_definition, taggings)
+
+        update_tagger_tag_list_for_change(tagger_tag_list, tag_definition, taggings, tagging)
+
+        tag_list_changes[tag_list_name] = tagger_tag_list
+      end
+
+      def update_tagger_tag_list_for_change(tagger_tag_list, tag_definition, taggings, tagging)
+        tag_list = tagger_tag_list[tagging.tagger]
+        tag_name = tagging.tag_name
+
+        return if tag_name.blank?
+
+        if taggings.any? { |existing| existing.id == tagging.id }
+          tag_list.delete(tag_name)
+          return
+        end
+
+        return if tag_list.include?(tag_name)
+
+        if tag_definition.preserve_tag_order?
+          insert_tag_in_order(taggings, tag_list, tagging, tag_name)
+        else
+          tag_list.silent_concat([tag_name])
+        end
+      end
+
+      def insert_tag_in_order(taggings, tag_list, tagging, tag_name)
+        taggings_for_tagger = taggings.select { |existing| existing.tagger == tagging.tagger }
+        ordering_key = [tagging.created_at, tagging.id]
+        insert_index = taggings_for_tagger.index do |existing|
+          ([existing.created_at, existing.id] <=> ordering_key).positive?
+        end
+
+        tag_list.insert(insert_index || tag_list.length, tag_name)
       end
 
       ##

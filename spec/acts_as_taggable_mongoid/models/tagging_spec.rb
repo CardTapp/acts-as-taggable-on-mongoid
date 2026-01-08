@@ -19,7 +19,9 @@ RSpec.describe ActsAsTaggableOnMongoid::Models::Tagging do
 
     it "should not create duplicate taggings" do
       taggable = TaggableModel.create(name: "Bob Jones")
-      tag      = ActsAsTaggableOnMongoid::Models::Tag.create(name: "awesome")
+      tag      = ActsAsTaggableOnMongoid::Models::Tag.create(name:          "awesome",
+                                                             context:       "tags",
+                                                             taggable_type: TaggableModel.name)
 
       expect do
         2.times { ActsAsTaggableOnMongoid::Models::Tagging.create(taggable: taggable, tag: tag, context: "tags", tag_name: "awesome") }
@@ -28,7 +30,9 @@ RSpec.describe ActsAsTaggableOnMongoid::Models::Tagging do
 
     it "should re-raise error if it is not because of duplicate names" do
       taggable = TaggableModel.create(name: "Bob Jones")
-      tag      = ActsAsTaggableOnMongoid::Models::Tag.create(name: "awesome")
+      tag      = ActsAsTaggableOnMongoid::Models::Tag.create(name:          "awesome",
+                                                             context:       "tags",
+                                                             taggable_type: TaggableModel.name)
 
       allow(ActsAsTaggableOnMongoid::Taggable::Utils::TagListDiff).to receive(:new).and_wrap_original do |orig_method, *args|
         diff = orig_method.call(**args[0])
@@ -93,21 +97,27 @@ RSpec.describe ActsAsTaggableOnMongoid::Models::Tagging do
 
       before(:each) do
         tagging.taggable = TaggableModel.create(name: "Black holes")
-        tagging.tag      = ActsAsTaggableOnMongoid::Models::Tag.create(name: "Physics")
+        tagging.tag      = ActsAsTaggableOnMongoid::Models::Tag.create(name:          "Physics",
+                                                                       context:       "Science",
+                                                                       taggable_type: TaggableModel.name)
         tagging.tagger   = tagger
         tagging.context  = "Science"
         tagging.tag_name = "Physics"
         tagging.save!
 
         tagging_2.taggable = TaggableModel.create(name: "Satellites")
-        tagging_2.tag      = ActsAsTaggableOnMongoid::Models::Tag.create(name: "Technology")
+        tagging_2.tag      = ActsAsTaggableOnMongoid::Models::Tag.create(name:          "Technology",
+                                                                         context:       "Science",
+                                                                         taggable_type: TaggableModel.name)
         tagging_2.tagger   = tagger_2
         tagging_2.context  = "Science"
         tagging_2.tag_name = "Technology"
         tagging_2.save!
 
         tagging_3.taggable = TaggableModel.create(name: "Satellites")
-        tagging_3.tag      = ActsAsTaggableOnMongoid::Models::Tag.create(name: "Engineering")
+        tagging_3.tag      = ActsAsTaggableOnMongoid::Models::Tag.create(name:          "Engineering",
+                                                                         context:       "Astronomy",
+                                                                         taggable_type: TaggableModel.name)
         tagging_3.tagger   = tagger_2
         tagging_3.context  = "Astronomy"
         tagging_3.tag_name = "Engineering"
@@ -168,8 +178,8 @@ RSpec.describe ActsAsTaggableOnMongoid::Models::Tagging do
         duplicate_tagging.id = BSON::ObjectId.new
 
         expect(duplicate_tagging).not_to be_valid
-        expect(duplicate_tagging.errors[:tag_name]).to eq(["is already taken"])
-        expect(duplicate_tagging.errors[:tag_id]).to eq(["is already taken"])
+        expect(duplicate_tagging.errors[:tag_name]).to eq(["has already been taken"])
+        expect(duplicate_tagging.errors[:tag_id]).to eq(["has already been taken"])
 
         expect { duplicate_tagging.save!(validate: false) }.to raise_error Mongo::Error::OperationFailure
       end
@@ -215,7 +225,7 @@ RSpec.describe ActsAsTaggableOnMongoid::Models::Tagging do
         duplicate_tagging.tag_id = new_tag.id
 
         expect(duplicate_tagging).not_to be_valid
-        expect(duplicate_tagging.errors[:tag_name]).to eq(["is already taken"])
+        expect(duplicate_tagging.errors[:tag_name]).to eq(["has already been taken"])
       end
 
       it "does not allow duplicate tag_id" do
@@ -224,7 +234,7 @@ RSpec.describe ActsAsTaggableOnMongoid::Models::Tagging do
         duplicate_tagging.tag_name = "new_tag"
 
         expect(duplicate_tagging).not_to be_valid
-        expect(duplicate_tagging.errors[:tag_id]).to eq(["is already taken"])
+        expect(duplicate_tagging.errors[:tag_id]).to eq(["has already been taken"])
       end
 
       it "does allow duplicate tag_name for different context" do
