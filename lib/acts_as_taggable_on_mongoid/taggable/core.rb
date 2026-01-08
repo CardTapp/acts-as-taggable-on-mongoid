@@ -325,7 +325,38 @@ module ActsAsTaggableOnMongoid
 
         return unless tag_definition
 
-        attribute_will_change! tag_definition.tag_list_name
+        tag_list_name = tag_definition.tag_list_name
+
+        if !tag_list_changes.key?(tag_list_name) && !tag_list_cache_set_on(tag_definition)
+          taggings = all_tags_on(tag_definition).to_a
+          tagger_tag_list = tagger_tag_list_from_taggings(tag_definition, taggings)
+          tag_list = tagger_tag_list[tagging.tagger]
+          tag_name = tagging.tag_name
+
+          if tag_name.present?
+            tagging_present = taggings.any? { |existing| existing.id == tagging.id }
+
+            if tagging_present
+              tag_list.delete(tag_name)
+            elsif !tag_list.include?(tag_name)
+              if tag_definition.preserve_tag_order?
+                taggings_for_tagger = taggings.select { |existing| existing.tagger == tagging.tagger }
+                ordering_key = [tagging.created_at, tagging.id]
+                insert_index = taggings_for_tagger.index do |existing|
+                  ([existing.created_at, existing.id] <=> ordering_key) == 1
+                end
+
+                tag_list.insert(insert_index || tag_list.length, tag_name)
+              else
+                tag_list.silent_concat([tag_name])
+              end
+            end
+          end
+
+          tag_list_changes[tag_list_name] = tagger_tag_list
+        end
+
+        attribute_will_change! tag_list_name
       end
 
       ##
