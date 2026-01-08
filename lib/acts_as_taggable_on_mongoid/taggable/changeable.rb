@@ -21,28 +21,7 @@ module ActsAsTaggableOnMongoid
 
         return if tag_list_changes.key?(tag_list_name)
 
-        default_tagger = tag_definition.tag_list_default_tagger(self)
-        default_tagger ||= tag_definition.default_tagger(self) if tag_definition.tagger?
-
-        original_value = if tag_list_cache_set_on(tag_definition)
-                           cached_list = tag_list_cache_on(tag_definition)
-
-                           if new_record? && cached_list.blank?
-                             tag_definition.default_tagger_tag_list(self)
-                           else
-                             cached_list&.dup
-                           end
-                         elsif new_record?
-                           default_value = tag_definition.default_tagger_tag_list(self)
-
-                           list_default = tag_definition.taggable_default(self)
-                           default_value[default_tagger] = list_default.dup if list_default && default_tagger
-
-                           default_value
-                         else
-                           # build from persisted taggings when no cache is set
-                           tagger_tag_list_from_taggings(tag_definition, all_tags_on(tag_definition))
-                         end
+        original_value = build_original_tag_list(tag_definition)
 
         tag_list_changes[tag_list_name] = original_value
       end
@@ -98,6 +77,40 @@ module ActsAsTaggableOnMongoid
       end
 
       private
+
+      def build_original_tag_list(tag_definition)
+        default_tagger = resolve_default_tagger(tag_definition)
+
+        return cached_original_tag_list(tag_definition, default_tagger) if tag_list_cache_set_on(tag_definition)
+        return new_record_original_tag_list(tag_definition, default_tagger) if new_record?
+
+        tagger_tag_list_from_taggings(tag_definition, all_tags_on(tag_definition))
+      end
+
+      def resolve_default_tagger(tag_definition)
+        default_tagger = tag_definition.tag_list_default_tagger(self)
+        return default_tagger unless default_tagger.nil? && tag_definition.tagger?
+
+        tag_definition.default_tagger(self)
+      end
+
+      def cached_original_tag_list(tag_definition, _default_tagger)
+        cached_list = tag_list_cache_on(tag_definition)
+        return tag_definition.default_tagger_tag_list(self) if new_record? && cached_list.blank?
+
+        cached_list&.dup
+      end
+
+      def new_record_original_tag_list(tag_definition, default_tagger)
+        default_value = tag_definition.default_tagger_tag_list(self)
+        list_default = tag_definition.taggable_default(self)
+
+        if list_default && default_tagger
+          default_value[default_tagger] = list_default.dup
+        end
+
+        default_value
+      end
 
       def attribute_will_change!(attribute_name)
         tag_definition = tag_types.detect { |_tag_name, tag_def| tag_def.tag_list_name.to_s == attribute_name.to_s }&.last

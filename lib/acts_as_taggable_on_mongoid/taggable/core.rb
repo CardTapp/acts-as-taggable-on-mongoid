@@ -162,21 +162,31 @@ module ActsAsTaggableOnMongoid
       def tag_list_original_value(tag_definition)
         original_value = tag_list_changes[tag_definition.tag_list_name] || tag_definition.default_tagger_tag_list(self)
 
-        return original_value unless new_record? && tag_definition.tagger?
-
-        default_tagger = tag_definition.default_tagger(self)
+        default_tagger = default_tagger_for_original_value(tag_definition)
         return original_value unless default_tagger
 
         adjusted_value = original_value.dup
-
-        if adjusted_value[default_tagger].blank?
-          moved_default = adjusted_value.delete(nil)
-          adjusted_value[default_tagger] = moved_default&.dup || tag_definition.taggable_default(self)&.dup
-        end
-
-        adjusted_value[nil] ||= ActsAsTaggableOnMongoid::TagList.new_taggable_list(tag_definition, self)
+        move_default_list_to_tagger(adjusted_value, tag_definition, default_tagger)
+        ensure_nil_tagger_list(adjusted_value, tag_definition)
 
         adjusted_value
+      end
+
+      def default_tagger_for_original_value(tag_definition)
+        return unless new_record? && tag_definition.tagger?
+
+        tag_definition.default_tagger(self)
+      end
+
+      def move_default_list_to_tagger(adjusted_value, tag_definition, default_tagger)
+        return unless adjusted_value[default_tagger].blank?
+
+        moved_default = adjusted_value.delete(nil)
+        adjusted_value[default_tagger] = moved_default&.dup || tag_definition.taggable_default(self)&.dup
+      end
+
+      def ensure_nil_tagger_list(adjusted_value, tag_definition)
+        adjusted_value[nil] ||= ActsAsTaggableOnMongoid::TagList.new_taggable_list(tag_definition, self)
       end
 
       def tag_list_on(tag_definition)
@@ -327,36 +337,50 @@ module ActsAsTaggableOnMongoid
 
         tag_list_name = tag_definition.tag_list_name
 
-        if !tag_list_changes.key?(tag_list_name) && !tag_list_cache_set_on(tag_definition)
-          taggings = all_tags_on(tag_definition).to_a
-          tagger_tag_list = tagger_tag_list_from_taggings(tag_definition, taggings)
-          tag_list = tagger_tag_list[tagging.tagger]
-          tag_name = tagging.tag_name
-
-          if tag_name.present?
-            tagging_present = taggings.any? { |existing| existing.id == tagging.id }
-
-            if tagging_present
-              tag_list.delete(tag_name)
-            elsif !tag_list.include?(tag_name)
-              if tag_definition.preserve_tag_order?
-                taggings_for_tagger = taggings.select { |existing| existing.tagger == tagging.tagger }
-                ordering_key = [tagging.created_at, tagging.id]
-                insert_index = taggings_for_tagger.index do |existing|
-                  ([existing.created_at, existing.id] <=> ordering_key) == 1
-                end
-
-                tag_list.insert(insert_index || tag_list.length, tag_name)
-              else
-                tag_list.silent_concat([tag_name])
-              end
-            end
-          end
-
-          tag_list_changes[tag_list_name] = tagger_tag_list
-        end
+        store_tag_list_change_from_taggings(tag_definition, tag_list_name, tagging)
 
         attribute_will_change! tag_list_name
+      end
+
+      def store_tag_list_change_from_taggings(tag_definition, tag_list_name, tagging)
+        return if tag_list_changes.key?(tag_list_name) || tag_list_cache_set_on(tag_definition)
+
+        taggings = all_tags_on(tag_definition).to_a
+        tagger_tag_list = tagger_tag_list_from_taggings(tag_definition, taggings)
+
+        update_tagger_tag_list_for_change(tagger_tag_list, tag_definition, taggings, tagging)
+
+        tag_list_changes[tag_list_name] = tagger_tag_list
+      end
+
+      def update_tagger_tag_list_for_change(tagger_tag_list, tag_definition, taggings, tagging)
+        tag_list = tagger_tag_list[tagging.tagger]
+        tag_name = tagging.tag_name
+
+        return if tag_name.blank?
+
+        if taggings.any? { |existing| existing.id == tagging.id }
+          tag_list.delete(tag_name)
+          return
+        end
+
+        return if tag_list.include?(tag_name)
+
+        if tag_definition.preserve_tag_order?
+          insert_tag_in_order(taggings, tag_list, tagging, tag_name)
+        else
+          tag_list.silent_concat([tag_name])
+        end
+      end
+
+      def insert_tag_in_order(taggings, tag_list, tagging, tag_name)
+        taggings_for_tagger = taggings.select { |existing| existing.tagger == tagging.tagger }
+        ordering_key = [tagging.created_at, tagging.id]
+        insert_index = taggings_for_tagger.index do |existing|
+          ([existing.created_at, existing.id] <=> ordering_key).positive?
+        end
+
+        tag_list.insert(insert_index || tag_list.length, tag_name)
       end
 
       ##
