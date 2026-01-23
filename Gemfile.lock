@@ -3,7 +3,7 @@ PATH
   specs:
     acts-as-taggable-on-mongoid (6.1.2.0)
       activesupport (>= 6.0)
-      mongoid (~> 8.0)
+      mongoid (>= 7.0)
 
 GEM
   remote: https://rubygems.org/

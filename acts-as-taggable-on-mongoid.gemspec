@@ -33,7 +33,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency "activesupport", ">= 6.0"
-  spec.add_dependency "mongoid", "~> 8.0"
+  spec.add_dependency "mongoid", ">= 7.0"
 
   spec.add_development_dependency "codecov", "~> 0.1", "~> 0.6.0"
   spec.add_development_dependency "cornucopia"
